@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.AuthorMapper">
+	<select id="authorList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			A.ATH_ID,
+			A.NAME,
+			A.TYPE_ID,
+			A.CREATE_DATE,
+			A.STATUS,
+			B.TYPE_NAME,
+			B.KEYWORD,
+			(
+				SELECT COUNT(ATH_ID) FROM AUTHOR_CONTENT WHERE ATH_ID = A.ATH_ID
+			) CONTENT_CNT
+		FROM
+			AUTHOR_INFO A, AUTHOR_TYPE B
+		WHERE 1 = 1
+			AND A.TYPE_ID = B.TYPE_ID
+			<if test="keyword != null">
+				AND A.NAME REGEXP #{keyword}
+			</if>
+			<if test="type != null">
+				AND A.TYPE_ID = #{type}
+			</if>
+		ORDER BY A.CREATE_DATE DESC
+		LIMIT #{offset}, 20
+	</select>
+	
+	<select id="authorListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			COUNT(A.ATH_ID) CNT
+		FROM
+			AUTHOR_INFO A, AUTHOR_TYPE B
+		WHERE 1 = 1
+			AND A.TYPE_ID = B.TYPE_ID
+			<if test="keyword != null">
+				AND A.NAME REGEXP #{keyword}
+			</if>
+			<if test="type != null">
+				AND A.TYPE_ID = #{type}
+			</if>
+		ORDER BY A.CREATE_DATE
+	</select>
+	
+	<select id="selectAuthorList" parameterType="hashMap" resultType="hashMap">
+		SELECT *
+		FROM
+			AUTHOR_INFO A
+		WHERE 1 = 1
+			<if test="name != null">
+				AND A.NAME = #{name}
+			</if>
+			<if test="typeId != null">
+				AND A.TYPE_ID = #{typeId}
+			</if>
+		ORDER BY CREATE_DATE DESC 
+	</select>
+	
+	<insert id="insertAuthorInfo" parameterType="hashMap">
+		INSERT INTO AUTHOR_INFO ( ATH_ID, NAME, TYPE_ID, CREATE_DATE, STATUS )
+		VALUES ( #{athId}, #{name}, #{typeId}, NOW(), #{status})
+	</insert>
+	<update id="updateAuthorInfo" parameterType="hashMap">
+		UPDATE AUTHOR_INFO SET
+		NAME = #{name}, TYPE_ID = #{typeId}, STATUS = #{status}
+		WHERE ATH_ID = #{athId}
+	</update>
+	
+	<select id="selectAuthorContentList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			C.COT_ID,
+			C.TITLE,
+			C.CREATE_DATE,
+			(Select sum(READ_COUNT) FROM CONTENT_VIEW D WHERE C.COT_ID = D.COT_ID) as READ_COUNT
+		FROM KTO.CONTENT_MASTER C
+			INNER JOIN KTO.AUTHOR_CONTENT A ON C.COT_ID = A.COT_ID
+		WHERE
+			A.ATH_ID = #{athId}
+		ORDER BY CREATE_DATE DESC
+		LIMIT #{offset}, 20
+	</select>
+	
+	<select id="selectAuthorContentListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			COUNT(C.COT_ID) CNT
+		FROM KTO.CONTENT_MASTER C
+			INNER JOIN KTO.AUTHOR_CONTENT A ON C.COT_ID = A.COT_ID
+		WHERE
+			A.ATH_ID = #{athId}
+	</select>
+	
+	<select id="selectAuthorType" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			T.TYPE_ID, 
+			T.TYPE_NAME, 
+			T.KEYWORD,
+			(
+				SELECT COUNT(A.ATH_ID) 
+				FROM AUTHOR_INFO A
+				WHERE A.TYPE_ID = T.TYPE_ID
+			) `AUTHOR_COUNT`
+		FROM AUTHOR_TYPE T
+		WHERE 1 = 1
+		<if test="keyword != null">
+			AND KEYWORD = #{keyword}
+		</if>
+		<if test="typeName != null">
+			AND TYPE_NAME = #{typeName}
+		</if>
+		ORDER BY T.CREATE_DATE DESC
+		<if test="offset != null">
+			LIMIT #{offset}, 20
+		</if>
+	</select>
+	
+	<select id="selectAuthorTypeCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT COUNT(TYPE_ID) CNT FROM AUTHOR_TYPE
+		WHERE 1 = 1
+		<if test="keyword != null">
+			AND KEYWORD = #{keyword}
+		</if>
+		<if test="typeName != null">
+			AND TYPE_NAME = #{typeName}
+		</if>
+	</select>
+	
+	<delete id="deleteAuthorType" parameterType="hashMap">
+		DELETE FROM AUTHOR_TYPE WHERE TYPE_ID = #{typeId}
+	</delete>
+	
+	<update id="updateAuthorType" parameterType="hashMap">
+		UPDATE AUTHOR_TYPE SET
+		TYPE_NAME = #{typeName}, KEYWORD = #{keyword}
+		WHERE TYPE_ID = #{typeId}
+	</update>
+	
+	<insert id="insertAuthorType" parameterType="hashMap">
+		INSERT INTO AUTHOR_TYPE (TYPE_ID, TYPE_NAME, KEYWORD, CREATE_DATE)
+		VALUES (#{typeId}, #{typeName}, #{keyword}, NOW())
+	</insert>
+	
+	<insert id="insertAuthorContent" parameterType="hashMap">
+		INSERT INTO AUTHOR_CONTENT ( ATH_ID, COT_ID )
+		VALUES
+		<foreach collection="authorList" item="item" separator=", ">
+			( #{item.athId}, #{item.cotId} )
+		</foreach>
+	</insert>
+	<delete id="deleteAuthorContent" parameterType="hashMap">
+		DELETE FROM AUTHOR_CONTENT WHERE COT_ID = #{cotId}
+	</delete>
+</mapper>

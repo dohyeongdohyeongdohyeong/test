@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.BannerMapper">
+ 	<select id="selectBannerContentList" parameterType="hashMap" resultType="hashMap">
+		select CONTENT_ID cid, A.TITLE title, B.TAG_NAME tagname, A.COT_ID cotid
+		from CONTENT_MASTER A, (select CC.TAG_NAME TAG_NAME,BB.COT_ID COT_ID  from CONTENT_TAGS BB, TAGS CC where BB.TAG_ID=CC.TAG_ID) B 
+		where A.COT_ID=B.COT_ID
+		<choose>
+			<when test="title != null">
+	  		and A.TITLE REGEXP #{title} 
+			</when>
+		</choose>
+		<choose>
+			<when test="tag != null">
+	  		and B.TAG_NAME REGEXP #{tag} 
+			</when>
+		</choose>
+		limit #{offset}, 20
+   </select>
+    <select id="selectBannerContentListCnt" parameterType="hashMap" resultType="hashMap">
+		select count(A.CONTENT_ID) CNT from CONTENT_MASTER A, (select CC.TAG_NAME TAG_NAME,BB.COT_ID COT_ID  from CONTENT_TAGS BB, TAGS CC where BB.TAG_ID=CC.TAG_ID) B 
+		where A.COT_ID=B.COT_ID
+		<choose>
+			<when test="title != null">
+	  		and A.TITLE REGEXP #{title} 
+			</when>
+		</choose>
+		<choose>
+			<when test="tag != null">
+	  		and B.TAG_NAME REGEXP #{tag} 
+			</when>
+		</choose>
+   </select>
+   <select id="selectBannerList" parameterType="hashMap" resultType="hashMap">
+		select B.MKB_ID mkbid, A.PAGE_ID pageid, B.TITLE title, B.IMG_ID imgid, B.LINK_URL url, B.CONTENT_ORDER orderby, B.COT_ID cotid, A.IS_ABLE able
+			from MARKETING_BANNER A, MARKETING_BANNER_DETAIL B 
+			where A.MKB_ID=B.MKB_ID
+			order by A.PAGE_ID, B.CONTENT_ORDER
+   </select>
+   <update id="updateBanner" parameterType="hashMap">
+  	update MARKETING_BANNER set 
+		<choose>
+			<when test="able != null">
+	  		IS_ABLE=#{able} 
+			</when>
+		</choose>
+  	where PAGE_ID=#{pageid}
+  </update>
+   <update id="updateBannerDetailOrder" parameterType="hashMap">
+  	update MARKETING_BANNER_DETAIL SET CONTENT_ORDER = IF(CONTENT_ORDER=0, 1, 0) where MKB_ID = #{mkbid}
+  </update>
+   <update id="updateBannerDetail" parameterType="hashMap">
+  	update MARKETING_BANNER_DETAIL set TITLE=#{title}
+  		<choose>
+			<when test="imgid != null">
+		  	, IMG_ID=#{imgid}
+			</when>
+		</choose>
+  		<choose>
+			<when test="cotid != null">
+		  	, COT_ID=#{cotid} 
+			</when>
+			<otherwise>
+            , COT_ID=null
+            </otherwise>
+		</choose>
+		<choose>
+			<when test="url != null">
+		  	, LINK_URL=#{url} 
+			</when>
+			<otherwise>
+            , LINK_URL=null
+            </otherwise>
+		</choose>
+  	where MKB_ID=#{mkbid} and CONTENT_ORDER = #{orderby}
+  </update>
+<!--    <insert id="insertSnsQnaAnswer" parameterType="hashMap"> -->
+<!--   	insert into QnA (	QNA_ID, PARENT_ID, QNA_BODY, USR_ID ) -->
+<!--   	values ( -->
+<!--   		#{qnaid}, -->
+<!--   		#{parentid}, -->
+<!--   		#{body}, -->
+<!--   		#{usrid} -->
+<!--   	) -->
+<!--   </insert> -->
+<!--   <delete id="deleteSnsQnaAnswer" parameterType="hashMap"> -->
+<!--   	delete from QnA where QNA_ID=#{qnaid} -->
+<!--   </delete> -->
+	<select id="SelectKillerContentBanner" parameterType="hashMap" resultType="hashMap">
+		SELECT A.*, B.IMAGE_DESCRIPTION as IMG_DESC
+		FROM KILLER_CONTENT_BANNER A, IMAGE B 
+		WHERE A.IMG_ID = B.IMG_ID
+		<choose>
+			<when test="status == 0">
+			AND A.STATUS = 0
+			</when>
+			<when test="status == 1">
+			AND A.STATUS = 1
+			</when>
+			<when test="status == 2">
+			AND A.STATUS = 2
+			</when>
+			<when test="status == 3">
+			AND A.STATUS != 0
+			</when>
+		</choose>
+		ORDER BY A.STATUS = 1 DESC, A.UPDATE_DATE DESC
+	</select>
+	<select id="SelectKillerContentImage" parameterType="hashMap" resultType="String">
+		SELECT A.IMG_ID
+		FROM KILLER_CONTENT_BANNER A
+		WHERE KCB_ID = #{kcbId}
+	</select>
+	
+	<insert id="InsertKillerContentBanner" parameterType="hashMap">
+	 	INSERT INTO KILLER_CONTENT_BANNER  (KCB_ID,TITLE) VALUES (#{kcbId}, '신규 배너(이름없음)')
+	</insert>
+	<delete id="DeleteKillerContentBanner" parameterType="hashMap">
+	 	DELETE FROM KILLER_CONTENT_BANNER WHERE KCB_ID = #{kcbId}
+	</delete>
+	<update id="UpdateKillerContentBanner" parameterType="hashMap">
+	 	UPDATE KILLER_CONTENT_BANNER
+	 	SET STATUS = ${status}
+	 		, UPDATE_DATE = now()
+	 	<if test="title != null">
+	 		, TITLE = #{title}
+	 	</if>
+	 	<if test="imgId != null">
+	 		,IMG_ID = #{imgId}
+	 	</if>
+	 	<if test="linkurl != null">
+	 		,LINK_URL = #{linkurl}
+	 	</if>
+	 	WHERE KCB_ID = #{kcbId}
+	</update>
+	<update id="UpdateKillerContentStatus" parameterType="hashMap">
+	 	UPDATE KILLER_CONTENT_BANNER
+	 	SET STATUS = 0
+	 	WHERE STATUS = #{status}
+	</update>
+</mapper>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.TagsMapper">
+  <select id="searchTagsCount" parameterType="hashMap" resultType="hashMap">
+		select count(*) cnt from TAGS where TAG_NAME=#{keyword}
+  </select>
+
+  <select id="insertTags" parameterType="hashMap" resultType="hashMap">
+		insert into TAGS values (uuid(), #{keyword}, #{usrId}, now(), null, 0)
+  </select>
+   <insert id="insertTag" parameterType="hashMap" >
+		insert into TAGS ( 
+			TAG_ID, TAG_NAME, CREATE_USR_ID, CREATE_DATE, TAG_COLOR, IS_BOLD 
+		) values (
+		#{TAG_ID}, #{TAG_NAME}, #{USR_ID}, now(), null, 0
+		)
+  </insert>
+  <select id="selectMemberTag" parameterType="hashMap" resultType="hashMap">
+      select count(*) CNT from CONTENT_TAGS where TAG_ID=#{tagId} and COT_ID=#{cotId}
+  </select>
+  
+  <insert id="insertMemberTag" parameterType="hashMap">
+		INSERT INTO CONTENT_TAGS ( 
+			TAG_ID, COT_ID, MASTER_TAG 
+		) VALUES (
+			#{tagId}, #{cotId}
+			<choose>
+				<when test="isMasterTag != null">
+					, #{isMasterTag}
+				</when>
+				<otherwise>
+					, 0
+				</otherwise>
+			</choose>
+		)
+  </insert>
+   
+  <update id="updateMemberTag" parameterType="hashMap">
+  		UPDATE CONTENT_TAGS SET
+  			MASTER_TAG = #{isMasterTag}
+  		WHERE 1 = 1
+  			AND COT_ID = #{cotId}
+  			AND TAG_ID = #{tagId}
+  </update>
+  
+  <select id="updateContentTag" parameterType="hashMap" resultType="hashMap">
+		update CONTENT_TAGS set MASTER_TAG=1 where COT_ID=#{cotId} and TAG_ID=#{tagId}
+  </select>
+   
+  <select id="updateContentTagAllCancel" parameterType="hashMap" resultType="hashMap">
+		update CONTENT_TAGS set MASTER_TAG=0 where COT_ID=#{cotId}
+  </select>
+ 
+  <delete id="removeMemberTag" parameterType="hashMap" >
+		delete from CONTENT_TAGS where COT_ID=#{cotId} and TAG_ID=#{tagId}
+  </delete>
+ 
+  <select id="searchTags" parameterType="hashMap" resultType="hashMap">
+      select * from TAGS where TAG_NAME = #{keyword} 
+	 UNION	select * from TAGS where TAG_NAME REGEXP #{keyword} and TAG_NAME != #{keyword}
+  </select>
+
+  <select id="searchContentTags" parameterType="hashMap" resultType="hashMap">
+		select * from TAGS where TAG_ID in (select TAG_ID from CONTENT_TAGS WHERE COT_ID = #{cotId})
+  </select>
+   
+  <select id="getContentMasterTag" parameterType="hashMap" resultType="hashMap">
+		select * from TAGS where TAG_ID in (select TAG_ID from CONTENT_TAGS WHERE COT_ID = #{cotId} and MASTER_TAG=1)
+  </select>
+   
+  <select id="getContentsTags" parameterType="hashMap" resultType="hashMap">
+  		SELECT DISTINCT 
+			A.TAG_ID, A.TAG_NAME, A.CREATE_DATE, A.TAG_COLOR, B.COT_ID, B.MASTER_TAG
+		FROM TAGS A 
+		INNER JOIN CONTENT_TAGS B ON A.TAG_ID = B.TAG_ID
+		WHERE COT_ID = #{cotId}
+  </select>
+</mapper>

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.ImageMapper">
+ 
+ <!-- related Image table -->
+  <insert id="insertWithCotId" parameterType="hashMap">
+  		INSERT INTO IMAGE (
+  			IMG_ID, COT_ID, IMAGE_PATH, IMAGE_DESCRIPTION
+  			<if test="order !=null">
+  				,`ORDER`
+  			</if>
+  		) VALUES (
+  			#{imgId}, #{cotId}, #{imgPath}, #{imgDescription}
+  			<if test="order !=null">
+  				,#{order}
+  			</if>
+  		) ON DUPLICATE KEY UPDATE 
+  			IMAGE_PATH = #{imgPath}
+  			, IMAGE_DESCRIPTION = #{imgDescription}
+  			<if test="order !=null">
+  				,`ORDER` = #{order}
+  			</if>
+  </insert>
+  <insert id="insertNotCotId" parameterType="hashMap">
+  		INSERT INTO IMAGE (
+  			IMG_ID, IMAGE_PATH, IMAGE_DESCRIPTION
+  		) VALUES (
+  			#{imgId}, #{imgPath}, #{imgDescription}
+  		) ON DUPLICATE KEY UPDATE
+  		<if test="imgPath != null">
+	  		IMAGE_PATH = #{imgPath},
+  		</if>
+	  		IMAGE_DESCRIPTION = #{imgDescription}
+  </insert>
+ <!-- related Image table -->
+  <delete id="deleteWithImgId" parameterType="hashMap">
+  		DELETE FROM IMAGE WHERE IMG_ID = #{imgId}
+  </delete>
+  <update id="UpdateWithImgId" parameterType="hashMap">
+  	update IMAGE set IMG_ID = #{imgId} , IMAGE_PATH=#{imgPath} , IMAGE_DESCRIPTION = #{imgDescription} WHERE IMG_ID=#{IMG_UPDATE}
+  </update>
+ <!-- related Image table -->
+  <update id="updateImagePathWithImgId" parameterType="hashMap">
+  		update IMAGE set IMAGE_PATH=#{imgPath} WHERE IMG_ID=#{imgId}
+  </update>
+  <update id="updateImagePathAndImgId" parameterType="hashMap">
+  		update IMAGE set IMAGE_PATH=#{imgPath}, IMG_ID = #{NewimgId} WHERE IMG_ID=#{imgId}
+  </update>
+   <update id="updateArticleContentImgId" parameterType="hashMap">
+  		update ARTICLE_CONTENT set IMG_ID =#{NewimgId} WHERE IMG_ID=#{imgId}
+  </update>
+ <!-- related Image table -->
+  <update id="updateImageDescription" parameterType="hashMap">
+  		update IMAGE set IMAGE_DESCRIPTION=#{desc} WHERE IMG_ID=#{imgId}
+  </update>
+  <update id="setupImageVisiableFalse" parameterType="hashMap">
+  		update IMAGE set IS_VISIABLE=0 WHERE IMG_ID=#{imgId}
+  </update>
+  <update id="setupImageVisiableTrue" parameterType="hashMap">
+  		update IMAGE set IS_VISIABLE=1 WHERE IMG_ID=#{imgId}
+  </update>
+  
+   <select id="selectImageWithCotId" parameterType="hashMap" resultType="hashMap">
+		SELECT IMG_ID, IMAGE_DESCRIPTION, IMAGE_PATH FROM IMAGE WHERE COT_ID = #{cotId}
+   </select>
+   <select id="selectArticleContentImage" parameterType="hashMap" resultType="hashMap">
+		SELECT A.IMG_ID, A.IMAGE_DESCRIPTION, A.IMAGE_PATH, B.IS_CAPTION, B.IMG_CAPTION, A.IS_VISIABLE
+		FROM IMAGE A left join ARTICLE_CONTENT B on A.IMG_ID = B.IMG_ID 
+		WHERE COT_ID = #{cotId}
+		ORDER BY A.ORDER
+   </select>
+   <select id="selectContentImage" parameterType="hashMap" resultType="hashMap">
+		SELECT A.IMG_ID, A.IMAGE_DESCRIPTION, A.IMAGE_PATH, A.ORDER as IMG_ORDER,A.IS_VISIABLE
+		FROM IMAGE A 
+		WHERE COT_ID = #{cotId}
+		AND A.IMG_ID NOT IN ( 
+					   SELECT B.IMG_ID FROM (
+			           SELECT X.ROOM_IMG1 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE  X.ROOM_IMG1 IS NOT NULL AND X.ROOM_IMG1 = Y.IMG_ID AND X.COT_ID = #{cotId}  AND Y.IS_THUBNAIL IS NULL
+			           UNION ALL
+			           SELECT X.ROOM_IMG2 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE  X.ROOM_IMG2 IS NOT NULL AND X.ROOM_IMG2 = Y.IMG_ID AND X.COT_ID = #{cotId}  AND Y.IS_THUBNAIL IS NULL
+			           UNION ALL
+			           SELECT X.ROOM_IMG3 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE  X.ROOM_IMG3 IS NOT NULL AND X.ROOM_IMG3 = Y.IMG_ID AND X.COT_ID = #{cotId}  AND Y.IS_THUBNAIL IS NULL
+			           UNION ALL
+			           SELECT X.ROOM_IMG4 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE X.ROOM_IMG4 IS NOT NULL AND X.ROOM_IMG4 = Y.IMG_ID AND X.COT_ID = #{cotId}  AND Y.IS_THUBNAIL IS NULL
+			           UNION ALL
+			           SELECT X.ROOM_IMG5 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE  X.ROOM_IMG5 IS NOT NULL AND X.ROOM_IMG5 = Y.IMG_ID AND X.COT_ID = #{cotId} AND Y.IS_THUBNAIL IS NULL) B
+			           )
+		ORDER BY A.ORDER
+   </select>
+  	<select id="selectImageWithImgId" parameterType="hashMap" resultType="hashMap">
+		SELECT IMG_ID imgId, IMAGE_DESCRIPTION imgdes FROM IMAGE WHERE IMG_ID = #{imgId}
+   </select>
+   <select id="selectCountWithImgId" parameterType="hashMap" resultType="hashMap">
+		SELECT count(*) CNT FROM IMAGE WHERE IMG_ID = #{imgId}
+   </select>
+<!--    <select id="selectUserImageList" parameterType="hashMap" resultType="hashMap"> -->
+<!-- 		SELECT count(*) CNT FROM IMAGE WHERE IMG_ID = #{imgId} -->
+<!--    </select> -->
+
+	<select id="selectUserImageWithCotId" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			U.*,
+			I.IMAGE_PATH,
+			I.IS_VISIABLE,
+			S.SNS_USR_NAME,
+			S.SNS_IDENTIFY
+		FROM
+			KTO.USER_IMAGE U 
+			INNER JOIN KTO.IMAGE I ON U.IMG_ID = I.IMG_ID
+			INNER JOIN KTO.SNS S ON U.SNS_ID = S.SNS_ID
+		WHERE U.COT_ID = #{cotId}
+		ORDER BY U.IDX 
+	</select>
+	<update id="updateUserImage">
+		UPDATE KTO.USER_IMAGE 
+		SET	ORDER = #{order}
+		WHERE UMG_ID = #{umgId}
+	</update>
+	<update id="updateUserImageIdx">
+		UPDATE KTO.USER_IMAGE
+		SET IDX = #{idx}
+		WHERE UMG_ID = #{umgId}
+	</update>
+	
+	<select id="selectImageDeclareList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			A.COT_ID,
+			A.TITLE,
+			I.IS_VISIABLE,
+			I.IMAGE_PATH,
+			D.IMG_ID,
+			S.SNS_IDENTIFY,
+			D.DECLARE_DATE,
+			D.DCI_ID
+		FROM
+			CONTENT_MASTER A INNER JOIN DATABASE_MASTER B ON A.COT_ID = B.COT_ID
+			INNER JOIN KTO.DECLARE_IMAGE D ON A.COT_ID = D.COT_ID
+			INNER JOIN KTO.IMAGE I ON D.IMG_ID = I.IMG_ID
+			INNER JOIN KTO.SNS S ON D.SNS_ID = S.SNS_ID 
+		WHERE
+			A.TITLE REGEXP #{title}
+		ORDER BY D.DECLARE_DATE DESC
+        limit #{offset}, 20
+	</select>
+	<select id="selectImageDeclareListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			COUNT(D.DCI_ID) CNT
+		FROM
+			CONTENT_MASTER A INNER JOIN DATABASE_MASTER B ON A.COT_ID = B.COT_ID
+			INNER JOIN KTO.DECLARE_IMAGE D ON A.COT_ID = D.COT_ID
+			INNER JOIN KTO.IMAGE I ON D.IMG_ID = I.IMG_ID
+			INNER JOIN KTO.SNS S ON D.SNS_ID = S.SNS_ID 
+		WHERE
+			A.TITLE REGEXP #{title}
+	</select>
+	 <update id="updatebeforeImage" parameterType="hashMap">
+  		update IMAGE set IMAGE_PATH=#{imgPath}, IMG_ID = #{NewimgId} WHERE IMG_ID=#{imgId}
+  	</update>
+  	<select id="SelectUserImageExcel" parameterType="hashMap" resultType="hashMap">
+  	select (select substring(B.IMAGE_PATH,17,100) from IMAGE B where A.IMG_ID = B.IMG_ID) filename 
+	,  (select case when IS_VISIABLE = 0  then '비노출' when IS_VISIABLE = 1 then '노출' end as IS_VISIABLE  from IMAGE B where A.IMG_ID = B.IMG_ID ) visible 
+	, (select TITLE from CONTENT_MASTER B where A.COT_ID = B.COT_ID) as title
+	, A.COT_ID
+	, (select B.SNS_IDENTIFY from SNS B where A.SNS_ID = B.SNS_ID) as Identify
+	, A.CREATE_DATE
+	from USER_IMAGE A
+	where A.COT_ID is not null
+	<choose>
+		<when test="startInput != null">
+		 and A.CREATE_DATE >= #{startInput}
+		</when>
+	</choose>
+	<choose>
+		<when test="endInput != null">
+		 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+		</when>
+	</choose>
+	order by CREATE_DATE desc
+  	</select>
+  	<update id="UpdateArticleImageList"  parameterType="hashMap">
+  	UPDATE IMAGE
+	SET `ORDER` = #{ORDER}
+	WHERE COT_ID = #{COT_ID} and IMG_ID =#{IMG_ID}
+  	</update>
+</mapper>

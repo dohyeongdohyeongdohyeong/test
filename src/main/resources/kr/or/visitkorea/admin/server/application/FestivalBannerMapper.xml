@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.FestivalBannerMapper">
+	
+	<select id="select" parameterType="string" resultType="hashmap">
+		SELECT B.COT_ID,
+		       B.TITLE,
+		       B.LINK,
+		       B.START_DATE,
+		       B.END_DATE,
+		       B.`USE`,
+		       B.CREATE_DATE,
+		       B.UPDATE_DATE,
+		       I.IMG_ID IMAGE_ID,
+		       I.IMAGE_DESCRIPTION
+		  FROM BANNER B, IMAGE I
+		 WHERE B.COT_ID = #{cotId}
+		   AND B.IMAGE = I.IMG_ID
+	</select>
+
+	<insert id="insert" parameterType="hashmap">
+		INSERT INTO BANNER (
+		  COT_ID,
+		  TITLE,
+		  LINK,
+		  IMAGE,
+		  START_DATE,
+		  END_DATE,
+		  `USE`,
+		  CREATE_DATE,
+		  UPDATE_DATE
+		) VALUES (
+		  #{cotId},
+		  #{title},
+		  #{link},
+		  #{image},
+		  #{startDate},
+		  #{endDate},
+		  #{use},
+		  NOW(),
+		  NOW()
+		)
+	</insert>
+	
+	<update id="update" parameterType="hashmap">
+		UPDATE BANNER
+		   <set>
+			   <if test="title != null">TITLE = #{title},</if>
+		       <if test="link != null">LINK = #{link},</if>
+		       <if test="image != null">IMAGE = #{image},</if>
+		       <if test="startDate != null">START_DATE = #{startDate},</if>
+		       <if test="endDate != null">END_DATE = #{endDate},</if>
+		       <if test="use != null">`USE` = #{use},</if>
+		       UPDATE_DATE = NOW()
+	       </set>
+		 WHERE COT_ID = #{cotId}
+	</update>
+	
+	<delete id="delete" parameterType="string">
+		DELETE FROM BANNER WHERE COT_ID = #{cotId}
+	</delete>
+
+</mapper>

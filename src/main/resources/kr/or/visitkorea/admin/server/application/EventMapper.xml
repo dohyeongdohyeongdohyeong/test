@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="kr.or.visitkorea.system.EventMapper">
+	<select id="selectEventList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			CM.COT_ID
+			, CM.CREATE_DATE
+			, CM.CREATE_USR_ID
+			, S.STF_ID
+			, EM.*
+		FROM CONTENT_MASTER CM
+			INNER JOIN EVENT_MASTER EM ON CM.COT_ID = EM.COT_ID
+			INNER JOIN STAFF S ON CM.CREATE_USR_ID = S.USR_ID
+		WHERE 1 = 1
+		AND IF(
+			(
+				SELECT 
+					COUNT(*)
+				FROM PERMISSION 
+				WHERE 1 = 1
+					AND PERMISSION_ID = #{adminPermission}
+					AND CREATE_USR_ID = #{usrId}
+			) > 0
+			, CREATE_USR_ID = #{usrId} OR STATUS != 1
+			, CREATE_USR_ID = #{usrId}
+		)
+		<choose>
+			<when test="type == 0">
+				AND EM.TITLE REGEXP #{keyword}
+			</when>
+		</choose>
+		<if test="createDate != null">
+			<![CDATA[
+				AND DATE(CM.CREATE_DATE) = DATE(#{createDate})
+			]]>
+		</if>
+		<if test="startDate != null">
+			<![CDATA[
+				AND DATE(EM.START_DATE) = DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND DATE(EM.END_DATE) = DATE(#{endDate})
+			]]>
+		</if>
+		<if test="status != -1">
+			AND EM.STATUS = #{status}
+		</if>
+		ORDER BY CM.CREATE_DATE DESC
+		LIMIT #{offset}, 20
+	</select>
+	
+	<select id="selectEventListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			COUNT(EVT_ID) CNT
+		FROM CONTENT_MASTER CM
+			INNER JOIN EVENT_MASTER EM ON CM.COT_ID = EM.COT_ID
+		WHERE 1 = 1
+		AND IF(
+			(
+				SELECT 
+					COUNT(*)
+				FROM PERMISSION 
+				WHERE 1 = 1
+					AND PERMISSION_ID = #{adminPermission}
+					AND CREATE_USR_ID = #{usrId}
+			) > 0
+			, CREATE_USR_ID = #{usrId} OR STATUS != 1
+			, CREATE_USR_ID = #{usrId}
+		)
+		<choose>
+			<when test="type == 0">
+				AND EM.TITLE REGEXP #{keyword}
+			</when>
+		</choose>
+		<if test="createDate != null">
+			<![CDATA[
+				AND DATE(CM.CREATE_DATE) = DATE(#{createDate})
+			]]>
+		</if>
+		<if test="startDate != null">
+			<![CDATA[
+				AND DATE(EM.START_DATE) = DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND DATE(EM.END_DATE) = DATE(#{endDate})
+			]]>
+		</if>
+		<if test="status != -1">
+			AND EM.STATUS = #{status}
+		</if>
+	</select>
+	
+	<select id="selectEventListWithStatusCnt" resultType="hashMap">
+		SELECT 
+			  EM.STATUS
+			, count(EM.EVT_ID) CNT
+		FROM EVENT_MASTER EM
+			INNER JOIN CONTENT_MASTER CM ON CM.COT_ID = EM.COT_ID
+		WHERE 1 = 1
+		AND IF(
+			(
+				SELECT 
+					COUNT(*)
+				FROM PERMISSION 
+				WHERE 1 = 1
+					AND PERMISSION_ID = #{adminPermission}
+					AND CREATE_USR_ID = #{usrId}
+			) > 0
+			, CREATE_USR_ID = #{usrId} OR STATUS != 1
+			, CREATE_USR_ID = #{usrId}
+		)
+		<choose>
+			<when test="type == 0">
+				AND EM.TITLE REGEXP #{keyword}
+			</when>
+		</choose>
+		<if test="createDate != null">
+			<![CDATA[
+				AND DATE(CM.CREATE_DATE) = DATE(#{createDate})
+			]]>
+		</if>
+		<if test="startDate != null">
+			<![CDATA[
+				AND DATE(EM.START_DATE) = DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND DATE(EM.END_DATE) = DATE(#{endDate})
+			]]>
+		</if>
+		GROUP BY STATUS
+		ORDER BY STATUS
+	</select>
+	
+	<insert id="saveContentMaster" parameterType="hashMap">
+		INSERT INTO CONTENT_MASTER (
+			COT_ID, CREATE_DATE, TITLE, CREATE_USR_ID, CONTENT_TYPE
+		) VALUES (
+			#{cotId}, NOW(), #{title}, #{usrId}, 30000
+		) ON DUPLICATE KEY UPDATE
+			TITLE = #{title}
+			, CONTENT_TYPE = 30000
+	</insert>
+	
+	<insert id="saveEventBase" parameterType="hashMap">
+		INSERT INTO EVENT_MASTER (
+			  EVT_ID, COT_ID, TITLE, START_DATE, END_DATE, IMG_ID
+			, ANNOUNCE_DATE, STATUS, CONTENTS, REJECT, CAUTION
+			, ANNOUNCE_TYPE, TEMPLATE_TYPE, IS_CAUTION, IS_STAFF, IS_COLLECT
+			, IS_LOGIN, CAUTION_TEMPLATE, STAFF_TEMPLATE, INFO_COLLECT_VIEW
+			, TERMS, BLACKLIST_USE_YN
+		) VALUES (
+			  #{evtId}, #{cotId}, #{title}, #{startDate}, #{endDate}, #{imgId}
+			, #{announceDate}, #{status}, #{contents}, #{reject}, #{caution}
+			, #{announceType}, #{templateType}, #{isCaution}, #{isStaff}, #{isCollect}
+			, #{isLogin}, #{cautionTemplate}, #{staffTemplate}, #{infoCollectView}
+			, #{terms},#{isBlacklist}
+		) ON DUPLICATE KEY UPDATE
+			  TITLE = #{title}
+			, START_DATE = #{startDate}
+			, END_DATE = #{endDate}
+			, ANNOUNCE_DATE = #{announceDate}
+			, STATUS = #{status}
+			, IMG_ID = #{imgId}
+			, CONTENTS = #{contents}
+			, REJECT = #{reject}
+			, CAUTION = #{caution}
+			, ANNOUNCE_TYPE = #{announceType}
+			, TEMPLATE_TYPE = #{templateType}
+			, IS_CAUTION = #{isCaution}
+			, IS_STAFF = #{isStaff}
+			, IS_COLLECT = #{isCollect}
+			, IS_LOGIN = #{isLogin}
+			, CAUTION_TEMPLATE = #{cautionTemplate}
+			, STAFF_TEMPLATE = #{staffTemplate}
+			, INFO_COLLECT_VIEW = #{infoCollectView}
+			, TERMS = #{terms}
+			, BLACKLIST_USE_YN = #{isBlacklist}
+	</insert>
+	
+	<insert id="saveEventBaseUserInfoCollect" parameterType="hashMap">
+		INSERT INTO EVENT_USER_INFO_COLLECT (
+			EVT_ID, IS_NAME, IS_TEL, IS_GENDER, IS_AGE, IS_ADDR
+			, IS_JOB, IS_EMAIL, IS_REGION, IS_ETC,ETC_NM
+		) VALUES (
+			#{evtId}, #{isName}, #{isTel}, #{isGender}, #{isAge}, #{isAddr}
+			, #{isJob}, #{isEmail}, #{isRegion}, #{isEtc} ,#{EtcName}
+		) ON DUPLICATE KEY UPDATE
+			IS_NAME = #{isName}
+			, IS_TEL = #{isTel}
+			, IS_GENDER = #{isGender}
+			, IS_AGE = #{isAge}
+			, IS_ADDR = #{isAddr}
+			, IS_JOB = #{isJob}
+			, IS_EMAIL = #{isEmail}
+			, IS_REGION = #{isRegion}
+			, IS_ETC = #{isEtc}
+			, ETC_NM = #{EtcName}
+	</insert>
+	
+	<insert id="saveEventBaseStaffInfo" parameterType="hashMap">
+		INSERT INTO EVENT_STAFF_INFO (
+			EVT_ID, NAME, TEL, EMAIL, DEPT
+		) VALUES (
+			#{evtId}, #{name}, #{tel}, #{email}, #{dept}
+		) ON DUPLICATE KEY UPDATE
+			NAME = #{name}
+			, TEL = #{tel}
+			, EMAIL = #{email}
+			, DEPT = #{dept}
+	</insert>
+	
+	<insert id="saveEventPromotion" parameterType="hashMap">
+		INSERT INTO EVENT_BANNER_INFO (
+			BAN_ID, EVT_ID, IMG_ID
+		) VALUES (
+			#{banId}, #{evtId}, #{imgId}
+		)
+		ON DUPLICATE KEY UPDATE
+			IMG_ID = #{imgId}
+	</insert>
+	
+	<insert id="saveEventProcess" parameterType="hashMap">
+		INSERT INTO EVENT_SUB_INFO (
+			SUB_EVT_ID, EVT_ID, TITLE, START_DATE, END_DATE
+			, EVT_TYPE_CD, ELECT_TYPE, IMMEDI_TYPE
+			, RANDOM_TYPE, USER_PREDICT_CNT, ANNOUNCE_PER, IS_NOT_WIN, EXCEL_FILE_NM
+			, WIN_COND_VALUE, WIN_COND_USE_YN
+		) VALUES (
+			#{subEvtId}, #{evtId}, #{title}, #{startDate}, #{endDate}
+			, #{evtTypeCd}, #{electType}, #{immediType}
+			, #{randomType}, #{userPredictCnt}, #{announcePer}, #{isNotWin}, #{excelfilenm}
+			, #{wincondvalue}, #{winconduse}
+		) ON DUPLICATE KEY UPDATE
+			SUB_EVT_ID = #{subEvtId}
+			, EVT_ID = #{evtId}
+			, TITLE = #{title}
+			, START_DATE = #{startDate}
+			, END_DATE = #{endDate}
+			, EVT_TYPE_CD = #{evtTypeCd}
+			, ELECT_TYPE = #{electType}
+			, IMMEDI_TYPE = #{immediType}
+			, RANDOM_TYPE = #{randomType}
+			, USER_PREDICT_CNT = #{userPredictCnt}
+			, ANNOUNCE_PER = #{announcePer}
+			, IS_NOT_WIN = #{isNotWin}
+			, EXCEL_FILE_NM = #{excelfilenm}
+			, WIN_COND_VALUE = #{wincondvalue}
+			, WIN_COND_USE_YN = #{winconduse}
+	</insert>
+	
+	<insert id="saveEventRullset" parameterType="hashMap">
+		INSERT INTO EVENT_WIN_RULLSET (
+			  SUB_EVT_ID
+			, ENTRY_NUM
+			, GFT_ID
+			, CREATE_DATE
+			, STF_ID
+		) VALUES 
+		<foreach collection="list" item="item" separator=",">
+		(
+			  #{item.subEvtId}
+			, #{item.entryNum}
+			, #{item.gftId}
+			, NOW()
+			, #{item.stfId}
+		)
+		</foreach>
+	</insert>
+	<delete id="removeEventRullset" parameterType="hashMap">
+	DELETE FROM EVENT_WIN_RULLSET
+	WHERE SUB_EVT_ID = #{subEvtId}
+	</delete>
+	<select id="selectEventRullsetChk" parameterType="hashMap" resultType="int">
+	SELECT COUNT(*) FROM EVENT_WIN_RULLSET
+	WHERE SUB_EVT_ID = #{subEvtId}
+	</select>
+	<select id="selectEventRullset" parameterType="hashMap" resultType="hashMap">
+	SELECT A.ENTRY_NUM as indexs, B.TITLE as gftname, C.DISP_NAME as stfname  
+	FROM EVENT_WIN_RULLSET A left join EVENT_GIFT_INFO B on A.GFT_ID = B.GFT_ID left join STAFF C on A.STF_ID = C.STF_ID
+	WHERE SUB_EVT_ID = #{subEvtId}
+	</select>
+	
+	<insert id="saveEventGift" parameterType="hashMap">
+		INSERT INTO EVENT_GIFT_INFO (
+			  GFT_ID
+			, SUB_EVT_ID
+			, EVT_ID
+			, TITLE
+			, COUNT
+			, `ORDER`
+			, IS_NOT_WIN
+		) VALUES (
+			  #{gftId}
+			, #{subEvtId}
+			, #{evtId}
+			, #{title}
+			, #{count}
+			, #{order}
+			, #{isNotWin}
+		) ON DUPLICATE KEY UPDATE
+			  SUB_EVT_ID = #{subEvtId}
+			, EVT_ID = #{evtId}
+			, TITLE = #{title}
+			, COUNT = #{count}
+			, `ORDER` = #{order}
+			, IS_NOT_WIN = #{isNotWin}	
+	</insert>
+	<insert id="saveOXQuiz" parameterType="hashMap">
+		INSERT INTO EVENT_OXQUIZ_COMPONENT (
+			  EQC_ID
+			, SUB_EVT_ID
+			, QUESTION_TYPE
+			, QUESTION
+			, QUESTION_IMG_ID
+			, QUESTION_IMG_ALT
+			, ANSWER
+			, HINT_USE_YN
+			, HINT_TYPE
+			, HINT_BODY
+			, HINT_IMG_ID
+			, HINT_IMG_ALT
+			, SORT
+		) VALUES (
+			  #{eqcId}
+			, #{subEvtId}
+			, #{questiontype}
+			, #{question}
+			, #{questionimgId}
+			, #{questionimgAlt}
+			, #{answer}
+			, #{hintYn}
+			, #{hintType}
+			, #{hintbody}
+			, #{hintimgId}
+			, #{hintimgAlt}
+			, #{sort}
+		) ON DUPLICATE KEY UPDATE
+			  SUB_EVT_ID = #{subEvtId}
+			, QUESTION_TYPE = #{questiontype}
+			, QUESTION = #{question}
+			, QUESTION_IMG_ID = #{questionimgId}
+			, QUESTION_IMG_ALT = #{questionimgAlt}
+			, ANSWER = #{answer}
+			, HINT_USE_YN = #{hintYn}
+			, HINT_TYPE = #{hintType}
+			, HINT_BODY = #{hintbody}
+			, HINT_IMG_ID = #{hintimgId}
+			, HINT_IMG_ALT = #{hintimgAlt}
+			, SORT = #{sort}
+	</insert>	
+	<insert id="saveEventComponent" parameterType="hashMap">
+		INSERT INTO EVENT_COMPONENTS (
+			EVC_ID, EVT_ID, COMP_TYPE, COMP_IDX, IS_BOX, IS_VERTICAL, SIZE_TYPE
+			<if test="SUB_EVT_ID != null">
+				, SUB_EVT_ID
+			</if>
+			<if test="IMG_ID != null">
+				, IMG_ID
+			</if>
+			<if test="COMP_BODY != null ">
+				, COMP_BODY
+			</if>
+			<if test="IMG_LINK != null ">
+				, IMG_LINK
+			</if>
+		) VALUES (
+			#{EVC_ID}, #{EVT_ID}, #{COMP_TYPE}, #{COMP_IDX}, #{IS_BOX}, #{IS_VERTICAL}, #{SIZE_TYPE}
+			<if test="SUB_EVT_ID != null">
+				, #{SUB_EVT_ID}
+			</if>
+			<if test="IMG_ID != null">
+				, #{IMG_ID}
+			</if>
+			<if test="COMP_BODY != null ">
+				, #{COMP_BODY}
+			</if>
+			<if test="IMG_LINK != null ">
+				, #{IMG_LINK}
+			</if>
+		) ON DUPLICATE KEY UPDATE
+			COMP_TYPE = #{COMP_TYPE}
+			, COMP_IDX = #{COMP_IDX}
+			, IS_BOX = #{IS_BOX}
+			, IS_VERTICAL = #{IS_VERTICAL}
+			, SIZE_TYPE = #{SIZE_TYPE}
+			<if test="SUB_EVT_ID != null">
+				, SUB_EVT_ID = #{SUB_EVT_ID}
+			</if>
+			<if test="IMG_ID != null">
+				, IMG_ID = #{IMG_ID}
+			</if>
+			<if test="COMP_BODY != null ">
+				, COMP_BODY = #{COMP_BODY}
+			</if>
+			<if test="IMG_LINK != null ">
+				, IMG_LINK = #{IMG_LINK}
+			</if>
+	</insert>
+	<insert id="saveEventResultComponent" parameterType="hashMap">
+		INSERT INTO EVENT_WIN_COMPONENTS (
+			EWC_ID, EVT_ID, COMP_TYPE, COMP_IDX, SIZE_TYPE
+			<if test="IMG_ID != null">
+				, IMG_ID
+			</if>
+			<if test="COMP_BODY != null ">
+				, COMP_BODY
+			</if>
+			<if test="IMG_LINK != null ">
+				, IMG_LINK
+			</if>
+		) VALUES (
+			#{EWC_ID}, #{EVT_ID}, #{COMP_TYPE}, #{COMP_IDX}, #{SIZE_TYPE}
+			<if test="IMG_ID != null">
+				, #{IMG_ID}
+			</if>
+			<if test="COMP_BODY != null ">
+				, #{COMP_BODY}
+			</if>
+			<if test="IMG_LINK != null ">
+				, #{IMG_LINK}
+			</if>
+		) ON DUPLICATE KEY UPDATE
+			COMP_TYPE = #{COMP_TYPE}
+			, COMP_IDX = #{COMP_IDX}
+			, SIZE_TYPE = #{SIZE_TYPE}
+			<if test="IMG_ID != null">
+				, IMG_ID = #{IMG_ID}
+			</if>
+			<if test="COMP_BODY != null ">
+				, COMP_BODY = #{COMP_BODY}
+			</if>
+			<if test="IMG_LINK != null ">
+				, IMG_LINK = #{IMG_LINK}
+			</if>
+	</insert>
+	<select id="getEvent" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			A.COT_ID, A.CONTENT_TYPE, A.TITLE, A.READ_COUNT, A.CREATE_DATE, A.CREATE_USR_ID
+			, B.EVT_ID, B.TITLE, B.START_DATE, B.END_DATE, B.ANNOUNCE_DATE, B.STATUS, B.CONTENTS, B.REJECT
+			, B.CAUTION, B.ANNOUNCE_TYPE, B.TEMPLATE_TYPE, B.IS_CAUTION, B.IS_STAFF, B.IS_COLLECT, B.IS_LOGIN
+			, B.WIN_DESC, B.IS_WIN_DESC, B.CAUTION_TEMPLATE, B.STAFF_TEMPLATE, B.IMG_ID
+		FROM CONTENT_MASTER A
+			INNER JOIN EVENT_MASTER B ON A.COT_ID = B.COT_ID
+		WHERE 1 = 1
+		<if test="cotId != null">
+			AND A.COT_ID = #{cotId}
+		</if>
+		<if test="evtId != null">
+			AND B.EVT_ID = #{evtId}
+		</if>
+	</select>
+	
+	<select id="getEventBase" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			CM.CREATE_DATE
+			, A.*
+			, B.*
+			, C.*
+		FROM CONTENT_MASTER CM
+		LEFT OUTER JOIN EVENT_MASTER A ON A.COT_ID = CM.COT_ID
+		LEFT OUTER JOIN EVENT_USER_INFO_COLLECT B ON A.EVT_ID = B.EVT_ID
+		LEFT OUTER JOIN EVENT_STAFF_INFO C ON A.EVT_ID = C.EVT_ID
+		WHERE A.EVT_ID = #{evtId}
+	</select>
+	
+	<select id="getSubEventInfo" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			  SI.SUB_EVT_ID
+			, SI.EVT_ID
+			, SI.TITLE
+			, SI.START_DATE
+			, SI.END_DATE
+			, SI.EVT_TYPE_CD
+			, SI.ELECT_TYPE
+			, SI.IMMEDI_TYPE
+			, SI.RANDOM_TYPE
+			, SI.USER_PREDICT_CNT
+			, SI.ANNOUNCE_PER
+			, SI.WIN_COND_VALUE
+			, SI.WIN_COND_USE_YN
+			, SI.IS_NOT_WIN
+			, SI.EXCEL_FILE_NM
+			, TC.EVT_TYPE_NM
+			, TC.GIFT_LIMIT_CNT
+			, TC.USE_YN
+		FROM EVENT_SUB_INFO AS SI
+		INNER JOIN EVENT_TYPE_CODE AS TC ON SI.EVT_TYPE_CD = TC.EVT_TYPE_CD
+		WHERE EVT_ID = #{evtId}
+	</select>
+	
+	<select id="getSubEventGift" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			  GFT_ID
+			, SUB_EVT_ID
+			, EVT_ID
+			, TITLE
+			, COUNT
+			, `ORDER`
+			, IS_NOT_WIN
+		FROM EVENT_GIFT_INFO
+		WHERE SUB_EVT_ID = #{subEvtId}
+		ORDER BY `ORDER` ASC
+	</select>
+	<select id="getOXQuizComponent" parameterType="hashMap" resultType="hashMap">
+		SELECT
+		  	  EQC_ID
+			, SUB_EVT_ID
+			, QUESTION_TYPE
+			, QUESTION
+			, QUESTION_IMG_ID
+			, QUESTION_IMG_ALT
+			, ANSWER
+			, HINT_USE_YN
+			, HINT_TYPE
+			, HINT_BODY
+			, HINT_IMG_ID
+			, HINT_IMG_ALT
+			, SORT
+			, (SELECT IMAGE_PATH FROM IMAGE B WHERE B.IMG_ID = QUESTION_IMG_ID) as QUESTION_IMG_PATH
+			, (SELECT IMAGE_PATH FROM IMAGE B WHERE B.IMG_ID = HINT_IMG_ID) as HINT_IMG_PATH
+		FROM EVENT_OXQUIZ_COMPONENT
+		WHERE SUB_EVT_ID = #{subEvtId}
+		ORDER BY SORT ASC
+	</select>
+	
+	<select id="getEventPromotion" parameterType="hashMap" resultType="hashMap">
+		SELECT * FROM EVENT_BANNER_INFO A
+		LEFT OUTER JOIN IMAGE I ON A.IMG_ID = I.IMG_ID
+		WHERE EVT_ID = #{evtId}
+	</select>
+	
+	<select id="getEventStats" parameterType="hashMap" resultType="hashMap">
+		SELECT * FROM EVENT_STATS
+		WHERE EVT_ID = #{evtId}
+	</select>
+	
+	<select id="getEventComponent" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			EC.EVC_ID, EC.EVT_ID, EC.IMG_ID, EC.COMP_TYPE, EC.SUB_EVT_ID, EC.COMP_BODY, EC.COMP_IDX
+			, EC.IS_BOX, EC.IS_VERTICAL, EC.IMG_LINK, EC.SIZE_TYPE
+			, I.IMAGE_DESCRIPTION IMG_DESC, I.IMAGE_PATH, I.IS_VISIABLE
+		FROM EVENT_COMPONENTS EC
+		LEFT OUTER JOIN IMAGE I ON EC.IMG_ID = I.IMG_ID
+		WHERE EVT_ID = #{evtId}
+		ORDER BY COMP_IDX
+	</select>
+	<select id="getEventResultComponent" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			 EC.EWC_ID, EC.EVT_ID, EC.IMG_ID, EC.COMP_TYPE, EC.COMP_BODY, EC.COMP_IDX, EC.IMG_LINK
+			, EC.SIZE_TYPE, I.IMAGE_DESCRIPTION IMG_DESC, I.IMAGE_PATH, I.IS_VISIABLE
+		FROM EVENT_WIN_COMPONENTS EC
+		LEFT OUTER JOIN IMAGE I ON EC.IMG_ID = I.IMG_ID
+		WHERE EVT_ID = #{evtId}
+		ORDER BY COMP_IDX
+	</select>
+	<select id="getEventImage" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			IMG_ID, IMAGE_DESCRIPTION, IMAGE_PATH 
+		FROM IMAGE 
+		WHERE 1 = 1
+		AND COT_ID = #{cotId}
+		AND IMG_ID NOT IN (
+			SELECT I.IMG_ID FROM EVENT_BANNER_INFO A
+			LEFT OUTER JOIN IMAGE I ON A.IMG_ID = I.IMG_ID
+			WHERE EVT_ID = #{evtId}
+		)
+	</select>
+	
+	<select id="getEventTypeCode" parameterType="hashMap" resultType="hashMap">
+		SELECT * FROM EVENT_TYPE_CODE where USE_YN != 'N'
+	</select>
+	
+	<delete id="deleteEventComponent" parameterType="hashMap">
+		DELETE FROM EVENT_COMPONENTS
+		WHERE EVC_ID = #{EVC_ID}
+	</delete>
+	<delete id="deleteEventResultComponent" parameterType="hashMap">
+		DELETE FROM EVENT_WIN_COMPONENTS
+		WHERE EWC_ID = #{EWC_ID}
+	</delete>
+	<delete id="deleteEventPromotion" parameterType="hashMap">
+		DELETE FROM EVENT_BANNER_INFO
+		WHERE EVT_ID = #{evtId}
+	</delete>
+	
+	<delete id="deleteEventProcess" parameterType="hashMap">
+		DELETE FROM EVENT_SUB_INFO
+		WHERE SUB_EVT_ID = #{subEvtId}
+	</delete>
+	
+	<delete id="deleteEventGift" parameterType="hashMap">
+		DELETE FROM EVENT_GIFT_INFO
+		WHERE GFT_ID = #{gftId}
+	</delete>
+	
+	<delete id="deleteEventOXQuiz" parameterType="hashMap">
+		DELETE FROM EVENT_OXQUIZ_COMPONENT
+		WHERE EQC_ID = #{eqcId}
+	</delete>
+	
+	
+	<update id="updateEventStatus" parameterType="hashMap">
+		UPDATE EVENT_MASTER SET
+			STATUS = #{status}
+		WHERE EVT_ID = #{evtId}
+	</update>
+	<update id="UpdateEventMasterImg" parameterType="hashMap">
+	UPDATE EVENT_MASTER SET
+			IMG_ID = #{IMG_UPDATE}
+		WHERE COT_ID = #{COT_ID}
+	</update>
+	<select id="SelectBlacklistBase" resultType="hashMap">
+	select HP from EVENT_BLACKLIT_BASE
+	</select>
+	<insert id="QuestionImgSave" parameterType="hashMap">
+  		INSERT INTO IMAGE (
+  			IMG_ID, IMAGE_PATH, IMAGE_DESCRIPTION
+  		) VALUES (
+  			#{questionimgId}, #{questionimgPath}, #{questionimgAlt}
+  		) ON DUPLICATE KEY UPDATE
+	  		IMAGE_PATH = #{questionimgPath},
+	  		IMAGE_DESCRIPTION = #{questionimgAlt}
+ 	 </insert>
+  
+  	<insert id="HintImgSave" parameterType="hashMap">
+  		INSERT INTO IMAGE (
+  			IMG_ID, IMAGE_PATH, IMAGE_DESCRIPTION
+  		) VALUES (
+  			#{hintimgId}, #{hintimgPath}, #{hintimgAlt}
+  		) ON DUPLICATE KEY UPDATE
+	  		IMAGE_PATH = #{hintimgPath},
+	  		IMAGE_DESCRIPTION = #{hintimgAlt}
+ 	 </insert>
+</mapper>

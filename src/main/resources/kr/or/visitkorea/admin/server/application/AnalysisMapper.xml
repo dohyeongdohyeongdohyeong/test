@@ -1,0 +1,1842 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.AnalysisMapper">
+    <select id="selectAnalysisMainTot" parameterType="hashMap" resultType="hashMap">
+		select sum(C.READ_COUNT) tot from SITE_MENU_ID A left join MENU_LOG C on A.SMID=C.SMID
+		, (select sum(READ_COUNT) tot from MENU_LOG where 1=1
+		    <choose>
+				<when test="sdate != null">
+				 and CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			) D
+		where 1=1 and A.SMID != '2b8a5946-9aa7-11e8-8165-020027310001'
+		<choose>
+			<when test="sdate != null">
+			 and C.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and C.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+   </select>
+   <select id="selectAnalysisMain" parameterType="hashMap" resultType="hashMap">
+		select A.SMID smid, A.NAME name, sum(C.READ_COUNT) mcnt , sum(C.READ_COUNT)/D.tot*100 bi
+		from SITE_MENU_ID A left join MENU_LOG C on A.SMID=C.SMID
+		, (select sum(READ_COUNT) tot from MENU_LOG where 1=1
+		    <choose>
+				<when test="sdate != null">
+				 and CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			) D
+		where 1=1 and A.SMID != '2b8a5946-9aa7-11e8-8165-020027310001'
+		<choose>
+			<when test="sdate != null">
+			 and C.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and C.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by A.SMID, A.NAME
+		order by bi desc
+   </select>
+   
+   <select id="selectMenuId" parameterType="hashMap" resultType="hashMap">
+		select SMID smid, NAME name	from SITE_MENU_ID
+   </select>
+   
+    <select id="selectAnalysisTagTot" parameterType="hashMap" resultType="hashMap">
+		select sum(B.READ_COUNT) tot from TAGS A left join TAG_OTHER_SECTION_LOG B on A.TAG_ID=B.TAG_ID
+		where B.MAIN_TYPE is not null
+	    <choose>
+			<when test="mtype != null">
+			 and B.MAIN_TYPE = #{mtype}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and A.TAG_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+   </select>
+   <select id="selectAnalysisTag" parameterType="hashMap" resultType="hashMap">
+		select A.TAG_ID tagid ,A.TAG_NAME name, sum(B.READ_COUNT) cnt from TAGS A left join TAG_OTHER_SECTION_LOG B on A.TAG_ID=B.TAG_ID
+		where B.MAIN_TYPE is not null
+	    <choose>
+			<when test="mtype != null">
+			 and B.MAIN_TYPE = #{mtype}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and A.TAG_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by A.TAG_ID, A.TAG_NAME
+		order by cnt desc
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+		
+   </select>
+   <select id="selectAnalysisTagCnt" parameterType="hashMap" resultType="hashMap">
+       select COUNT(TAG_ID) CNT from (select A.TAG_ID,A.TAG_NAME from TAGS A left join TAG_OTHER_SECTION_LOG B on A.TAG_ID=B.TAG_ID where B.MAIN_TYPE is not null 
+       <choose>
+			<when test="mtype != null">
+			 and B.MAIN_TYPE = #{mtype}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and A.TAG_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+	 group by TAG_ID) AA
+	    
+   </select>
+
+   
+   <select id="selectArea" parameterType="hashMap" resultType="hashMap">
+       SELECT X.VALUE name, X.BIG_CATEGORY code FROM CODE X WHERE X.CODE_TYPE = 0 AND X.MID_CATEGORY = 0 AND X.SML_CATEGORY = 0 group by BIG_CATEGORY order by name
+   </select>
+   
+   <select id="selectThemeCode" parameterType="hashMap" resultType="hashMap">
+       SELECT 
+	       	X.BIG_CATEGORY code,
+	       	X.VALUE name
+       FROM CODE X 
+       WHERE 1 = 1 
+       		AND X.CODE_TYPE = 2
+   </select>
+   
+   <select id="selectLogo" parameterType="hashMap" resultType="hashMap">
+       select ( SELECT X.VALUE FROM CODE X WHERE X.CODE_TYPE = 0 AND X.MID_CATEGORY = 0 AND X.SML_CATEGORY = 0 AND X.BIG_CATEGORY = B.AREA_CODE LIMIT 1) AS areaName
+		, sum(READ_COUNT) cnt
+		from LOCAL_GOVERNMENT_SUB_LOG B
+		where 1=1
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by areaName
+		order by cnt desc
+   </select>
+   <select id="selectLogoTot" parameterType="hashMap" resultType="hashMap">
+       select  sum(READ_COUNT) tot	from LOCAL_GOVERNMENT_SUB_LOG B
+		where 1=1
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+   </select>
+   
+   <select id="selectSectionTot" parameterType="hashMap" resultType="hashMap">
+       select sum(B.READ_COUNT) tot 
+		from LOCAL_GOVERNMENT_LOG B,( SELECT VALUE, BIG_CATEGORY, MID_CATEGORY FROM CODE WHERE CODE_TYPE = 0 AND MID_CATEGORY = 0 AND SML_CATEGORY = 0) X
+		where B.AREA_CODE = X.BIG_CATEGORY
+		<choose>
+			<when test="areacode != null and areacode != 0">
+			 AND B.AREA_CODE = #{areacode}
+			</when>
+		</choose>
+		<choose>
+			<when test="section != null">
+			 and B.SECTION =  #{section}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+   </select>
+   <select id="selectSection" parameterType="hashMap" resultType="hashMap">
+       select X.VALUE areaName, B.HEADER header, B.TITLE title, sum(B.READ_COUNT) cnt, B.LINK_URL link 
+		from LOCAL_GOVERNMENT_LOG B,( SELECT VALUE, BIG_CATEGORY, MID_CATEGORY FROM CODE WHERE CODE_TYPE = 0 AND MID_CATEGORY = 0 AND SML_CATEGORY = 0) X
+		where B.AREA_CODE = X.BIG_CATEGORY
+		<choose>
+			<when test="areacode != null and areacode != 0">
+			 AND B.AREA_CODE = #{areacode}
+			</when>
+		</choose>
+		<choose>
+			<when test="section != null">
+			 and B.SECTION =  #{section}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by B.TITLE
+		order by cnt desc
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+   </select>
+   <select id="selectSectionCnt" parameterType="hashMap" resultType="hashMap">
+       select count(*) CNT from (select X.VALUE areaName, B.TITLE title, sum(B.READ_COUNT) cnt, B.LINK_URL link 
+		from LOCAL_GOVERNMENT_LOG B,( SELECT VALUE, BIG_CATEGORY, MID_CATEGORY FROM CODE WHERE CODE_TYPE = 0 AND MID_CATEGORY = 0 AND SML_CATEGORY = 0) X
+		where B.AREA_CODE = X.BIG_CATEGORY
+		<choose>
+			<when test="areacode != null and areacode != 0">
+			 AND B.AREA_CODE = #{areacode}
+			</when>
+		</choose>
+		<choose>
+			<when test="section != null">
+			 and B.SECTION =  #{section}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by B.TITLE ) A
+   </select>
+   
+   <select id="selectSigunguTot" parameterType="hashMap" resultType="hashMap">
+       select sum(B.READ_COUNT) tot
+		from LOCAL_GOVERNMENT_SUB_LOG B,( SELECT VALUE, BIG_CATEGORY, MID_CATEGORY FROM CODE WHERE CODE_TYPE = 0 AND MID_CATEGORY != 0 AND SML_CATEGORY = 0) X
+		where B.AREA_CODE = X.BIG_CATEGORY and B.SIGUGUN_CODE = X.MID_CATEGORY
+		<choose>
+			<when test="areacode != null and areacode != 0">
+			 AND B.AREA_CODE = #{areacode}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+   </select>
+   <select id="selectSigungu" parameterType="hashMap" resultType="hashMap">
+       select X.VALUE areaname, sum(B.READ_COUNT) cnt
+		from LOCAL_GOVERNMENT_SUB_LOG B,( SELECT VALUE, BIG_CATEGORY, MID_CATEGORY FROM CODE WHERE CODE_TYPE = 0 AND MID_CATEGORY != 0 AND SML_CATEGORY = 0) X
+		where B.AREA_CODE = X.BIG_CATEGORY and B.SIGUGUN_CODE = X.MID_CATEGORY
+		<choose>
+			<when test="areacode != null and areacode != 0">
+			 AND B.AREA_CODE = #{areacode}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by areaName order by cnt desc
+   </select>
+   
+   <select id="selectAreaSigungu" parameterType="hashMap" resultType="hashMap">
+       SELECT VALUE sigungu, MID_CATEGORY code FROM CODE 
+		WHERE CODE_TYPE = 0 AND SML_CATEGORY = 0 and MID_CATEGORY != 99
+		<choose>
+			<when test="areacode != null and areacode != 0">
+			 and BIG_CATEGORY = #{areacode}
+			</when>
+		</choose>
+		order by MID_CATEGORY *1
+   </select>
+   
+   <select id="selectContentsTot" parameterType="hashMap" resultType="hashMap">
+       select /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) pageview
+			, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) fav
+			, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) share
+			, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) likes
+			, /*관광정보지킴이*/ sum((Select count(*) from ZIKIMI AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) zikimi
+			, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) comment
+			, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) print
+			, /*발도장*/ sum((Select count(STP_ID) from STAMP_HISTORY AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) stamp
+		from (Select BB.*,CC.AREA_CODE, CC.SIGUGUN_CODE from CONTENT_MASTER BB, ${maintype} CC where BB.COT_ID=CC.COT_ID) B
+		<choose>
+			<when test="areacode != null">
+			,( SELECT VALUE, BIG_CATEGORY, MID_CATEGORY FROM CODE WHERE CODE_TYPE = 0 AND MID_CATEGORY = 0 AND SML_CATEGORY = 0) X
+			    where B.AREA_CODE=X.BIG_CATEGORY
+			 	and B.AREA_CODE = #{areacode}
+				<choose>
+					<when test="sigungucode != null">
+					 and B.SIGUGUN_CODE = #{sigungucode}
+					</when>
+				</choose>
+			</when>
+			<otherwise>
+	    		where 1=1
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and B.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			 and B.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+   </select>
+   <select id="selectContents" parameterType="hashMap" resultType="hashMap">
+       select B.COT_ID cotid, B.TITLE title
+			, /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) pageview
+			, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) fav
+			, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) share
+			, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) likes
+			, /*관광정보지킴이*/ sum((Select count(*) from ZIKIMI AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) zikimi
+			, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) comment
+			, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) print
+			, /*발도장*/ sum((Select count(STP_ID) from STAMP_HISTORY AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) stamp
+		from (Select BB.*,CC.AREA_CODE, CC.SIGUGUN_CODE from CONTENT_MASTER BB, ${maintype} CC where BB.COT_ID=CC.COT_ID) B
+		<choose>
+			<when test="areacode != null">
+			,( SELECT VALUE, BIG_CATEGORY, MID_CATEGORY FROM CODE WHERE CODE_TYPE = 0 AND MID_CATEGORY = 0 AND SML_CATEGORY = 0) X
+			    where B.AREA_CODE=X.BIG_CATEGORY
+			 	and B.AREA_CODE = #{areacode}
+				<choose>
+					<when test="sigungucode != null">
+					 and B.SIGUGUN_CODE = #{sigungucode}
+					</when>
+				</choose>
+			</when>
+			<otherwise>
+	    		where 1=1
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and B.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			 and B.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+		group by cotid
+		<choose>
+			<when test="orderby != null">
+			order by ${orderby} desc
+			</when>
+		</choose>
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+   </select>
+   <select id="selectContentsCnt" parameterType="hashMap" resultType="hashMap">
+       select count(*) CNT from (select B.COT_ID cotid, B.TITLE title
+			, /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) pageview
+			, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) fav
+			, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) share
+			, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) likes
+			, /*관광정보지킴이*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) zikimi
+			, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) comment
+			, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				 and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+				</when>
+			</choose>
+			)) print		
+			from (Select BB.*,CC.AREA_CODE, CC.SIGUGUN_CODE from CONTENT_MASTER BB, ${maintype} CC where BB.COT_ID=CC.COT_ID) B
+		<choose>
+			<when test="areacode != null">
+			,( SELECT VALUE, BIG_CATEGORY, MID_CATEGORY FROM CODE WHERE CODE_TYPE = 0 AND MID_CATEGORY = 0 AND SML_CATEGORY = 0) X
+			    where B.AREA_CODE=X.BIG_CATEGORY
+			 	and B.AREA_CODE = #{areacode}
+				<choose>
+					<when test="sigungucode != null">
+					 and B.SIGUGUN_CODE = #{sigungucode}
+					</when>
+				</choose>
+			</when>
+			<otherwise>
+	    		where 1=1
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and B.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			and B.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by cotid) A
+   </select>
+   
+    <select id="selectBanner" parameterType="hashMap" resultType="hashMap">
+        select TITLE title, sum(READ_COUNT) cnt, LINK_URL link from BANNER_LOG B
+		where 1=1
+		<choose>
+			<when test="section != null">
+			and B.SECTION = #{section}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by TITLE
+		order by cnt desc
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+   </select>
+   <select id="selectBannerTot" parameterType="hashMap" resultType="hashMap">
+        select sum(READ_COUNT) tot from BANNER_LOG B
+		where 1=1
+		<choose>
+			<when test="section != null">
+			and B.SECTION = #{section}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+   </select>
+   <select id="selectBannerCnt" parameterType="hashMap" resultType="hashMap">
+       select count(*) CNT from (
+        select TITLE title, sum(READ_COUNT) cnt, LINK_URL link from BANNER_LOG B
+		where 1=1
+		<choose>
+			<when test="section != null">
+			and B.SECTION = #{section}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by TITLE
+		) A
+   </select>
+   
+    <select id="selectConnect" parameterType="hashMap" resultType="hashMap">
+   		select SNS_TYPE stype, AREA_NAME areaname, SIGUNGU_NAME sigunguname, CREATE_DATE cdate, sum(READ_COUNT) cnt from CONNECT_LOCATION_LOG
+   		where 1=1
+		<choose>
+			<when test="stype != null">
+			and SNS_TYPE = #{stype}
+			</when>
+		</choose>
+		<choose>
+			<when test="areaname != null">
+			and AREA_NAME REGEXP #{areaname}
+			</when>
+		</choose>
+				<choose>
+			<when test="sigunguname != null">
+			and SIGUNGU_NAME REGEXP #{sigunguname}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and CREATE_DATE <![CDATA[ <= ]]> #{edate}
+			</when>
+		</choose>
+		group by SNS_TYPE, AREA_NAME, SIGUNGU_NAME
+		order by cnt desc
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+   </select>
+   <select id="selectConnectCnt" parameterType="hashMap" resultType="hashMap">
+       select count(*) CNT from (
+   		select SNS_TYPE stype, AREA_NAME areaname, SIGUNGU_NAME sigunguname, CREATE_DATE cdate, sum(READ_COUNT) cnt from CONNECT_LOCATION_LOG
+   		where 1=1
+		<choose>
+			<when test="stype != null">
+			and SNS_TYPE = #{stype}
+			</when>
+		</choose>
+		<choose>
+			<when test="areaname != null">
+			and AREA_NAME REGEXP #{areaname}
+			</when>
+		</choose>
+				<choose>
+			<when test="sigunguname != null">
+			and SIGUNGU_NAME REGEXP #{sigunguname}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by SNS_TYPE, AREA_NAME, SIGUNGU_NAME
+		order by cnt desc
+		) A
+   </select>
+   
+    <select id="selectOtherMain" parameterType="hashMap" resultType="hashMap">
+    select B.SMID, sum(B.READ_COUNT) cnt, B.CREATE_DATE cdate, C.NAME name
+	from OTHER_DEPARTMENT_LOG B, SITE_MENU_ID C
+	where B.SMID=C.SMID and C.SMID = 'faead355-9aa6-11e8-8165-020027310001'
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+			</when>
+		</choose>
+	UNION
+	select B.SMID, sum(B.READ_COUNT) cnt, B.CREATE_DATE cdate, C.NAME name
+	from OTHER_DEPARTMENT_LOG B, SITE_MENU_ID C
+	where B.SMID=C.SMID and C.SMID = '28d91274-9aa7-11e8-8165-020027310001'
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+			</when>
+		</choose>
+	UNION
+	select B.SMID, sum(B.READ_COUNT) cnt, B.CREATE_DATE cdate, C.NAME name
+	from OTHER_DEPARTMENT_LOG B, SITE_MENU_ID C
+	where B.SMID=C.SMID and C.SMID = '2b8a5946-9aa7-11e8-8165-020027310001'
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+			</when>
+		</choose>
+   </select>
+   <select id="selectOtherMainConnect" parameterType="hashMap" resultType="hashMap">
+	select B.SMID, sum(B.READ_COUNT) cnt, B.CREATE_DATE cdate, C.NAME name
+	from OTHER_DEPARTMENT_LOG B, SITE_MENU_ID C
+	where B.SMID=C.SMID and C.SMID = '84cf49d6-7ade-4248-8f91-63b2d97ab19c'
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+			</when>
+		</choose>
+	UNION
+	select B.SMID, sum(B.READ_COUNT) cnt, B.CREATE_DATE cdate, C.NAME name
+	from OTHER_DEPARTMENT_LOG B, SITE_MENU_ID C
+	where B.SMID=C.SMID and C.SMID = '6084d12d-8b45-47ed-a68e-c35a9da61f25'
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+			</when>
+		</choose>
+   </select>
+   <select id="selectOtherMainTot" parameterType="hashMap" resultType="hashMap">
+	select sum(B.READ_COUNT) tot
+	from OTHER_DEPARTMENT_LOG B, SITE_MENU_ID C
+	where B.SMID=C.SMID and C.SMID in ('faead355-9aa6-11e8-8165-020027310001','28d91274-9aa7-11e8-8165-020027310001','2b8a5946-9aa7-11e8-8165-020027310001')
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+			</when>
+		</choose>
+   </select>
+    
+	<select id="selectOtherDepService" parameterType="hashMap" resultType="hashMap">
+   		SELECT OTD_ID otdid, TITLE title FROM OTHER_DEPARTMENT_SERVICE 
+   		WHERE 1 = 1
+   		<choose>
+			<when test="otdid != null">
+			 and OTD_ID in (#{otdid})
+			</when>
+		</choose>
+   		order by TITLE
+   	</select>
+   	
+	<select id="selectOtherContentsTot" parameterType="hashMap" resultType="hashMap">
+		select /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) pageview
+		, /*코스등록*/ sum((Select count(*) from SNS_COURSE_DETAILS AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) course
+		, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) fav
+		, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) share
+		, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) likes
+		, /*관광정보지킴이*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) zikimi
+		, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) comment
+		, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) print
+		from (Select BB.COT_ID, BB.TITLE, BB.CONTENT_TYPE, AA.OTD_ID, CC.AREA_CODE, CC.SIGUGUN_CODE from OTHER_DEPARTMENT_CONTENT AA, CONTENT_MASTER BB, ${dbname1} CC where BB.COT_ID=AA.COT_ID and AA.COT_ID=CC.COT_ID) B
+		<choose>
+			<when test="areacode != null">
+			 	where B.AREA_CODE = #{areacode}
+				<choose>
+					<when test="sigungucode != null">
+					 and B.SIGUGUN_CODE = #{sigungucode}
+					</when>
+				</choose>
+			</when>
+			<otherwise>
+	    		where 1=1
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and B.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			 and B.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 0">
+			UNION
+				select /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) pageview
+				, /*코스등록*/ sum((Select count(*) from SNS_COURSE_DETAILS AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) course
+				, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) fav
+				, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) share
+				, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) likes
+				, /*관광정보지킴이*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) zikimi
+				, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) comment
+				, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) print
+				from (Select BB.COT_ID, BB.TITLE, BB.CONTENT_TYPE, AA.OTD_ID, CC.AREA_CODE, CC.SIGUGUN_CODE from OTHER_DEPARTMENT_CONTENT AA, CONTENT_MASTER BB, ${dbname2} CC where BB.COT_ID=AA.COT_ID and AA.COT_ID=CC.COT_ID) B
+				<choose>
+					<when test="areacode != null">
+					 	where B.AREA_CODE = #{areacode}
+						<choose>
+							<when test="sigungucode != null">
+							 and B.SIGUGUN_CODE = #{sigungucode}
+							</when>
+						</choose>
+					</when>
+					<otherwise>
+			    		where 1=1
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="title != null">
+					 and B.TITLE REGEXP #{title}
+					</when>
+				</choose>
+				<choose>
+					<when test="contenttype != null">
+					 and B.CONTENT_TYPE = #{contenttype}
+					</when>
+				</choose>
+				<choose>
+					<when test="otdid != null">
+					and B.OTD_ID = #{otdid}
+					</when>
+				</choose>
+			</when>
+		</choose>
+	</select>
+	<select id="selectOtherContents" parameterType="hashMap" resultType="hashMap">
+		select B.COT_ID cotid, B.TITLE title
+		, /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) pageview
+		, /*코스등록*/ sum((Select count(*) from SNS_COURSE_DETAILS AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) course
+		, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) fav
+		, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) share
+		, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) likes
+		, /*관광정보지킴이*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) zikimi
+		, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) comment
+		, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) print
+		from (Select BB.COT_ID, BB.TITLE, BB.CONTENT_TYPE, AA.OTD_ID, CC.AREA_CODE, CC.SIGUGUN_CODE from OTHER_DEPARTMENT_CONTENT AA, CONTENT_MASTER BB, ${dbname1} CC where BB.COT_ID=AA.COT_ID and AA.COT_ID=CC.COT_ID) B
+		<choose>
+			<when test="areacode != null">
+			 	where B.AREA_CODE = #{areacode}
+				<choose>
+					<when test="sigungucode != null">
+					 and B.SIGUGUN_CODE = #{sigungucode}
+					</when>
+				</choose>
+			</when>
+			<otherwise>
+	    		where 1=1
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and B.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			 and B.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		group by cotid
+		<choose>
+			<when test="mode == 0">
+			UNION
+				select B.COT_ID cotid, B.TITLE title
+				, /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) pageview
+				, /*코스등록*/ sum((Select count(*) from SNS_COURSE_DETAILS AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) course
+				, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) fav
+				, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) share
+				, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) likes
+				, /*관광정보지킴이*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) zikimi
+				, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) comment
+				, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) print
+				from (Select BB.COT_ID, BB.TITLE, BB.CONTENT_TYPE, AA.OTD_ID, CC.AREA_CODE, CC.SIGUGUN_CODE from OTHER_DEPARTMENT_CONTENT AA, CONTENT_MASTER BB, ${dbname2} CC where BB.COT_ID=AA.COT_ID and AA.COT_ID=CC.COT_ID) B
+				<choose>
+					<when test="areacode != null">
+					 	where B.AREA_CODE = #{areacode}
+						<choose>
+							<when test="sigungucode != null">
+							 and B.SIGUGUN_CODE = #{sigungucode}
+							</when>
+						</choose>
+					</when>
+					<otherwise>
+			    		where 1=1
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="title != null">
+					 and B.TITLE REGEXP #{title}
+					</when>
+				</choose>
+				<choose>
+					<when test="contenttype != null">
+					 and B.CONTENT_TYPE = #{contenttype}
+					</when>
+				</choose>
+				<choose>
+					<when test="otdid != null">
+					and B.OTD_ID = #{otdid}
+					</when>
+				</choose>
+				group by cotid
+				
+			</when>
+		</choose>
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+	</select>
+	
+	<select id="selectOtherContentsCnt" parameterType="hashMap" resultType="hashMap">
+	    select count(*) CNT from (
+	   	select B.COT_ID cotid, B.TITLE title
+		, /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) pageview
+		, /*코스등록*/ sum((Select count(*) from SNS_COURSE_DETAILS AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) course
+		, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) fav
+		, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) share
+		, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) likes
+		, /*관광정보지킴이*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) zikimi
+		, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) comment
+		, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+			<choose>
+				<when test="sdate != null">
+				and AA.CREATE_DATE >= #{sdate}
+				</when>
+			</choose>
+			<choose>
+				<when test="edate != null">
+				 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+				</when>
+			</choose>
+		)) print
+		from (Select BB.COT_ID, BB.TITLE, BB.CONTENT_TYPE, AA.OTD_ID, CC.AREA_CODE, CC.SIGUGUN_CODE from OTHER_DEPARTMENT_CONTENT AA, CONTENT_MASTER BB, ${dbname1} CC where BB.COT_ID=AA.COT_ID and AA.COT_ID=CC.COT_ID) B
+		<choose>
+			<when test="areacode != null">
+			 	where B.AREA_CODE = #{areacode}
+				<choose>
+					<when test="sigungucode != null">
+					 and B.SIGUGUN_CODE = #{sigungucode}
+					</when>
+				</choose>
+			</when>
+			<otherwise>
+	    		where 1=1
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and B.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			 and B.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+		<choose>
+			<when test="otdid != null">
+			and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		group by cotid
+		<choose>
+			<when test="mode == 0">
+			UNION
+				select B.COT_ID cotid, B.TITLE title
+				, /*페이지뷰*/ sum((Select sum(READ_COUNT) from CONTENT_VIEW AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) pageview
+				, /*코스등록*/ sum((Select count(*) from SNS_COURSE_DETAILS AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) course
+				, /*즐겨찾기*/ sum((Select count(*) from SNS_FAVORITES AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) fav
+				, /*공유하기*/ sum((Select count(*) from SHARE_CONTENT AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) share
+				, /*좋아요*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) likes
+				, /*관광정보지킴이*/ sum((Select count(*) from SNS_LIKE AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) zikimi
+				, /*댓글수*/ sum((Select count(*) from SNS_COMMENT AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) comment
+				, /*인쇄수*/ sum((Select sum(READ_COUNT) from PRINT_LOG AA where AA.COT_ID=B.COT_ID
+					<choose>
+						<when test="sdate != null">
+						and AA.CREATE_DATE >= #{sdate}
+						</when>
+					</choose>
+					<choose>
+						<when test="edate != null">
+						 and AA.CREATE_DATE <![CDATA[ <= ]]> #{edate}
+						</when>
+					</choose>
+				)) print
+				from (Select BB.COT_ID, BB.TITLE, BB.CONTENT_TYPE, AA.OTD_ID, CC.AREA_CODE, CC.SIGUGUN_CODE from OTHER_DEPARTMENT_CONTENT AA, CONTENT_MASTER BB, ${dbname2} CC where BB.COT_ID=AA.COT_ID and AA.COT_ID=CC.COT_ID) B
+				<choose>
+					<when test="areacode != null">
+					 	where B.AREA_CODE = #{areacode}
+						<choose>
+							<when test="sigungucode != null">
+							 and B.SIGUGUN_CODE = #{sigungucode}
+							</when>
+						</choose>
+					</when>
+					<otherwise>
+			    		where 1=1
+					</otherwise>
+				</choose>
+				<choose>
+					<when test="title != null">
+					 and B.TITLE REGEXP #{title}
+					</when>
+				</choose>
+				<choose>
+					<when test="contenttype != null">
+					 and B.CONTENT_TYPE = #{contenttype}
+					</when>
+				</choose>
+				<choose>
+					<when test="otdid != null">
+					and B.OTD_ID = #{otdid}
+					</when>
+				</choose>
+				group by cotid
+				
+			</when>
+		</choose>
+		) A
+	</select>
+		
+	
+	<select id="selectOtherTagTot" parameterType="hashMap" resultType="hashMap">
+	    select sum(B.READ_COUNT) tot from TAGS A left join TAG_OTHER_SECTION_LOG B on A.TAG_ID=B.TAG_ID
+		where B.MAIN_TYPE is not null
+		<choose>
+			<when test="otdid != null">
+			 and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+	</select>
+   <select id="selectOtherTag" parameterType="hashMap" resultType="hashMap">
+		select A.TAG_ID tagid ,A.TAG_NAME name, sum(B.READ_COUNT) cnt from TAGS A left join TAG_OTHER_SECTION_LOG B on A.TAG_ID=B.TAG_ID
+		where B.MAIN_TYPE is not null
+	    <choose>
+			<when test="otdid != null">
+			 and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by A.TAG_ID, A.TAG_NAME
+		order by cnt desc
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+   </select>
+   <select id="selectOtherTagCnt" parameterType="hashMap" resultType="hashMap">
+       select count(*) CNT from (select A.TAG_ID tagid ,A.TAG_NAME name, sum(B.READ_COUNT) cnt from TAGS A left join TAG_OTHER_SECTION_LOG B on A.TAG_ID=B.TAG_ID
+		where B.MAIN_TYPE is not null
+	    <choose>
+			<when test="otdid != null">
+			 and B.OTD_ID = #{otdid}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and B.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and B.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		group by A.TAG_ID, A.TAG_NAME
+		order by cnt desc
+	    ) A
+   </select>
+</mapper>

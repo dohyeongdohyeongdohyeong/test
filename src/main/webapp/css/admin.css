@@ -1,0 +1,28 @@
+@charset "UTF-8";
+
+#UploadButton {
+	background-color : #e91e63 !important;
+	padding : 0px !important;
+	border-radius : 30px !important;
+	cursor: pointer;
+	position: absolute;
+	right: 10px;
+	bottom: 10px;;
+}
+
+.loader-wrapper {
+	z-index : 1004 !important; 
+}
+
+.progress-wrapper{
+	z-index : 1004 !important; 
+}
+
+#sidenav-overlay{
+	z-index : 1004 !important; 
+}
+
+.KillerContentsRow{
+	padding-left : 30px !important;
+}
+

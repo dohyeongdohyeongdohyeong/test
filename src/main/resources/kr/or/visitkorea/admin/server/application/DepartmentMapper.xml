@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.DepartmentMapper">
+ 
+ <!-- related other department table -->
+     
+  <insert id="insertAllTagKeywords" parameterType="hashMap" >
+  		insert into OTHER_DEPARTMENT_AREA_TAGS(ODM_ID, TAG_KEYWORD, `ORDER`) values ${querycondition}
+  </insert>
+     
+  <delete id="removeAllTagsFromOdmId" parameterType="string" >
+  		delete from OTHER_DEPARTMENT_AREA_TAGS where ODM_ID=#{odmId}
+  </delete>
+
+   <select id="getTagsFromOdmId" parameterType="string" resultType="hashMap">
+    	select * from OTHER_DEPARTMENT_AREA_TAGS 
+   		where ODM_ID = #{odmId} order by "ORDER" desc
+   </select>
+	
+	<select id="searchTabMenu" parameterType="hashMap" resultType="int">
+		select 
+			count(distinct D.COT_ID) cnt
+		from 
+			TAGS A, CONTENT_TAGS B, OTHER_DEPARTMENT_CONTENT C, CONTENT_MASTER D 
+		where 
+			A.TAG_ID = B.TAG_ID and C.COT_ID = B.COT_ID and D.COT_ID = C.COT_ID and 
+			A.TAG_NAME = #{keyword} and C.OTD_ID = #{otdId};
+	</select>
+
+   <select id="getTabMenu" parameterType="hashMap" resultType="hashMap">
+    	select * from OTHER_DEPARTMENT_AREA 
+   		where OTD_ID = #{otdId} and MAIN_AREA='TAB_MENU' limit 1
+   </select>
+     
+  <insert id="insertTabMenu" parameterType="hashMap" >
+  		insert into OTHER_DEPARTMENT_AREA ( ODM_ID, OTD_ID, MAIN_AREA, VIEW_TITLE, VIEW_CONNECT_MORE ) values (#{odmId}, #{otdId}, 'TAB_MENU', 0, '0')
+  </insert>
+     
+   <select id="getContentList" parameterType="hashMap" resultType="hashMap">
+    	select * from OTHER_DEPARTMENT_AREA 
+   		where OTD_ID = #{otdId} and MAIN_AREA='CONTENT_LIST' limit 1
+   </select>
+     
+  <insert id="insertContentList" parameterType="hashMap" >
+  		insert into OTHER_DEPARTMENT_AREA ( ODM_ID, OTD_ID, MAIN_AREA, VIEW_TITLE, VIEW_CONNECT_MORE ) values (#{odmId}, #{otdId}, 'CONTENT_LIST', 0, '0')
+  </insert>
+
+   <select id="getShowcase" parameterType="hashMap" resultType="hashMap">
+    	select * from (select A.* from OTHER_DEPARTMENT_AREA A LEFT OUTER JOIN CONTENT_MASTER B ON A.COT_ID = B.COT_ID) T 
+   		where T.OTD_ID = #{otdId} and T.MAIN_AREA='S'
+ 
+		<choose>
+  			<when test="isMain == 'false'">
+	   		 and T.MAN_ID is null 
+	   		</when>
+	   		<when test="isMain == 'true'">
+	   		 and T.MAN_ID is not null 
+	   		</when>
+   		</choose>
+
+   		order by T.COMP_ORDER asc, T.COT_ORDER asc
+   </select>
+    <select id="getAreaShowcaseWithTitle" parameterType="hashMap" resultType="hashMap">
+    	select *
+    	, (select I.IMAGE_DESCRIPTION from IMAGE I where T.IMG_ID = I.IMG_ID ) as IMAGE_DESCRIPTION
+    	, areacode(T.AREA_CODE) AREA_NAME
+    	, siguguncode(T.AREA_CODE, T.SIGUNGU_CODE) SIGUGUN_NAME
+    	from (select A.* from OTHER_DEPARTMENT_AREA A LEFT OUTER JOIN CONTENT_MASTER B ON A.COT_ID = B.COT_ID) T 
+   		where T.OTD_ID = #{otdId} and T.MAIN_AREA='SHOWCASE_WITH_TITLE' and T.MAN_ID is null 
+   		order by T.COMP_ORDER asc, T.COT_ORDER asc
+   </select>
+   <select id="getAreaA" parameterType="hashMap" resultType="hashMap">
+    	select *
+    	, (select I.IMAGE_DESCRIPTION from IMAGE I where T.IMG_ID = I.IMG_ID ) as IMAGE_DESCRIPTION
+    	, areacode(T.AREA_CODE) AREA_NAME
+    	, siguguncode(T.AREA_CODE, T.SIGUNGU_CODE) SIGUGUN_NAME 
+    	from (select A.* from OTHER_DEPARTMENT_AREA A LEFT OUTER JOIN CONTENT_MASTER B ON A.COT_ID = B.COT_ID) T 
+   		where T.OTD_ID = #{otdId} and T.MAIN_AREA='A' and T.MAN_ID is null 
+   		order by T.COMP_ORDER asc, T.COT_ORDER asc
+   </select>
+   
+   <select id="getAreaB" parameterType="hashMap" resultType="hashMap">
+    	select *
+    	, (select I.IMAGE_DESCRIPTION from IMAGE I where T.IMG_ID = I.IMG_ID ) as IMAGE_DESCRIPTION 
+    	, areacode(T.AREA_CODE) AREA_NAME
+    	, siguguncode(T.AREA_CODE, T.SIGUNGU_CODE) SIGUGUN_NAME
+    	from (select A.* from OTHER_DEPARTMENT_AREA A LEFT OUTER JOIN CONTENT_MASTER B ON A.COT_ID = B.COT_ID) T 
+   		where T.OTD_ID = #{otdId} and T.MAIN_AREA='B' and T.MAN_ID is null 
+   		order by T.COMP_ORDER asc, T.COT_ORDER asc
+  </select>
+   <select id="getAreaC" parameterType="hashMap" resultType="hashMap">
+   		select * 
+   		, (select I.IMAGE_DESCRIPTION from IMAGE I where T.IMG_ID = I.IMG_ID ) as IMAGE_DESCRIPTION
+   		, areacode(T.AREA_CODE) AREA_NAME
+    	, siguguncode(T.AREA_CODE, T.SIGUNGU_CODE) SIGUGUN_NAME 
+   		from (select A.* from OTHER_DEPARTMENT_AREA A LEFT OUTER JOIN CONTENT_MASTER B ON A.COT_ID = B.COT_ID) T 
+   		where T.OTD_ID = #{otdId} and T.MAIN_AREA='C' and T.MAN_ID is null 
+   		order by T.COMP_ORDER asc, T.COT_ORDER asc
+  </select>
+   <select id="getTags" parameterType="hashMap" resultType="hashMap">
+		select * from OTHER_DEPARTMENT_TAGS A, TAGS B where A.TAG_ID = B.TAG_ID and A.OTD_ID = #{otdId}
+   </select>
+   <select id="getService" parameterType="hashMap" resultType="hashMap">
+		select * from OTHER_DEPARTMENT_SERVICE where OTD_ID = #{otdId}
+   </select>
+   <select id="getImageInformation" parameterType="hashMap" resultType="hashMap">
+		select 
+			B.IMG_ID, B.IMAGE_DESCRIPTION, A.LINK_URL
+		from
+			OTHER_DEPARTMENT_AREA A, IMAGE B 
+		where 
+			A.IMG_ID = B.IMG_ID 
+			and A.ODM_ID = #{ODM_ID}
+		limit 1
+   </select>
+   <select id="selectTagCountForTabMenu" parameterType="hashMap" resultType="hashMap">
+		select 1024 as rowCount
+   </select>
+   <select id="getContents" parameterType="hashMap" resultType="hashMap">
+   <choose>
+		<when test="otdId == '0a01eb7b-96de-11e8-8165-020027310001'" >
+      	select '0a01eb7b-96de-11e8-8165-020027310001' as OTD_ID, B.* 
+      	from CONTENT_MASTER B where 1=1 
+		</when>
+		<when test="otdId == 'ab097fc9-daa6-423d-8fcb-50aec7852e21'" >
+      	select 'ab097fc9-daa6-423d-8fcb-50aec7852e21' as OTD_ID, B.* 
+      	from CONTENT_MASTER B where 1=1 
+		</when>
+		<when test="section == 'ARTICLE'" >
+      	select B.COT_ID COT_ID, B.TITLE TITLE
+      	from CONTENT_MASTER B, ARTICLE_MASTER A 
+      	where A.COT_ID = B.COT_ID
+		</when>
+		<when test="section == 'SIGHT'" >
+         select B.COT_ID, B.TITLE 
+         from CONTENT_MASTER B
+         where B.CONTENT_TYPE in (12, 13, 14, 28, 32, 38, 39, 11200) 
+      </when>
+      <when test="section == 'COURSE' and mode== 2 " >
+         select B.COT_ID, B.TITLE 
+         from CONTENT_MASTER B
+         where B.CONTENT_TYPE = 25
+         and B.TITLE regexp #{keyword}          
+      </when>
+      <when test="section == 'COURSE' and mode== 3 " >
+         select B.CRS_ID, B.TITLE 
+         from SNS_COURSE B
+         where  
+         B.TITLE regexp #{keyword}
+         AND B.IS_OPEN = 1          
+      </when>
+		<when test="section == 'FESTIVAL'" >
+         select B.COT_ID, B.TITLE 
+         from CONTENT_MASTER B
+         where B.CONTENT_TYPE = 15 
+		</when>
+		<when test="section == 'EVENT'" >
+	      	SELECT B.COT_ID, B.TITLE
+	      	FROM CONTENT_MASTER B, EVENT_MASTER A 
+	      	WHERE A.COT_ID = B.COT_ID
+	   		AND B.TITLE REGEXP #{keyword}
+			<choose>
+				<when test="mode == 0">
+					AND A.STATUS = 4
+				</when>
+				<when test="mode == 1">
+					AND A.STATUS = 6
+				</when>
+			</choose>
+		</when>
+		<otherwise>
+      	select A.OTD_ID, B.* 
+      	from OTHER_DEPARTMENT_CONTENT A, CONTENT_MASTER B 
+      	Where A.COT_ID = B.COT_ID
+   		and A.OTD_ID = #{otdId}
+		</otherwise>
+	</choose>
+	<if test="section != 'EVENT'">
+		<choose>
+			<when test="mode == 0">
+	   		 and B.TITLE regexp #{keyword}
+			</when>
+			<when test="mode == 1">
+			  and B.COT_ID = cotid(${keyword})
+			</when>
+		</choose>
+	</if>
+   </select>
+   <select id="getMasterContents" parameterType="hashMap" resultType="hashMap">
+		select * , 
+		getimage(0, COT_ID) ARTICLE_IMAGE, 
+		getimage(1, COT_ID) DATABASE_IMAGE 
+		from CONTENT_MASTER 
+		where CONTENT_STATUS in (2,3,5)
+		<choose>
+			<when test="mode == 0">
+	   		 and TITLE regexp #{keyword}
+			</when>
+			<when test="mode == 1">
+			  and COT_ID = cotid(${keyword})
+			</when>
+		</choose>
+   </select>
+     
+  <insert id="insertMemberTag" parameterType="hashMap" >
+		insert into OTHER_DEPARTMENT_TAGS (TAG_ID,OTD_ID,TAG_ORDER) values (#{tagId}, #{otdId}, ${order})
+  </insert>
+     
+  <delete id="deleteMemberTag" parameterType="hashMap" >
+		delete from OTHER_DEPARTMENT_TAGS where TAG_ID=#{tagId} and OTD_ID=#{otdId}
+  </delete>
+
+  <select id="searchContentTags" parameterType="hashMap" resultType="hashMap">
+		select * from OTHER_DEPARTMENT_TAGS A, TAGS B where A.TAG_ID = B.TAG_ID and OTD_ID = #{otdId} order by TAG_ORDER
+  </select>
+      
+  <insert id="insertDeptArea" parameterType="hashMap" >
+		insert into 
+			OTHER_DEPARTMENT_AREA 
+			(ODM_ID, OTD_ID, COMP_ID, COMP_ORDER, MAIN_AREA, TEMPLATE_ID, TITLE, VIEW_TITLE, CREATE_DATE ) 
+		values 
+			( uuid() , #{OTD_ID}, #{COMP_ID}, #{COMP_ORDER}, #{MAIN_AREA}, #{TEMPLATE_ID}, #{TITLE}, #{VIEW_TITLE}, now() )
+  </insert>
+   <update id="updateForModifiedDate" parameterType="hashMap">
+  		UPDATE CONTENT_MASTER SET MODIFIED_DATE=now() WHERE COT_ID = #{cotId}
+  </update>
+  <update id="updateForModifiedDateImg" parameterType="hashMap">
+      UPDATE CONTENT_MASTER A, IMAGE B SET MODIFIED_DATE=now() WHERE  B.IMG_ID = #{imgId} and A.COT_ID = B.COT_ID
+  </update>
+  <update id="updateDeptArea" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_AREA set COT_ID=NULL, CONTENT_TITLE="", IMG_ID=NULL where ODM_ID = #{ODM_ID}
+  </update>
+      
+  <delete id="deleteDeptArea" parameterType="hashMap" >
+		delete from  OTHER_DEPARTMENT_AREA where ODM_ID = #{ODM_ID}
+  </delete>
+      
+  <update id="updateDeptOrder" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_AREA 
+		set ${TYPE} = #{ORDER} 
+		where 
+		<if test="COMP_ID != null">
+		COMP_ID = #{COMP_ID}
+		</if>
+		<if test="ODM_ID != null">
+		ODM_ID = #{ODM_ID}
+		</if>
+  </update>
+      
+   <update id="updateDeptTagsOrder" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_TAGS 
+		set TAG_ORDER = #{ORDER} 
+		where 
+		TAG_ID=#{TAG_ID} and OTD_ID=#{OTD_ID}
+  </update>
+  
+  <update id="updateDeptSection" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_AREA set TITLE = #{TITLE} where ODM_ID=#{ODM_ID}
+  </update>
+       
+  <update id="updateDeptSectionView" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_AREA set VIEW_TITLE = #{MODE} where ODM_ID=#{ODM_ID}
+  </update>
+       
+  <update id="updateDeptConnectMore" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_AREA set CONNECT_MORE = #{CONNECT_MORE} where ODM_ID=#{ODM_ID}
+  </update>
+       
+  <update id="updateDeptConnectMoreView" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_AREA set VIEW_CONNECT_MORE = #{MODE} where ODM_ID=#{ODM_ID}
+  </update>
+       
+  <update id="updateFirstLine" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_AREA set COT_ID=#{COT_ID}, IMG_ID=#{IMG_ID}, CONTENT_TITLE=#{CONTENT_TITLE}, COMP_ID=#{COMP_ID} where ODM_ID=#{ODM_ID}
+  </update>
+       
+  <update id="updateImageIdWithOdmId" parameterType="hashMap" >
+		update OTHER_DEPARTMENT_AREA 
+		<if test="IMG_ID != null">
+			set IMG_ID = #{IMG_ID} 
+		</if>
+		<if test="LINK_URL != null">
+			set LINK_URL = #{LINK_URL}
+		</if>
+		where ODM_ID = #{ODM_ID}
+  </update>
+        
+  <insert id="insertDeptAreaRow" parameterType="hashMap" >
+		insert into 
+			OTHER_DEPARTMENT_AREA 
+			(ODM_ID, OTD_ID, COT_ID, IMG_ID, COMP_ID, COMP_ORDER, MAIN_AREA, TEMPLATE_ID, TITLE, COT_ORDER, 			
+			<if test="LINK_FILE_URL != null">
+				LINK_FILE_URL,
+			</if>
+			<if test="LINK_URL != null">
+				LINK_URL,
+			</if>
+			<if test="AREA_CODE != null">
+				AREA_CODE,
+			</if>
+			<if test="SIGUNGU_CODE != null">
+				SIGUNGU_CODE,
+			</if>
+			VIEW_TITLE, CREATE_DATE ) 
+		values 
+			( #{ODM_ID}, #{OTD_ID}, #{COT_ID}, #{IMG_ID}, #{COMP_ID}, #{COMP_ORDER}, #{MAIN_AREA}, #{TEMPLATE_ID}, #{TITLE}, #{COT_ORDER},
+			<if test="LINK_FILE_URL != null">
+				#{LINK_FILE_URL},
+			</if>
+			<if test="LINK_URL != null">
+				#{LINK_URL},
+			</if>
+			<if test="AREA_CODE != null">
+				#{AREA_CODE},
+			</if>
+			<if test="SIGUNGU_CODE != null">
+				#{SIGUNGU_CODE},
+			</if>
+			1, now() 
+			)  ON DUPLICATE KEY UPDATE
+	  		CONTENT_TITLE = #{TITLE}
+	  		<if test="IMG_ID != null">
+				, IMG_ID = #{IMG_ID}  
+			</if>
+			<if test="LINK_FILE_URL != null">
+				, LINK_FILE_URL = #{LINK_FILE_URL}
+			</if>
+			<if test="LINK_URL != null">
+				, LINK_URL = #{LINK_URL}
+			</if>
+			<if test="AREA_CODE != null">
+				, AREA_CODE = #{AREA_CODE}
+			</if>
+			<if test="SIGUNGU_CODE != null">
+				, SIGUNGU_CODE = #{SIGUNGU_CODE}
+			</if>
+  </insert>
+        
+  <insert id="insertDeptAreaRow2" parameterType="hashMap" >
+		insert into 
+			OTHER_DEPARTMENT_AREA 
+			(ODM_ID, OTD_ID, COMP_ID, COMP_ORDER, MAIN_AREA, TEMPLATE_ID, CONTENT_TITLE, COT_ORDER,
+			<if test="IMG_ID != null">
+				IMG_ID,  
+			</if>
+			<if test="LINK_FILE_URL != null">
+				LINK_FILE_URL, FILE_DESCRIPTION, 
+			</if>
+			<if test="LINK_URL != null">
+				LINK_URL,
+			</if>
+			<if test="AREA_CODE != null">
+				AREA_CODE,
+			</if>
+			<if test="SIGUNGU_CODE != null">
+				SIGUNGU_CODE,
+			</if>
+			VIEW_TITLE, CREATE_DATE ) 
+		values 
+			( #{ODM_ID}, #{OTD_ID}, #{COMP_ID}, #{COMP_ORDER}, #{MAIN_AREA}, #{TEMPLATE_ID}, #{TITLE}, #{COT_ORDER},
+			<if test="IMG_ID != null">
+				#{IMG_ID},  
+			</if>
+			<if test="LINK_FILE_URL != null">
+				#{LINK_FILE_URL}, #{FILE_DESCRIPTION}, 
+			</if>
+			<if test="LINK_URL != null">
+				#{LINK_URL},
+			</if>
+			<if test="AREA_CODE != null">
+				#{AREA_CODE},
+			</if>
+			<if test="SIGUNGU_CODE != null">
+				#{SIGUNGU_CODE},
+			</if>
+			1, now() 
+			) ON DUPLICATE KEY UPDATE
+	  		CONTENT_TITLE = #{TITLE}
+	  		<if test="IMG_ID != null">
+				, IMG_ID = #{IMG_ID}  
+			</if>
+			<if test="LINK_FILE_URL != null">
+				, LINK_FILE_URL = #{LINK_FILE_URL}
+				, FILE_DESCRIPTION = #{FILE_DESCRIPTION}
+			</if>
+			<if test="LINK_URL != null">
+				, LINK_URL = #{LINK_URL}
+			</if>
+			<if test="AREA_CODE != null">
+				, AREA_CODE = #{AREA_CODE}
+			</if>
+			<if test="SIGUNGU_CODE != null">
+				, SIGUNGU_CODE = #{SIGUNGU_CODE}
+			</if>
+  </insert>
+ 
+  <select id="checkImage" parameterType="hashMap" resultType="hashMap">
+   		select 
+   		(select FIRST_IMAGE from DATABASE_MASTER where COT_ID = #{COT_ID}) FIRST_IMAGE,
+   		(select IMG_ID from ARTICLE_MASTER where COT_ID = #{COT_ID}) IMG_ID
+  </select>
+ 
+  <select id="getMaseterTag" parameterType="hashMap" resultType="hashMap">
+   		select mastertag(#{COT_ID}) MASTER_TAG
+  </select>
+ 
+  <update id="updateContentTitle" parameterType="hashMap">
+    	update OTHER_DEPARTMENT_AREA A, CONTENT_MASTER B set A.CONTENT_TITLE = B.TITLE where A.COT_ID = B.COT_ID and A.ODM_ID = #{ODM_ID}
+  </update>
+ 
+  <select id="getContentInfo" parameterType="hashMap" resultType="hashMap">
+   		select * from CONTENT_MASTER  where COT_ID = #{COT_ID}
+  </select>
+ 
+ <insert id="insertDeptService" parameterType="hashMap">
+  		INSERT INTO OTHER_DEPARTMENT_SERVICE
+  			(OTD_ID, TITLE, TEMPLATE_TYPE, USE_ARTICLE_CONTENTS, USE_DB_CONTENTS, CREATE_DATE)
+  		VALUES (
+			#{OTD_ID}, #{TITLE}, #{TEMPLATE_TYPE}, #{USE_ARTICLE_CONTENTS}, #{USE_DB_CONTENTS}, now()
+  		) 
+  </insert>
+  <update id="updateDeptService" parameterType="hashMap">
+  		UPDATE 
+  			OTHER_DEPARTMENT_SERVICE
+  		SET
+  			TITLE = #{TITLE},
+  			TEMPLATE_TYPE = #{TEMPLATE_TYPE},
+  			USE_ARTICLE_CONTENTS = #{USE_ARTICLE_CONTENTS},
+  			USE_DB_CONTENTS = #{USE_DB_CONTENTS}
+  		WHERE
+  			OTD_ID = #{OTD_ID}
+  </update>
+  <update id="updateDeptAllOrder" parameterType="hashMap">
+  	update OTHER_DEPARTMENT_AREA
+	set COMP_ORDER = COMP_ORDER -1
+	where OTD_ID = #{OTD_ID}
+	and MAIN_AREA = #{MAIN_AREA}
+	and COMP_ORDER > #{ORDER}
+  </update>
+</mapper>

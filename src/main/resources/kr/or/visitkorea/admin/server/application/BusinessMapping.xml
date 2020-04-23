@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+
+	<!-- server information 
+	<business id="GET_IMAGE_SERVER"				>kr.or.visitkorea.admin.server.application.modules.server.GetServerInformation</business>
+	-->
+
+	<!-- address 
+	<business id="GET_ADDRESS_BIG_CODE"				>kr.or.visitkorea.admin.server.application.modules.addr.AddressBigCodeList</business>
+	<business id="GET_ADDRESS_BIG_WITH_MID_CODE"	>kr.or.visitkorea.admin.server.application.modules.addr.AddressBigWithMidCodeList</business>
+	-->
+
+	<!-- files 
+	<business id="FILE_UPLOAD"						>kr.or.visitkorea.admin.server.application.modules.files.Upload</business>
+	<business id="FILE_DOWNLOAD_XLS"				>kr.or.visitkorea.admin.server.application.modules.files.DownloadXls</business>
+	<business id="VIEW"								>kr.or.visitkorea.admin.server.application.modules.files.View</business>
+	<business id="TEMP_VIEW"						>kr.or.visitkorea.admin.server.application.modules.files.TempView</business>
+	-->
+
+	<!-- staff 
+	<business id="LOGIN"							>kr.or.visitkorea.admin.server.application.modules.staff.Login</business>
+	<business id="USER_LIST"						>kr.or.visitkorea.admin.server.application.modules.staff.UserList</business>
+	<business id="USER_INSERT"						>kr.or.visitkorea.admin.server.application.modules.staff.UserInsert</business>
+	<business id="USER_SELECT"						>kr.or.visitkorea.admin.server.application.modules.staff.UserSelect</business>
+	<business id="USER_UPDATE"						>kr.or.visitkorea.admin.server.application.modules.staff.UserUpdate</business>
+	<business id="USER_DELETE"						>kr.or.visitkorea.admin.server.application.modules.staff.UserDelete</business>
+	<business id="USER_PAUSE"						>kr.or.visitkorea.admin.server.application.modules.staff.UserPause</business>
+	-->
+
+	<!-- permission 
+	<business id="GET_PERMIT_TEMPLATE"				>kr.or.visitkorea.admin.server.application.modules.permission.GetPermitTemplate</business>
+	<business id="PERMISSION_INSERT"				>kr.or.visitkorea.admin.server.application.modules.permission.PermissionInsert</business>
+	<business id="PERMISSION_DELETE"				>kr.or.visitkorea.admin.server.application.modules.permission.PermissionDelete</business>
+	<business id="PERMISSION_SELECT"				>kr.or.visitkorea.admin.server.application.modules.permission.PermissionSelect</business>
+	<business id="PERMISSION_INS_ALL_ADMIN"			>kr.or.visitkorea.admin.server.application.modules.permission.PermissionDeleteAllAndInsertAdmin</business>
+	<business id="PERMISSION_DEL_ALL_ADMIN"			>kr.or.visitkorea.admin.server.application.modules.permission.PermissionDeleteAllAdmin</business>
+	<business id="PERMISSION_INS_ALL_USER"			>kr.or.visitkorea.admin.server.application.modules.permission.PermissionDeleteAllAndInsertUser</business>
+	<business id="PERMISSION_DEL_ALL_USER"			>kr.or.visitkorea.admin.server.application.modules.permission.PermissionDeleteAllUser</business>
+	-->
+
+	<!-- article 
+	<business id="ARTICLE_LIST"						>kr.or.visitkorea.admin.server.application.modules.article.ArticleList</business>
+	<business id="ARTICLE_SELET_CONTENT"			>kr.or.visitkorea.admin.server.application.modules.article.ArticleSelectContent</business>
+	<business id="ARTICLE_SELECT_WITH_COTID"		>kr.or.visitkorea.admin.server.application.modules.article.ArticleSelect</business>
+	<business id="UPDATE_FOR_DELETE_STATUS"			>kr.or.visitkorea.admin.server.application.modules.article.ArticleUpdateForStatus</business>
+	<business id="PROCESS_MONTH_ROW"				>kr.or.visitkorea.admin.server.application.modules.article.ProcessMonthRow</business>
+	<business id="ARTICLE_ETC_SELECT_WITH_COTID"	>kr.or.visitkorea.admin.server.application.modules.article.ArticleEtcSelect</business>
+	<business id="INSERT_RELATED_CONTENT"			>kr.or.visitkorea.admin.server.application.modules.article.InsertRelatedContent</business>
+	<business id="ARTICLE_RELATED_CONTENT_LIST"		>kr.or.visitkorea.admin.server.application.modules.article.ArticleRelatedContentList</business>
+	<business id="DB_RELATED_CONTENT_LIST"			>kr.or.visitkorea.admin.server.application.modules.article.DbRelatedContentList</business>
+	<business id="DELETE_RELATED_CONTENT"			>kr.or.visitkorea.admin.server.application.modules.article.DeleteRelatedContent</business>
+	<business id="SELECT_ARTICLE_CONTENT_DETAIL"	>kr.or.visitkorea.admin.server.application.modules.article.SelectContentDetail</business>
+	<business id="ARTICLE_CONTENT_ROW"				>kr.or.visitkorea.admin.server.application.modules.article.ArticleContentRow</business>
+	<business id="ARTICLE_INSERT_IMAGE"				>kr.or.visitkorea.admin.server.application.modules.article.ArticleInsertImage</business>
+	<business id="DELETE_ARTICLE_CONTENT_WD_IMGID"	>kr.or.visitkorea.admin.server.application.modules.article.DeleteArticleContentWithImgId</business>
+	<business id="INSERT_ARTICLE"					>kr.or.visitkorea.admin.server.application.modules.article.InsertArticle</business>
+	-->
+		
+	<!-- tags  
+	<business id="GET_LIST_OF_COTID"				>kr.or.visitkorea.admin.server.application.modules.tags.GetListOfCotId</business>
+	<business id="SEARCH_TAGS"						>kr.or.visitkorea.admin.server.application.modules.tags.SearchTags</business>
+	<business id="INSERT_MEMBER_TAG"				>kr.or.visitkorea.admin.server.application.modules.tags.InsertMemberTag</business>
+	<business id="REMOVE_MEMBER_TAG"				>kr.or.visitkorea.admin.server.application.modules.tags.RemoveMemberTag</business>
+	<business id="SETUP_MASTER_TAG"					>kr.or.visitkorea.admin.server.application.modules.tags.SetupMasterTag</business>
+	<business id="GET_MASTER_TAG"					>kr.or.visitkorea.admin.server.application.modules.tags.GetMasterTag</business>
+	-->
+
+	<!-- images 
+	<business id="INSERT_IMAGE"						>kr.or.visitkorea.admin.server.application.modules.images.InsertImage</business>
+	<business id="INSERT_IMAGE_NOT_COTID"			>kr.or.visitkorea.admin.server.application.modules.images.InsertImageNotCotId</business>
+	<business id="SELECT_IMAGE_LIST"				>kr.or.visitkorea.admin.server.application.modules.images.SelectImageList</business>
+	<business id="DELETE_IMAGE_WIDTH_IMGID"			>kr.or.visitkorea.admin.server.application.modules.images.DeleteImageWithImgId</business>
+	<business id="IMAGE_PATH_UPDATE_WITH_IMGID"	 	>kr.or.visitkorea.admin.server.application.modules.images.ImagePathUpdateWithImgId</business>
+	<business id="UPDATE_IMAGE_DESCRIPTION"	 		>kr.or.visitkorea.admin.server.application.modules.images.UpdateImageDescription</business>
+	-->
+	
+	<!-- database 
+	<business id="DATABASE_LIST"					>kr.or.visitkorea.admin.server.application.modules.database.DatabaseList</business>
+	<business id="GET_TOURIST_SPOT"					>kr.or.visitkorea.admin.server.application.modules.database.GetTouristSpot</business>
+	<business id="GET_CULTURAL_FACILITIES"			>kr.or.visitkorea.admin.server.application.modules.database.GetCultualFacilities</business>
+	<business id="GET_LEPORTS"						>kr.or.visitkorea.admin.server.application.modules.database.GetLeports</business>
+	<business id="GET_ACCOMMODATION"				>kr.or.visitkorea.admin.server.application.modules.database.GetAccommodation</business>
+	<business id="GET_SHOPPING"						>kr.or.visitkorea.admin.server.application.modules.database.GetShopping</business>
+	<business id="GET_EATERY"						>kr.or.visitkorea.admin.server.application.modules.database.GetEatery</business>
+	<business id="GET_FESTIVAL"						>kr.or.visitkorea.admin.server.application.modules.database.GetFestival</business>
+	<business id="GET_COURSE"						>kr.or.visitkorea.admin.server.application.modules.database.GetCourse</business>
+	<business id="DATABASE_SINGLE_ROW"				>kr.or.visitkorea.admin.server.application.modules.database.ProcDatabaseSingleRow</business>
+	<business id="COURSE_REORDER"					>kr.or.visitkorea.admin.server.application.modules.database.CourseReorder</business>
+	<business id="DELETE_COURSE_ITEM"				>kr.or.visitkorea.admin.server.application.modules.database.DeleteCourseItem</business>
+	<business id="INSERT_COURSE_ITEM"				>kr.or.visitkorea.admin.server.application.modules.database.InsertCourseItem</business>
+	<business id="UPDATE_IMAGE_COURSE_INFO"			>kr.or.visitkorea.admin.server.application.modules.database.UpdateImageCourseInfo</business>
+	<business id="LIST_COURSE"						>kr.or.visitkorea.admin.server.application.modules.database.ListCourse</business>
+	<business id="DATABASE_SELECT_WITH_COTID"		>kr.or.visitkorea.admin.server.application.modules.database.SelectWithCotId</business>
+	<business id="GET_ALL_CATEGORIES"				>kr.or.visitkorea.admin.server.application.modules.database.GetAllCategories</business>
+	<business id="UPDATE_SINGLE_ROW"				>kr.or.visitkorea.admin.server.application.modules.database.UpdateSingleRow</business>
+	<business id="GET_BASE_WITH_COTID"				>kr.or.visitkorea.admin.server.application.modules.database.GetBaseWithCotId</business>
+	<business id="GET_ETC_WITH_COTID"				>kr.or.visitkorea.admin.server.application.modules.database.GetEtcWithCotId</business>
+	<business id="GET_ALL_LINK_INFORMATION"			>kr.or.visitkorea.admin.server.application.modules.database.GetAllLinkInformation</business>
+	<business id="REMOVE_LINK"						>kr.or.visitkorea.admin.server.application.modules.database.RemoveLink</business>
+	<business id="INDEX_MOVE_LINK"					>kr.or.visitkorea.admin.server.application.modules.database.IndexMoveLink</business>
+	<business id="GET_SPOT_LIST"					>kr.or.visitkorea.admin.server.application.modules.history.SelectSpotContentList</business>
+	<business id="GET_HISTORY_LIST"					>kr.or.visitkorea.admin.server.application.modules.history.SelectHistoryList</business>
+	<business id="POST_HISTORY_DATA"				>kr.or.visitkorea.admin.server.application.modules.history.UpdateHistoryData</business>
+	<business id="DELETE_HISTORY_DATA"				>kr.or.visitkorea.admin.server.application.modules.history.DeleteHistoryData</business>
+	
+	-->
+
+	<!-- department 
+	<business id="GET_OTHER_DEPARTMENT_MAIN"		>kr.or.visitkorea.admin.server.application.modules.department.GetOtherDepartmentMain</business>
+	<business id="GET_OTHER_DEPARTMENT_CONTENT"		>kr.or.visitkorea.admin.server.application.modules.department.GetOtherDepartmentContents</business>
+	<business id="GET_OTHER_DEPARTMENT_M_CONTENT"	>kr.or.visitkorea.admin.server.application.modules.department.GetOtherDepartmentMasterContents</business>
+	<business id="INSERT_DEPARTMENT_MEMBER_TAG"		>kr.or.visitkorea.admin.server.application.modules.department.InsertMemberTag</business>
+	<business id="GET_OTHER_DEPARTMENT_MEMBER_TAG"	>kr.or.visitkorea.admin.server.application.modules.department.GetOtherDepartmentTags</business>
+	<business id="DEL_OTHER_DEPARTMENT_MEMBER_TAG"	>kr.or.visitkorea.admin.server.application.modules.department.DelOtherDepartmentTags</business>
+	<business id="INSERT_DEPT_AREA"					>kr.or.visitkorea.admin.server.application.modules.department.InsertDeptArea</business>
+	<business id="INSERT_DEPT_AREA_ROW"				>kr.or.visitkorea.admin.server.application.modules.department.InsertDeptAreaRow</business>
+	<business id="DELETE_DEPT_AREA"					>kr.or.visitkorea.admin.server.application.modules.department.DeleteDeptArea</business>
+	<business id="UPDATE_DEPT_AREA"					>kr.or.visitkorea.admin.server.application.modules.department.UpdateDeptArea</business>
+	<business id="REORDER_DEPT_AREA"				>kr.or.visitkorea.admin.server.application.modules.department.ReorderDeptArea</business>
+	<business id="UPDATE_COMP_TITLE"				>kr.or.visitkorea.admin.server.application.modules.department.UpdateCompTitle</business>
+	<business id="UPDATE_COMP_TITLE_VIEW"			>kr.or.visitkorea.admin.server.application.modules.department.UpdateCompTitleView</business>
+	<business id="UPDATE_COMP_CONNECT_MORE"			>kr.or.visitkorea.admin.server.application.modules.department.UpdateConnectMore</business>
+	<business id="UPDATE_COMP_CONNECT_MORE_VIEW"	>kr.or.visitkorea.admin.server.application.modules.department.UpdateConnectMoreView</business>
+	<business id="UPDARTE_DEPT_ROW"					>kr.or.visitkorea.admin.server.application.modules.department.UpdateDeptRow</business>
+	<business id="GET_IMAGE_INFORMATION_WITH_ODMID"	>kr.or.visitkorea.admin.server.application.modules.department.GetImageInformationWithOdmId</business>
+	<business id="UPDATE_IMAGE_PATH_WITH_ODMID"		>kr.or.visitkorea.admin.server.application.modules.department.UpdateImagePathWithOdmId</business>
+	<business id="GET_OD_CONTENT_DATA"				>kr.or.visitkorea.admin.server.application.modules.department.GetODContentData</business>
+	-->
+
+	<!-- sitemain 
+	<business id="INSERT_SIGUNGU_URL"	 			>kr.or.visitkorea.admin.server.application.modules.site.InsertSigunguUrl</business>
+	<business id="INSERT_SM_SHOWCASE"				>kr.or.visitkorea.admin.server.application.modules.site.InsertSMShowcase</business>
+	<business id="INSERT_SM_CURATION"	 			>kr.or.visitkorea.admin.server.application.modules.site.InsertSMCuration</business>
+	<business id="INSERT_SM_MARKETING"	 			>kr.or.visitkorea.admin.server.application.modules.site.InsertSMMarketing</business>
+	<business id="INSERT_SM_LOCAL_GOV"	 			>kr.or.visitkorea.admin.server.application.modules.site.InsertSMLocalGov</business>
+	<business id="GET_MAIN_SHOWCASE"				>kr.or.visitkorea.admin.server.application.modules.site.GetMainShowcase</business>
+	<business id="GET_MAIN_CURATION"				>kr.or.visitkorea.admin.server.application.modules.site.GetMainCuration</business>
+	<business id="GET_MAIN_MARKETING"				>kr.or.visitkorea.admin.server.application.modules.site.GetMainMarketing</business>
+	<business id="GET_MAIN_LOCAL_GOV"				>kr.or.visitkorea.admin.server.application.modules.site.GetMainLocalGov</business>
+	<business id="GET_CITY_CAPITAL"					>kr.or.visitkorea.admin.server.application.modules.site.GetCityCapital</business>
+	<business id="DEL_SITE_MAIN_TAG"				>kr.or.visitkorea.admin.server.application.modules.site.DelSiteMainTags</business>
+	<business id="INSERT_SITE_MAIN_TAG"				>kr.or.visitkorea.admin.server.application.modules.site.InsertSiteMainTags</business>
+	<business id="GET_SITE_MAIN_TAG"				>kr.or.visitkorea.admin.server.application.modules.site.GetSiteMainTags</business>
+	<business id="GET_RECOMMAND_MAIN"				>kr.or.visitkorea.admin.server.application.modules.site.GetRecommandMain</business>
+	<business id="GET_COURSE_MAIN"					>kr.or.visitkorea.admin.server.application.modules.site.GetCourseMain</business>
+	<business id="GET_SIGHT_MAIN"					>kr.or.visitkorea.admin.server.application.modules.site.GetSightMain</business>
+	<business id="INSERT_RECOMMAND_MAIN"			>kr.or.visitkorea.admin.server.application.modules.site.InsertRecommandMain</business>
+	<business id="INSERT_SIGHT_MAIN"				>kr.or.visitkorea.admin.server.application.modules.site.InsertSightMain</business>
+	<business id="INSERT_COURSE_MAIN"				>kr.or.visitkorea.admin.server.application.modules.site.InsertCourseMain</business>
+	-->
+	
+	<!-- sns
+	<business id="SELECT_SNS_LIST"	 				>kr.or.visitkorea.admin.server.application.modules.sns.SelectSNSList</business>
+	<business id="SELECT_SNSCOMMENT_LIST"	 		>kr.or.visitkorea.admin.server.application.modules.sns.SelectSNSCommentList</business>
+	<business id="SELECT_SNS_ANSLYSIS"	 			>kr.or.visitkorea.admin.server.application.modules.sns.SelectSNSAnalysis</business>
+	<business id="UPDATE_SNSCOMMENT"				>kr.or.visitkorea.admin.server.application.modules.sns.UpdateSNSComment</business>
+	<business id="SELECT_SNSCOURSE_LIST"	 		>kr.or.visitkorea.admin.server.application.modules.sns.SelectSNSCourseList</business>
+	<business id="SELECT_SNSQNA_LIST"	 		    >kr.or.visitkorea.admin.server.application.modules.sns.SelectSNSQnaList</business>
+	<business id="SELECT_SNSQNA_ANSWER_LIST"	 	>kr.or.visitkorea.admin.server.application.modules.sns.SelectSNSQnaAnswerList</business>
+	<business id="INSERT_SNSQNA_ANSWER"				>kr.or.visitkorea.admin.server.application.modules.sns.InsertSNSQnaAnswer</business>
+	<business id="DELETE_SNSQNA_ANSWER"				>kr.or.visitkorea.admin.server.application.modules.sns.DeleteSNSQnaAnswer</business>
+	
+	-->
+	<!-- Adbanner
+	<business id="SELECT_BANNER_LIST"				>kr.or.visitkorea.admin.server.application.modules.banner.SelectBannerList</business>
+	<business id="UPDATE_BANNER"				    >kr.or.visitkorea.admin.server.application.modules.banner.UpdateBanner</business>
+	<business id="UPDATE_BANNER_DETAIL"		        >kr.or.visitkorea.admin.server.application.modules.banner.UpdateBannerDetail</business>
+	<business id="UPDATE_BANNER_DETAIL_ORDER"		>kr.or.visitkorea.admin.server.application.modules.banner.UpdateBannerDetailOrder</business>
+	<business id="SELECT_BANNER_CONTENT_LIST"		>kr.or.visitkorea.admin.server.application.modules.banner.SelectBannerContentList</business>
+	-->
+	<!-- department
+	<business id="SELECT_DEPARTMENT_LIST"	        >kr.or.visitkorea.admin.server.application.modules.department_info.SelectDepartmentList</business>
+	<business id="SELECT_DEPARTMENT_INFO_LIST       >kr.or.visitkorea.admin.server.application.modules.department_info.SelectDepartmentInfoList</business>
+	<business id="INSERT_DEPARTMENT_INFO            >kr.or.visitkorea.admin.server.application.modules.department_info.InsertDepartmentInfo</business>
+	<business id="UPDATE_DEPARTMENT_INFO_DETAIL     >kr.or.visitkorea.admin.server.application.modules.department_info.UpdateDepartmentInfoDetail</business>
+	-->
+	<!-- analysis
+	<business id="SELECT_ANALYSIS_MAIN"	            >kr.or.visitkorea.admin.server.application.modules.analysis.SelectAnalysisMain</business>
+	<business id="SELECT_MENU_ID"	                >kr.or.visitkorea.admin.server.application.modules.analysis.SelectMenuId</business>
+	<business id="SELECT_ANALYSIS_TAG"	            >kr.or.visitkorea.admin.server.application.modules.analysis.SelectAnalysisTag</business>
+	<business id="SELECT_AREA"	                    >kr.or.visitkorea.admin.server.application.modules.analysis.SelectArea</business>
+	-->
+	<!-- news
+	<business id="SELECT_NEWS_LIST"	                >kr.or.visitkorea.admin.server.application.modules.news.SelectNewsList</business>
+	<business id="SELECT_NEWS"	                    >kr.or.visitkorea.admin.server.application.modules.news.SelectNews</business>
+	<business id="INSERT_NEWS"	                    >kr.or.visitkorea.admin.server.application.modules.news.InsertNews</business>
+	<business id="UPDATE_NEWS"	                    >kr.or.visitkorea.admin.server.application.modules.news.UpdateNews</business>
+	-->
+</mapping>

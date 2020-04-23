@@ -1,0 +1,85 @@
+<!-- #%L GwtMaterial %% Copyright (C) 2015 - 2018 GwtMaterialDesign %% Licensed 
+	under the Apache License, Version 2.0 (the "License"); you may not use this 
+	file except in compliance with the License. You may obtain a copy of the 
+	License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by 
+	applicable law or agreed to in writing, software distributed under the License 
+	is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+	KIND, either express or implied. See the License for the specific language 
+	governing permissions and limitations under the License. #L% -->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+	xmlns:g='urn:import:com.google.gwt.user.client.ui'
+	xmlns:m="urn:import:gwt.material.design.client.ui"
+	xmlns:ma="urn:import:gwt.material.design.addins.client">
+
+	<ui:with field="res" type="kr.or.visitkorea.admin.client.resources.AppResources" />
+
+	<m:MaterialPanel ui:field="mainPanel">
+		
+		<m:MaterialHeader>
+		
+			<!-- NavBar -->
+			<m:MaterialNavBar activates="sideNav" ui:field="navBar" paddingLeft="20" backgroundColor="BLUE">
+				<m:MaterialNavBrand text="Administrator v3.0" />
+				<m:MaterialNavSection float="RIGHT">
+					<m:MaterialLabel ui:field="sessionTime" />
+					<m:MaterialTooltip text="세션 갱신" position="BOTTOM">
+						<m:MaterialLink ui:field="sessionRefresh" iconType="REFRESH" iconPosition="NONE" />
+					</m:MaterialTooltip>
+					<m:MaterialTooltip text="이벤트 엑셀 다운로드" position="BOTTOM">
+						<m:MaterialLink ui:field="EventExcelBtn" activates="sideNav" iconType="EVENT_NOTE" iconPosition="NONE" />
+					</m:MaterialTooltip>
+					<m:MaterialTooltip text="시스템 프로퍼티 설정" position="BOTTOM">
+						<m:MaterialLink ui:field="globalEnvIcon" iconType="SETTINGS_APPLICATIONS" iconPosition="NONE" />
+					</m:MaterialTooltip>
+					<m:MaterialTooltip text="매뉴얼 다운로드" position="BOTTOM">
+						<m:MaterialLink ui:field="btnNoti" activates="sideNav" iconType="LIVE_HELP" iconPosition="NONE" />
+					</m:MaterialTooltip>
+					<m:MaterialTooltip text="로그아웃" position="BOTTOM">
+						<m:MaterialLink ui:field="btnLogout" activates="sideNav" iconType="EXIT_TO_APP" iconPosition="NONE" />
+					</m:MaterialTooltip>
+				</m:MaterialNavSection>
+			</m:MaterialNavBar>
+
+			<!-- Search Bar -->
+			<m:MaterialNavBar ui:field="navBarSearch" backgroundColor="WHITE" visible="false">
+				<m:MaterialSearch ui:field="txtSearch" width="100%" placeholder="Keyword" textColor="BLACK" active="true" />
+			</m:MaterialNavBar>
+		</m:MaterialHeader>
+
+		<!-- SideNav -->
+		<m:MaterialSideNavDrawer m:id="sideNav" ui:field="sideNavDrawer">
+		
+			<ma:sideprofile.MaterialSideProfile url="images/image-asset.png">
+				<m:MaterialImage ui:field="userimage" url="images/staff.png" />
+				<m:MaterialLabel ui:field="stfid" text="" textColor="WHITE" />
+				<m:MaterialLink ui:field="displayname" text="mail" activates="dropProfile" iconType="ARROW_DROP_DOWN" iconPosition="RIGHT" textColor="WHITE" />
+			</ma:sideprofile.MaterialSideProfile>
+				<m:MaterialCollapsible ui:field="sideMenu">
+					<m:MaterialCollapsibleItem>
+						<m:MaterialCollapsibleHeader>
+							<m:MaterialLink ui:field="Manage_Login"  text="로그인" iconType="FACE" iconPosition="LEFT" textColor="BLUE" />
+						</m:MaterialCollapsibleHeader>
+						<m:MaterialCollapsibleBody />
+					</m:MaterialCollapsibleItem>
+				</m:MaterialCollapsible>
+		</m:MaterialSideNavDrawer>
+		
+		<m:MaterialContainer>
+			<m:MaterialPanel textAlign="CENTER">
+				<m:MaterialImage marginTop="240" url="images/background_logo.png" />
+				<!-- <m:MaterialIcon marginTop="240" textColor="BLUE_DARKEN_1" iconType="LANGUAGE" iconSize="LARGE" /> -->
+				<m:MaterialLabel text="대한민국 구석구석 3.0" textColor="BLUE" fontSize="2em" />
+				<m:MaterialLabel text="모두가 행복한 관광을 만들어 나가는 국민기업." textColor="BLUE" fontSize="0.8em" />
+				<m:MaterialLabel text="한국관광공사" textColor="BLUE" fontSize="0.8em" />
+				<m:MaterialLabel text="　" textColor="BLUE" fontSize="0.8em" />
+				<m:MaterialLabel text="서비스안내 문의 : 033-738-3570" textColor="BLUE" fontSize="1.2em" />
+			</m:MaterialPanel>
+		</m:MaterialContainer>
+		
+		<m:MaterialContainer  ui:field="containerFooter" >
+			<m:MaterialPanel textAlign="LEFT" width="100%" ui:field="shortCutContainer" >
+			</m:MaterialPanel>
+		</m:MaterialContainer>
+		
+	</m:MaterialPanel>
+</ui:UiBinder>

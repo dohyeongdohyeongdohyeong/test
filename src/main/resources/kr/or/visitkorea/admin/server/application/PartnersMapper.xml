@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.PartnersMapper">
+ 
+   <select id="selectContentList" parameterType="hashMap" resultType="hashMap">
+		select A.PAC_ID pacid, B.SNS_ID snsid, B.SNS_IDENTIFY id, B.SNS_USR_NAME name, C.COT_ID cotid, C.TITLE title, A.CREATE_DATE cdate, A.STATUS status, A.UPDATE_DATE udate, C.CONTENT_TYPE ctype
+			, A.COMMENT cmt, A.DOWN_URL url, A.FILE_NAME fname, A.FILE_URL furl, A.DEPLOY_URL resurl, A.DETAIL_BODY dbody
+			, A.USAGE_URL "usage", A.APPLY_TYPE applytype, A.ETC_QNA etcqna, A.DN_OFFER dnoffer 
+		from PARTNERS_CONTENT A, SNS B, CONTENT_MASTER C
+		where A.SNS_ID=B.SNS_ID and A.COT_ID=C.COT_ID
+		<choose>
+			<when test="ctype == 0">
+			 and ((C.CONTENT_TYPE > 39 and C.CONTENT_TYPE != 2000) or C.CONTENT_TYPE is null)
+			</when>
+		</choose>
+		<choose>
+			<when test="ctype == 1">
+			 and (C.CONTENT_TYPE <![CDATA[ <= ]]> 39 or C.CONTENT_TYPE = 2000)
+			</when>
+		</choose>
+		<choose>
+			<when test="status != null">
+			 and A.STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and C.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		order by status, A.CREATE_DATE desc
+        limit #{offset}, 20
+   </select>
+  
+   <select id="selectContentListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT count(*) CNT FROM (
+		select A.PAC_ID pacid, B.SNS_ID snsid, B.SNS_IDENTIFY id, B.SNS_USR_NAME name, C.COT_ID cotid, C.TITLE title, A.CREATE_DATE cdate, A.STATUS status, A.UPDATE_DATE udate, C.CONTENT_TYPE ctype 
+		from PARTNERS_CONTENT A, SNS B, CONTENT_MASTER C
+		where A.SNS_ID=B.SNS_ID and A.COT_ID=C.COT_ID
+		<choose>
+			<when test="ctype == 0">
+			 and ((C.CONTENT_TYPE > 39 and C.CONTENT_TYPE != 2000) or C.CONTENT_TYPE is null)
+			</when>
+		</choose>
+		<choose>
+			<when test="ctype == 1">
+			 and (C.CONTENT_TYPE <![CDATA[ <= ]]> 39 or C.CONTENT_TYPE = 2000)
+			</when>
+		</choose>
+		<choose>
+			<when test="status != null">
+			 and A.STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and C.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		) AAA
+   </select>
+   
+  <update id="updatePartnersContent" parameterType="hashMap">
+  	update PARTNERS_CONTENT set STATUS = #{status}, DN_OFFER = #{dnoffer},UPDATE_DATE = now()
+		<choose>
+			<when test="cmt != null">
+	  		,COMMENT=#{cmt} 
+			</when>
+		</choose>
+		<choose>
+			<when test="url != null">
+	  		,DOWN_URL=#{url} 
+			</when>
+		</choose>
+	where PAC_ID = #{pacid}
+  </update>
+   
+  <select id="selectChannelList" parameterType="hashMap" resultType="hashMap">
+		select A.PAH_ID pahid, A.PARENT_ID parentid, C.SNS_ID snsid, A.USR_ID usrid, C.SNS_IDENTIFY id, C.SNS_USR_NAME name, A.TITLE title, A.CREATE_DATE cdate, A.STATUS status, A.UPDATE_DATE udate
+			, A.DOWN_URL url, A.DOWN_NAME downname, A.BODY body
+			, B.TITLE ftitle, B.SUB_TITLE fsubtitle, B.FILE_URL fdownurl
+			, B.FILE_NAME fdownname, B.PDF_FILE_NAME pdfname, B.PDF_FILE_URL pdfurl
+			, B.LINK_URL linkurl, B.START_DATE sdate, B.END_DATE edate, A.RTYPE ctype, A.POSITION position
+			, B.PUBLISHER as publ, B.PUBLISH_DATE as publdate
+			,(select if(USR_ID is null or USR_ID='', if(PAH_ID=PARENT_ID, '-', '[신규댓글]'), '') from PARTNERS_CHANNEL D where A.PAH_ID=D.PARENT_ID order by D.CREATE_DATE desc limit 1) res
+		from PARTNERS_CHANNEL A left join PARTNERS_CHANNEL_FILE B on A.PAH_ID=B.PAH_ID, SNS C
+		where A.SNS_ID=C.SNS_ID and A.PAH_ID=A.PARENT_ID
+		<choose>
+			<when test="ctype != null">
+			 and A.RTYPE = #{ctype}
+			</when>
+		</choose>
+		<choose>
+			<when test="status != null">
+			 and A.STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and C.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and C.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and A.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="order == null">
+			 order by status, A.CREATE_DATE desc
+			</when>
+			<when test="order != null">
+				<choose>
+					<when test="order == 1">
+					 order by A.CREATE_DATE asc
+					</when>
+				</choose>
+				<choose>
+					<when test="order == 2">
+					 	 order by A.CREATE_DATE desc
+					</when>
+				</choose>
+				<choose>
+					<when test="order == 3">
+					 	 order by A.UPDATE_DATE asc
+					</when>
+				</choose>
+				<choose>
+					<when test="order == 4">
+					 	 order by A.UPDATE_DATE desc
+					</when>
+				</choose>
+				
+			</when>
+		</choose>
+		
+        limit #{offset}, 20
+   </select>
+  
+   <select id="selectChannelListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT count(*) CNT FROM (
+		select A.PAH_ID pahid, A.PARENT_ID parentid, C.SNS_ID snsid, A.USR_ID usrid, C.SNS_IDENTIFY id, C.SNS_USR_NAME name, A.TITLE title, A.CREATE_DATE cdate, A.STATUS status, A.UPDATE_DATE udate
+			, A.DOWN_URL url, A.DOWN_NAME downname, A.BODY body, B.TITLE ftitle, B.SUB_TITLE fsubtitle, B.FILE_URL fdownurl
+			, B.FILE_NAME fdownname, B.LINK_URL linkurl, B.START_DATE sdate, B.END_DATE edate, A.RTYPE ctype, A.POSITION position
+			, B.PUBLISHER as publ, B.PUBLISH_DATE as publdate
+			,(select if(USR_ID is null or USR_ID='', '[신규댓글]', '') from PARTNERS_CHANNEL D where A.PAH_ID=D.PARENT_ID order by D.CREATE_DATE desc limit 1) res
+		from PARTNERS_CHANNEL A left join PARTNERS_CHANNEL_FILE B on A.PAH_ID=B.PAH_ID, SNS C
+		where A.SNS_ID=C.SNS_ID and A.PAH_ID=A.PARENT_ID
+		<choose>
+			<when test="ctype != null">
+			 and A.RTYPE = #{ctype}
+			</when>
+		</choose>
+		<choose>
+			<when test="status != null">
+			 and A.STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and C.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and C.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and A.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		) AAA
+   </select>
+  <select id="selectChannelAnswerList" parameterType="hashMap" resultType="hashMap">
+		select A.PAH_ID pahid, B.SNS_IDENTIFY snsid, A.CREATE_DATE cdate, A.BODY body, A.USR_ID usrid, C.STF_ID stfid
+			,(select bb.IMAGE_PATH from SNS aa left outer join IMAGE bb on aa.IMG_ID=bb.IMG_ID where aa.SNS_ID=B.SNS_ID limit 1) imgpath
+		from PARTNERS_CHANNEL A left outer join SNS B on A.SNS_ID=B.SNS_ID left outer join STAFF C on C.USR_ID=A.USR_ID
+		where A.PAH_ID!=A.PARENT_ID
+		<choose>
+			<when test="pahid != null">
+			 and A.PARENT_ID = #{pahid}
+			</when>
+		</choose>
+		order by A.CREATE_DATE
+   </select>
+   <select id="selectChannelFiles" parameterType="hashMap" resultType="hashMap">
+		select A.PAH_ID pahid, A.TITLE title, SUB_TITLE subtitle, A.FILE_URL fileurl, FILE_NAME fname, PDF_FILE_URL pdfurl, PDF_FILE_NAME pdfname, LINK_URL linkurl, START_DATE sdate, END_DATE edate, , B.PUBLISHER publ, B.PUBLISH_DATE publdate
+		from PARTNERS_CHANNEL_FILE A
+		where 1=1
+		<choose>
+			<when test="pahid != null">
+			 and A.PAH_ID = #{pahid}
+			</when>
+		</choose>
+   </select>   
+  
+   <insert id="insertChannelAnswer" parameterType="hashMap">
+  	insert into PARTNERS_CHANNEL (	PAH_ID, PARENT_ID, BODY, USR_ID)
+  	values (
+  		#{pahid},
+  		#{parentid},
+  		#{body},
+  		#{usrid}
+  	)
+  </insert>
+  <delete id="deleteChannelAnswer" parameterType="hashMap">
+  	delete from PARTNERS_CHANNEL where PAH_ID=#{pahid}
+  </delete>
+  <update id="updatePartnersChannel" parameterType="hashMap">
+  	update PARTNERS_CHANNEL set UPDATE_DATE = now()
+		<choose>
+			<when test="status != null">
+	  		,STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="position != null">
+	  		,POSITION = #{position}
+			</when>
+		</choose>
+	where PAH_ID = #{pahid}
+  </update>
+ 
+	<select id="selectPartnersReqHistMultiFileUpload" parameterType="hashMap" resultType="hashMap">
+		SELECT UFI_ID, PAH_ID, FILE_ID, FILE_ORG_NAME, UPLOAD_DATE 
+		FROM KTO.PARTNERS_CHANNEL_UPLOAD 
+		WHERE PAH_ID = #{pahid}
+	</select>
+<!--   <select id="selectSnsIdCnt" parameterType="hashMap" resultType="hashMap"> -->
+<!-- 		select count(*) CNT -->
+<!-- 		from SNS -->
+<!-- 		where SNS_IDENTIFY = #{id} -->
+<!--    </select> -->
+   
+<!--   <insert id="insertPartners" parameterType="hashMap"> -->
+<!--   	insert into SNS (SNS_ID, SNS_IDENTIFY, IS_USE, SNS_USR_NAME, MAG_NAME, PASSWORD, SNS_TYPE, CREATE_DATE, LAST_CREATE_DATE) -->
+<!--   	values ( -->
+<!--   		#{snsid}, -->
+<!--   		#{id}, -->
+<!--   		#{isuse}, -->
+<!--   		#{name} -->
+<!--   		,#{magname} -->
+<!--   		,#{pass} -->
+<!--   		,10, now(), now() -->
+<!--   	) -->
+<!--   </insert> -->
+<!--    <update id="updatePartners" parameterType="hashMap"> -->
+<!--   	update SNS set IS_USE=#{isuse}, SNS_USR_NAME=#{name}, MAG_NAME=#{magname} -->
+<!--   	<choose> -->
+<!-- 		<when test="pass != null"> -->
+<!-- 		,PASSWORD= #{pass} -->
+<!-- 		</when> -->
+<!-- 	</choose> -->
+<!--   	where SNS_ID = #{snsid} -->
+<!--   </update> -->
+
+<select id="selectProposalList" parameterType="hashMap" resultType="hashMap">
+	SELECT A.PPS_ID, A.PARENT_ID, A.USR_ID, A.TITLE, A.BODY, A.STATUS, A.TYPE, A.CREATE_DATE, A.UPDATE_DATE, C.SNS_ID SNS_ID, C.SNS_IDENTIFY ID, C.SNS_USR_NAME NAME,
+		(SELECT IF(EE.STATUS = 0, '[신규 댓글]', '-') FROM PARTNERS_PROPOSAL DD INNER JOIN PARTNERS_PROPOSAL_HISTORY EE ON DD.PPS_ID = EE.PPS_ID WHERE A.PPS_ID=DD.PARENT_ID AND DD.PPS_ID != DD.PARENT_ID ORDER BY EE.CREATE_DATE DESC LIMIT 1) as REPLY
+	FROM PARTNERS_PROPOSAL A
+	INNER JOIN SNS C ON A.SNS_ID = C.SNS_ID
+	WHERE A.PPS_ID IS NOT NULL
+	AND A.PPS_ID = A.PARENT_ID
+	<choose>
+		<when test="type != null and type != -1">
+		 and A.TYPE = #{type}
+		</when>
+	</choose>
+	<choose>
+		<when test="status != null and status != -1">
+		 and A.STATUS = #{status}
+		</when>
+	</choose>
+	<choose>
+		<when test="title != null">
+		 and A.TITLE REGEXP #{title}
+		</when>
+	</choose>
+	order by A.STATUS, A.CREATE_DATE desc
+    limit #{offset}, 20
+</select>
+<select id="selectProposalListCount" parameterType="hashMap" resultType="hashMap">
+	SELECT COUNT(1) AS CNT 
+	FROM (
+		SELECT A.PPS_ID, A.PARENT_ID, A.USR_ID, A.TITLE, A.BODY, A.STATUS, A.TYPE, A.CREATE_DATE, A.UPDATE_DATE, C.SNS_ID SNS_ID, C.SNS_IDENTIFY ID, C.SNS_USR_NAME NAME,
+			(SELECT IF(EE.STATUS = 0, '[신규 댓글]', '-') FROM PARTNERS_PROPOSAL DD INNER JOIN PARTNERS_PROPOSAL_HISTORY EE ON DD.PPS_ID = EE.PPS_ID WHERE A.PPS_ID=DD.PARENT_ID AND DD.PPS_ID != DD.PARENT_ID ORDER BY EE.CREATE_DATE DESC LIMIT 1) as REPLY
+		FROM PARTNERS_PROPOSAL A
+		INNER JOIN SNS C ON A.SNS_ID = C.SNS_ID
+		WHERE A.PPS_ID IS NOT NULL
+		AND A.PPS_ID = A.PARENT_ID
+		<choose>
+			<when test="type != null and type != -1">
+			 and A.TYPE = #{type}
+			</when>
+		</choose>
+		<choose>
+			<when test="status != null and status != -1">
+			 and A.STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and A.TITLE REGEXP #{title}
+			</when>
+		</choose>
+	) AAA
+</select>
+<select id="selectPartnersProposalMultiFileUpload" parameterType="hashMap" resultType="hashMap">
+	SELECT UFI_ID, PPS_ID, FILE_ID, FILE_ORG_NAME, UPLOAD_DATE
+	FROM KTO.PARTNERS_PROPOSAL_FILES
+	WHERE PPS_ID = #{ppsId}
+</select>
+<select id="selectProposalAnswerList" parameterType="hashMap" resultType="hashMap">
+	select A.PPS_ID AS ppsId, B.SNS_IDENTIFY snsId, A.CREATE_DATE createDate, A.BODY body, A.USR_ID as usrId, C.STF_ID stfId,
+		(select SUB_IMG.IMAGE_PATH from SNS SUB_SNS left outer join IMAGE SUB_IMG on SUB_SNS.IMG_ID = SUB_IMG.IMG_ID where SUB_SNS.SNS_ID = B.SNS_ID limit 1) AS imgpath
+	FROM KTO.PARTNERS_PROPOSAL A
+	LEFT OUTER JOIN SNS B on A.SNS_ID = B.SNS_ID
+	LEFT OUTER JOIN STAFF C on C.USR_ID = A.USR_ID
+	WHERE A.PPS_ID != A.PARENT_ID
+	<choose>
+		<when test="ppsId != null">
+		 and A.PARENT_ID = #{ppsId}
+		</when>
+	</choose>
+	order by A.CREATE_DATE
+</select>
+<delete id="deletePartnersProposalAnswer" parameterType="hashMap">
+	delete from PARTNERS_PROPOSAL where PPS_ID = #{ppsId}
+</delete>
+<insert id="insertPartnersProposalAnswer" parameterType="hashMap">
+	INSERT INTO PARTNERS_PROPOSAL (PPS_ID, PARENT_ID, BODY, USR_ID, CREATE_DATE, UPDATE_DATE) VALUES (#{ppsId}, #{parentId}, #{body}, #{usrId}, now(), now())
+</insert>
+<insert id="insertPartnersProposalAnswerHistory" parameterType="hashMap">
+	INSERT INTO PARTNERS_PROPOSAL_HISTORY (PH_ID, PPS_ID, STATUS, CREATE_DATE) VALUES (#{phId}, #{ppsId}, 1, now())
+</insert>
+  <update id="updatePartnersProposal" parameterType="hashMap">
+  	UPDATE PARTNERS_PROPOSAL SET UPDATE_DATE = now()
+		<choose>
+			<when test="status != null">
+	  			, STATUS = #{status}
+			</when>
+		</choose>
+	WHERE PPS_ID = #{ppsId}
+  </update>
+  
+  <select id="PartnersContentExcelCount" parameterType="hashMap" resultType="int">
+  select count(*)
+		from PARTNERS_CONTENT A, SNS B, CONTENT_MASTER C
+		where A.SNS_ID=B.SNS_ID and A.COT_ID=C.COT_ID
+		<choose>
+			<when test="CategoryCode == 1">
+			 and ((C.CONTENT_TYPE > 39 and C.CONTENT_TYPE != 2000) or C.CONTENT_TYPE is null)
+			</when>
+		</choose>
+		<choose>
+			<when test="CategoryCode == 2">
+			 and (C.CONTENT_TYPE <![CDATA[ <= ]]> 39 or C.CONTENT_TYPE = 2000)
+			</when>
+		</choose>
+		<choose>
+			<when test="StatusSearch != -1">
+			 and A.STATUS = #{StatusSearch}
+			</when>
+		</choose>
+		
+		<choose>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 2">
+				<choose>
+					<when test="startInput != null">
+					 and A.MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.UPDATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 1">
+			 and C.TITLE REGEXP #{title}
+			</when>
+			<when test="mode == 2">
+			  and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+			<when test="mode == 3">
+			  and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="Is_Use != -1">
+			 and A.IS_USE = ${Is_Use}
+			</when>
+		</choose>
+		<choose>
+			<when test="Apply_type != 0">
+			 and A.APPLY_TYPE = ${Apply_type}
+			</when>
+		</choose>
+  </select>
+  <select id="PartnersContentExcel" parameterType="hashMap" resultType="hashMap">
+  select A.PAC_ID
+	  <if test="Chk0 == 1">
+	    ,B.SNS_ID Chk0
+	  </if>
+	  <if test="Chk1 == 1">
+		,B.SNS_IDENTIFY Chk1
+	  </if>
+	  <if test="Chk2 == 1">
+		,B.SNS_USR_NAME Chk2
+	  </if>
+	  <if test="Chk3 == 1">
+		,B.MAG_NAME Chk3
+	  </if>
+	  <if test="Chk4 == 1">
+		,C.COT_ID Chk4
+	  </if>
+	  <if test="Chk5 == 1">
+		,C.TITLE Chk5
+	  </if>
+	  <if test="Chk6 == 1">
+		,case when (C.CONTENT_TYPE-10000) = 100 then '맛여행' 
+	   when (C.CONTENT_TYPE-10000) = 200 then '풍경여행'
+	   when (C.CONTENT_TYPE-10000) = 300 then '영화드라마여행'
+	   when (C.CONTENT_TYPE-10000) = 400 then '레포츠여행'
+	   when (C.CONTENT_TYPE-10000) = 500 then '체험여행'
+	   when (C.CONTENT_TYPE-10000) = 600 then '네티즌선정베스트그곳'
+	   when (C.CONTENT_TYPE-10000) = 700 then '교과서속여행'
+	   when (C.CONTENT_TYPE-10000) = 800 then '테마여행'
+	   when (C.CONTENT_TYPE-10000) = 900 then '문화유산여행'
+	   when (C.CONTENT_TYPE-10000) = 1000 then '추천가볼만한곳'
+	   when (C.CONTENT_TYPE-10000) = 1100 then '무장애여행'
+	   when (C.CONTENT_TYPE-10000) = 1101 then '장애인여행추천'
+	   when (C.CONTENT_TYPE-10000) = 1102 then '영유아가족'
+	   when (C.CONTENT_TYPE-10000) = 1103 then '어르신여행'
+	   when (C.CONTENT_TYPE-10000) = 1200 then '생태관광'
+	   when (C.CONTENT_TYPE-10000) = 1201 then '생태관광_추천'
+	   when (C.CONTENT_TYPE-10000) = 1202 then '생태관광_테마'
+	   when (C.CONTENT_TYPE-10000) = 1300 then '테마10선'
+	   when (C.CONTENT_TYPE-10000) = 1400 then '웰니스25선'
+	   when (C.CONTENT_TYPE-10000) = 1500 then '관광의별'
+	   when (C.CONTENT_TYPE-10000) = 1501 then '관광의별_수상내역'
+	   when (C.CONTENT_TYPE-10000) = 1502 then '관광의별_수상지소개칼럼'
+	   when (C.CONTENT_TYPE-10000) = 1600 then '품질인증(KQ)'
+	   when C.CONTENT_TYPE = 12 then '관광지' 
+	   when C.CONTENT_TYPE = 14 then '문화시설' 
+	   when C.CONTENT_TYPE = 15 then '축제행사공연' 
+	   when C.CONTENT_TYPE = 25 then '여행코스'
+	   when C.CONTENT_TYPE = 28 then '레포츠' 
+	   when C.CONTENT_TYPE = 32 then '숙박' 
+	   when C.CONTENT_TYPE = 38 then '쇼핑' 
+	   when C.CONTENT_TYPE = 39 then '음식점' 
+	   when C.CONTENT_TYPE = 2000 then '생태관광'
+	   end Chk6
+	  </if>
+	  <if test="Chk7 == 1">
+		,A.USAGE_URL Chk7
+	  </if>
+	  <if test="Chk8 == 1">
+		,A.COMMENT Chk8
+	  </if>
+	  <if test="Chk9 == 1">
+		,case when   A.APPLY_TYPE = 1 then '이미지' 
+	   when A.APPLY_TYPE = 2 then '본문내용(only 텍스트)' 
+	   when A.APPLY_TYPE = 3 then '본문내용+이미지' 
+	   when A.APPLY_TYPE = 4 then '온라인'
+	   when A.APPLY_TYPE = 5 then '인쇄물' 
+	   when A.APPLY_TYPE = 6 then '기타' 
+	    end Chk9
+	  </if>
+	  <if test="Chk10 == 1">
+		,A.ETC_QNA Chk10
+	  </if>
+	  <if test="Chk11 == 1">
+		,A.DOWN_URL Chk11
+	  </if>
+	  <if test="Chk12 == 1">
+		,case when A.DN_OFFER = 0 then '제공'
+		 when A.DN_OFFER = 1 then '미제공'
+		 end Chk12
+	  </if>
+	  <if test="Chk13 == 1">
+		,A.DEPLOY_URL Chk13
+	  </if>
+	  <if test="Chk14 == 1">
+		,A.DETAIL_BODY Chk14
+	  </if>
+	  <if test="Chk15 == 1">
+		,A.FILE_NAME Chk15
+	  </if>
+	  <if test="Chk16 == 1">
+		,A.FILE_URL Chk16
+	  </if>
+	  <if test="Chk17 == 1">
+		,case when A.IS_USE = 0 then '미사용'
+		 when A.IS_USE = 1 then '사용'
+		 end Chk17
+	  </if>
+	  <if test="Chk18 == 1">
+		,case when A.STATUS = 0 then '접수'
+		 when A.STATUS = 1 then '처리중'
+		 when A.STATUS = 2 then '승인완료'
+		 when A.STATUS = 3 then '반려'
+		 when A.STATUS = 4 then '반영완료'
+		 end Chk18
+	  </if>
+	  <if test="Chk19 == 1">
+		,A.CREATE_DATE Chk19
+	  </if>
+	  <if test="Chk20 == 1">
+		,A.UPDATE_DATE Chk20
+	  </if>
+		from PARTNERS_CONTENT A, SNS B, CONTENT_MASTER C
+		where A.SNS_ID=B.SNS_ID and A.COT_ID=C.COT_ID
+		<choose>
+			<when test="CategoryCode == 1">
+			 and ((C.CONTENT_TYPE > 39 and C.CONTENT_TYPE != 2000) or C.CONTENT_TYPE is null)
+			</when>
+		</choose>
+		<choose>
+			<when test="CategoryCode == 2">
+			 and (C.CONTENT_TYPE <![CDATA[ <= ]]> 39 or C.CONTENT_TYPE = 2000)
+			</when>
+		</choose>
+		<choose>
+			<when test="StatusSearch != -1">
+			 and A.STATUS = #{StatusSearch}
+			</when>
+		</choose>
+		
+		<choose>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 2">
+				<choose>
+					<when test="startInput != null">
+					 and A.MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.UPDATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 1">
+			 and C.TITLE REGEXP #{title}
+			</when>
+			<when test="mode == 2">
+			  and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+			<when test="mode == 3">
+			  and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="Is_Use != -1">
+			 and A.IS_USE = ${Is_Use}
+			</when>
+		</choose>
+		<choose>
+			<when test="Apply_type != 0">
+			 and A.APPLY_TYPE = ${Apply_type}
+			</when>
+		</choose>
+		order by A.CREATE_DATE desc
+  </select>
+  <select id="PartnersMember" parameterType="hashMap" resultType="hashMap">
+	 select 
+	  '파트너스' as DIVISION
+	  ,SNS_IDENTIFY
+	  ,SNS_USR_NAME
+	  ,MAG_NAME
+	  ,CREATE_DATE
+	  ,SNS_ID 
+	  ,case when IS_USE = 0 then '미사용' when IS_USE = 1 then '사용'  end IS_USE
+	  from SNS 
+	  where SNS_TYPE = 10
+	  order by CREATE_DATE desc
+  </select>
+  <select id="PartnersMemberActivity" parameterType="hashMap" resultType="hashMap">
+	 	select 
+	  '파트너스' Chk0
+	  ,A.SNS_IDENTIFY Chk1
+	  ,A.SNS_USR_NAME Chk2
+	  ,A.MAG_NAME Chk3
+	  , (SELECT count(*) FROM PARTNERS_CONTENT AA where A.SNS_ID=AA.SNS_ID) AS Chk4
+	  , (SELECT count(*) FROM ZIKIMI AA where A.SNS_ID=AA.SNS_ID and AA.REQ_TYPE = 1) AS Chk5
+	  , (SELECT count(*) FROM ZIKIMI AA where A.SNS_ID=AA.SNS_ID and AA.REQ_TYPE = 0) AS Chk6
+      , (SELECT count(*) FROM PARTNERS_CHANNEL AA where A.SNS_ID=AA.SNS_ID and AA.PAH_ID = AA.PARENT_ID) AS Chk7
+      , (SELECT count(*) FROM PARTNERS_PROPOSAL AA where A.SNS_ID=AA.SNS_ID and AA.PPS_ID = AA.PARENT_ID) AS Chk8
+	  ,A.SNS_ID Chk9
+	  from SNS A
+	  where SNS_TYPE = 10
+	  order by CREATE_DATE desc
+  </select>
+  <select id="PartnersChanelExcelDownload" parameterType="hashMap" resultType="hashMap">
+ 	select  C.SNS_IDENTIFY Chk0
+	, C.SNS_USR_NAME  Chk1
+	,  case when A.RTYPE = 0 then '배너홍보'
+	   when A.RTYPE = 1 then '관광가이드북'
+	   when A.RTYPE = 2 then '기타문의'
+	   end as Chk2
+	, A.TITLE Chk3
+	, A.PAH_ID Chk4
+	, A.CREATE_DATE Chk5
+	, case when A.STATUS = 0 then '접수'
+	   when A.STATUS = 1 then '처리중'
+	   when A.STATUS = 2 then '승인'
+	   when A.STATUS = 3 then '처리완료'
+	   when A.STATUS = 4 then '반려'
+	   end as Chk6
+	, A.UPDATE_DATE Chk7
+	,(select if(USR_ID is null or USR_ID='', if(PAH_ID=PARENT_ID, '-', '[신규댓글]'), '[답변완료]') from PARTNERS_CHANNEL D where A.PAH_ID=D.PARENT_ID order by D.CREATE_DATE desc limit 1)  Chk8
+	,C.SNS_ID Chk9
+	from PARTNERS_CHANNEL A left join PARTNERS_CHANNEL_FILE B on A.PAH_ID=B.PAH_ID, SNS C
+	where A.SNS_ID=C.SNS_ID and A.PAH_ID=A.PARENT_ID
+	order by A.CREATE_DATE desc
+  </select>
+</mapper>

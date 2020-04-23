@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.SnsMapper">
+ 
+   <select id="selectSnsList" parameterType="hashMap" resultType="hashMap">
+		SELECT SNS_ID, SNS_USR_NAME, SNS_IDENTIFY, SNS_TYPE, IMG_ID, CREATE_DATE, LAST_CREATE_DATE, LOGIN_CNT logcnt, IS_USE isuse, MAG_NAME  FROM SNS WHERE 1=1
+		<choose>
+			<when test="snstype != null">
+				<if test="snstype != 20">
+				 and SNS_TYPE = #{snstype}
+				</if>
+				<if test="snstype == 20">
+				 and SNS_TYPE != 10
+				</if>
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="idname != null">
+			 and (SNS_IDENTIFY REGEXP #{idname} or SNS_USR_NAME REGEXP #{idname})
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="orderCrDate != null">
+			 order by CREATE_DATE desc
+			</when>
+		</choose>
+		
+        limit #{offset}, 20
+   </select>
+  
+   <select id="selectSnsListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT count(*) CNT FROM SNS WHERE 1=1
+		<choose>
+			<when test="snstype != null">
+				<if test="snstype != 20">
+				 and SNS_TYPE = #{snstype}
+				</if>
+				<if test="snstype == 20">
+				 and SNS_TYPE != 10
+				</if>
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="idname != null">
+			 and SNS_IDENTIFY REGEXP #{idname} or SNS_USR_NAME REGEXP #{idname}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+   </select>
+   
+      <select id="selectSnsAnalysis" parameterType="hashMap" resultType="hashMap">
+		SELECT A.SNS_USR_NAME, A.SNS_IDENTIFY, A.SNS_TYPE
+			, (SELECT count(*) FROM SNS_FAVORITES F where A.SNS_ID=F.SNS_ID) AS f
+			, (SELECT count(*) FROM SNS_COMMENT C where A.SNS_ID=C.SNS_ID) AS cc
+			, (SELECT count(*) FROM SHARE_CONTENT SC where A.SNS_ID=SC.SNS_ID) AS sc
+			, (SELECT count(*) FROM SNS_LIKE L where A.SNS_ID=L.SNS_ID) AS l
+			, (SELECT count(*) FROM QnA Q where A.SNS_ID=Q.SNS_ID) AS q
+			, (SELECT count(*) FROM SNS_COURSE CO where A.SNS_ID=CO.SNS_ID) AS co
+			, (SELECT count(*) FROM SNS_SCRAP SS where A.SNS_ID=SS.SNS_ID) AS ss
+			, (SELECT count(*) FROM ZIKIMI AA where A.SNS_ID=AA.SNS_ID) AS zi
+			, (SELECT count(*) FROM PARTNERS_CONTENT AA where A.SNS_ID=AA.SNS_ID) AS pc
+			, (SELECT count(*) FROM PARTNERS_CHANNEL AA where A.SNS_ID=AA.SNS_ID) AS ph
+			, (SELECT COUNT(*) FROM SNS_COURSE SC WHERE SC.SNS_ID IN (SELECT SCAA.SNS_ID FROM SNS SCAA WHERE A.SNS_IDENTIFY = SCAA.SNS_IDENTIFY AND A.SNS_TYPE = SCAA.SNS_TYPE)) AS ssc
+			, (SELECT COUNT(*) FROM SHARE_PERSONAL_COURSE SPC WHERE A.SNS_ID = SPC.SNS_ID) AS cs
+			, (SELECT COUNT(*) FROM STAMP_HISTORY SH WHERE A.SNS_ID = SH.SNS_ID) AS sh
+			, (SELECT COUNT(*) FROM COUPON_LOG CP, COUPON_INFO CPI WHERE A.SNS_ID = CP.SNS_ID AND CP.CP_ID = CPI.CP_ID AND CPI.CP_GB = 'CP') AS cp
+			, (SELECT COUNT(*) FROM COUPON_LOG CP, COUPON_INFO CPI WHERE A.SNS_ID = CP.SNS_ID AND CP.CP_ID = CPI.CP_ID AND CPI.CP_GB = 'MS') AS ms
+		FROM SNS A
+		WHERE 1=1
+		<choose>
+			<when test="snstype != null">
+			 and SNS_TYPE = #{snstype}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="sort != null">
+			 ORDER BY ${sort} DESC
+			</when>
+		</choose>
+				
+        limit #{offset}, 20
+   </select>
+  
+   <select id="selectSnsAnalysisCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT count(*) CNT FROM SNS WHERE 1=1
+		<choose>
+			<when test="snstype != null">
+			 and SNS_TYPE = #{snstype}
+			</when>
+		</choose>
+		<choose>
+			<when test="sdate != null">
+			 and CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+   </select>
+   
+   <select id="selectSnsCommentList" parameterType="hashMap" resultType="hashMap">
+ 		SELECT 
+			  SC.CMT_ID
+			, SC.PARENT_CMT_ID
+			, SC.SNS_ID
+			, SC.COT_ID
+			, SC.COMMENT
+			, SC.CREATE_DATE
+			, SC.IS_VIEW
+			, SC.IS_DELETE
+			, SC.`DEPTH`
+			, SC.IMG_ID
+			, S.SNS_IDENTIFY
+			, CM.COT_ID
+			, CM.CONTENT_ID
+			, CM.TITLE
+			, (
+				SELECT COUNT(A.CMT_ID)
+				FROM SNS_COMMENT A
+				WHERE A.PARENT_CMT_ID = SC.CMT_ID
+			) REPLY_CNT
+		FROM SNS_COMMENT SC
+			LEFT OUTER JOIN SNS S ON SC.SNS_ID = S.SNS_ID
+			LEFT OUTER JOIN CONTENT_MASTER CM ON SC.COT_ID = CM.COT_ID
+		WHERE 1 = 1
+			AND SC.COT_ID = #{cotId}
+			AND SC.`DEPTH` = #{depth}
+			<if test="parentId != null">
+				AND SC.PARENT_CMT_ID = #{parentId}
+			</if>
+		ORDER BY CREATE_DATE DESC
+		<if test="offset != null">
+	        LIMIT #{offset}, 10
+		</if>
+   </select>   
+   
+   <select id="selectSnsCommentListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			COUNT(SC.CMT_ID) CNT
+		FROM SNS_COMMENT SC
+			LEFT OUTER JOIN SNS S ON SC.SNS_ID = S.SNS_ID
+			LEFT OUTER JOIN CONTENT_MASTER CM ON SC.COT_ID = CM.COT_ID
+		WHERE 1 = 1
+			AND SC.COT_ID = #{cotId}
+			AND SC.`DEPTH` = #{depth}
+			<if test="parentId != null">
+				AND SC.PARENT_CMT_ID = #{parentId}
+			</if>
+		ORDER BY SC.CREATE_DATE DESC
+   </select>
+   
+   <insert id="insertSnsComment" parameterType="hashMap">
+   		INSERT INTO SNS_COMMENT (
+	   		  CMT_ID
+			, PARENT_CMT_ID
+			, SNS_ID
+			, COT_ID
+			, COMMENT
+			, CREATE_DATE
+			, IS_VIEW
+			, IS_DELETE
+			, DEPTH
+			<if test="imgId != null">
+				, IMG_ID
+			</if>
+   		) VALUES (
+   			  #{cmtId}
+   			, #{parentId}
+   			, #{snsId}
+   			, #{cotId}
+   			, #{comment}
+   			, NOW()
+   			, #{isView}
+   			, 0
+   			, #{depth}
+			<if test="imgId != null">
+	   			, #{imgId}
+			</if>
+   		)
+   </insert>
+   <update id="updateSnsComment" parameterType="hashMap">
+		UPDATE SNS_COMMENT SET 
+		<choose>
+			<when test="isView != null">
+		 		IS_VIEW = #{isView}
+			</when>
+		</choose>
+		<choose>
+			<when test="isDelete != null and isView != null">
+		 		,IS_DELETE = #{isDelete} 
+			</when>
+		</choose>
+		
+		WHERE CMT_ID = #{cmtId}
+   </update>
+ 
+   <select id="selectSnsCourseList" parameterType="hashMap" resultType="hashMap">
+		select
+			A.CRS_ID crsid,
+			A.TITLE title,
+			(select count(D.COT_ID) from SNS_COURSE_DETAILS D where D.CRS_ID = A.CRS_ID) cnt,
+			B.SNS_IDENTIFY id,
+			A.CREATE_DATE date,
+			A.`DESC` `desc`,
+			A.IS_OPEN isOpen,
+			A.UPDATE_DATE updateDate,
+			(SELECT COUNT(1) FROM KTO.SHARE_PERSONAL_COURSE SPC WHERE SPC.CRS_ID=A.CRS_ID) AS shareCnt
+		from SNS_COURSE A,
+			SNS B
+		where
+			A.SNS_ID = B.SNS_ID
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and A.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="isOpen != null">
+				and A.IS_OPEN = #{isOpen}
+			</when>
+		</choose>
+        limit #{offset}, 20
+   </select>
+   <select id="selectSnsCourseListCnt" parameterType="hashMap" resultType="hashMap">
+		Select count(A.CRS_ID) CNT from SNS_COURSE A, SNS B
+			where A.SNS_ID = B.SNS_ID
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and A.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="isOpen != null">
+				and A.IS_OPEN = #{isOpen}
+			</when>
+		</choose>
+   </select>
+   
+	<update id="updateSnsCourseDetail" parameterType="hashMap">
+		UPDATE SNS_COURSE set IS_OPEN = #{isOpen}, `DESC` = #{desc}, UPDATE_DATE = now()
+		WHERE CRS_ID = #{crsId}
+	</update>
+   
+   <select id="selectSnsQnaList" parameterType="hashMap" resultType="hashMap">
+		select A.QNA_ID qnaid, A.TITLE title, B.SNS_IDENTIFY id, A.CREATE_DATE date, A.QNA_BODY body
+			,(select if(USR_ID is null or USR_ID='', '답변전', '답변완료') from QnA D where A.QNA_ID=D.PARENT_ID order by D.CREATE_DATE desc limit 1) res
+		from QnA A, SNS B
+		where A.SNS_ID=B.SNS_ID and A.QNA_ID=A.PARENT_ID 
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and A.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		order by res desc, A.CREATE_DATE desc
+        limit #{offset}, 20
+   </select>
+   <select id="selectSnsQnaListCnt" parameterType="hashMap" resultType="hashMap">
+		select count(A.TITLE) CNT
+		from QnA A, SNS B
+		where A.SNS_ID=B.SNS_ID and A.QNA_ID=A.PARENT_ID
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and A.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+   </select>
+   
+   <select id="selectSnsQnaAnswerList" parameterType="hashMap" resultType="hashMap">
+		select A.QNA_ID qnaid, A.TITLE title, B.SNS_IDENTIFY snsid, A.CREATE_DATE date, A.QNA_BODY body, A.USR_ID usrid, C.STF_ID stfid
+			,(select bb.IMAGE_PATH from SNS aa left outer join IMAGE bb on aa.IMG_ID=bb.IMG_ID where aa.SNS_ID=B.SNS_ID limit 1) imgpath
+		from QnA A left outer join SNS B on A.SNS_ID=B.SNS_ID left outer join STAFF C on C.USR_ID=A.USR_ID
+		where A.QNA_ID!=A.PARENT_ID
+		<choose>
+			<when test="qnaid != null">
+			 and A.PARENT_ID = #{qnaid}
+			</when>
+		</choose>
+		order by A.CREATE_DATE
+   </select>
+   <select id="selectSnsQnaFiles" parameterType="hashMap" resultType="hashMap">
+		select A.QNA_ID qnaid, A.LINK_FILE_URL lnfileurl, A.TITLE title
+		from QnA_FILES A
+		where 1=1
+		<choose>
+			<when test="qnaid != null">
+			 and A.QNA_ID = #{qnaid}
+			</when>
+		</choose>
+   </select>   
+   
+   <insert id="insertSnsQnaAnswer" parameterType="hashMap">
+  	insert into QnA (	QNA_ID, PARENT_ID, QNA_BODY, USR_ID)
+  	values (
+  		#{qnaid},
+  		#{parentid},
+  		#{body},
+  		#{usrid}
+  	)
+  </insert>
+  <delete id="deleteSnsQnaAnswer" parameterType="hashMap">
+  	delete from QnA where QNA_ID=#{qnaid}
+  </delete>
+  
+  <select id="selectSnsIdCnt" parameterType="hashMap" resultType="hashMap">
+		select count(*) CNT
+		from SNS
+		where SNS_IDENTIFY = #{id} and SNS_TYPE=10
+   </select>
+   
+  <insert id="insertPartners" parameterType="hashMap">
+  	insert into SNS (SNS_ID, SNS_IDENTIFY, IS_USE, SNS_USR_NAME, MAG_NAME, PASSWORD, SNS_TYPE, CREATE_DATE, LAST_CREATE_DATE)
+  	values (
+  		#{snsid},
+  		#{id},
+  		#{isuse},
+  		#{name}
+  		,#{magname}
+  		,#{pass}
+  		,10, now(), now()
+  	)
+  </insert>
+   <update id="updatePartners" parameterType="hashMap">
+  	update SNS set IS_USE=#{isuse}, SNS_USR_NAME=#{name}, MAG_NAME=#{magname}
+  	<choose>
+		<when test="pass != null">
+		,PASSWORD= #{pass}
+		</when>
+	</choose>
+  	where SNS_ID = #{snsid}
+  </update>
+  <select id="MemberInfoExcelDownload" parameterType="hashMap" resultType="hashMap">
+    select concat(A.SNS_IDENTIFY,'(',A.SNS_USR_NAME,')') Chk0
+	  , case when SNS_TYPE = '0' then '페이스북'
+	  when SNS_TYPE = '1' then '트위터'
+	  when SNS_TYPE = '2' then '인스타그램'
+	  when SNS_TYPE = '3' then '다음'
+	  when SNS_TYPE = '4' then '네이버'
+	  when SNS_TYPE = '5' then '카카오톡'
+	  when SNS_TYPE = '6' then '구글'
+	  when SNS_TYPE = '10' then '파트너스'
+	  when SNS_TYPE = '99' then '관리자'	
+	  End as Chk1
+	  , CREATE_DATE Chk2
+	  , LOGIN_CNT Chk3
+	  from SNS A 
+	  order by CREATE_DATE desc
+  </select>
+  <select id="SNSCourseExcelDownload" parameterType="hashMap" resultType="hashMap">
+  select A.TITLE Chk0,
+			(select count(D.COT_ID) from SNS_COURSE_DETAILS D where D.CRS_ID = A.CRS_ID) Chk1,
+			B.SNS_IDENTIFY Chk2,
+			A.CREATE_DATE Chk3,
+			case when A.IS_OPEN = 0 then '비공개'
+			 when A.IS_OPEN = 1 then '공개'
+			 End as Chk4
+     		,( SELECT GROUP_CONCAT(Y.TITLE ORDER BY X.CREATE_DATE, Y.COT_ID ASC SEPARATOR ',')  					
+				        FROM SNS_COURSE_DETAILS X, CONTENT_MASTER Y					 
+				        WHERE 1 = 1													
+				        AND X.CRS_ID = A.CRS_ID										
+				        AND X.COT_ID = Y.COT_ID 										 
+				        GROUP BY X.CRS_ID) AS Chk5
+			from SNS_COURSE A, SNS B
+				where
+					A.SNS_ID = B.SNS_ID
+			 order by A.CREATE_DATE desc
+  </select>
+</mapper>

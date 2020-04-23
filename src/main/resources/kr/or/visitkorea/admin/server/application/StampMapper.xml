@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.visitkorea.system.StampMapper">
+	<select id="selectStampStats" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			SH.CREATE_DATE
+			, IFNULL(STP.CNT, 0) STP_CNT
+			, IFNULL(MISSION.ONE_CNT, 0) ONE_MISSION_CNT
+			, IFNULL(ATTEND.ONE_CNT, 0) ONE_ATTEND_CNT
+			, IFNULL(MISSION.TWO_CNT, 0) TWO_MISSION_CNT
+			, IFNULL(ATTEND.TWO_CNT, 0) TWO_ATTEND_CNT
+		FROM (
+			SELECT DISTINCT DATE(CREATE_DATE) CREATE_DATE FROM STAMP_HISTORY
+		) SH
+		LEFT OUTER JOIN (
+			SELECT 
+				DATE(CREATE_DATE) CREATE_DATE
+				, COUNT(STP_ID) CNT
+			FROM STAMP_HISTORY
+			WHERE 1 = 1
+			<if test="evntId != null">
+				AND EVNT_ID = #{evntId}
+			</if>
+			GROUP BY DATE(CREATE_DATE)
+		) STP ON SH.CREATE_DATE = STP.CREATE_DATE
+		LEFT OUTER JOIN (
+			SELECT 
+				  A.CREATE_DATE
+				, COUNT(CASE WHEN A.CNT > 0 THEN A.CNT end) ONE_CNT
+				, COUNT(CASE WHEN A.CNT > 1 THEN A.CNT end) TWO_CNT
+			FROM (
+				SELECT
+					STP_ID, EVNT_ID, SNS_ID, DATE(CREATE_DATE) CREATE_DATE, COUNT(STP_ID) CNT
+				FROM STAMP_HISTORY
+				WHERE 1 = 1
+				<if test="evntId != null">
+					AND EVNT_ID = #{evntId}
+				</if>
+				GROUP BY SNS_ID
+			) A
+			GROUP BY CREATE_DATE
+		) MISSION ON SH.CREATE_DATE = MISSION.CREATE_DATE
+		LEFT OUTER JOIN (
+			SELECT A.CREATE_DATE
+				, SUM(CASE WHEN A.STEP = 1 THEN A.CNT end) ONE_CNT
+				, SUM(CASE WHEN A.STEP != 1 THEN A.CNT end) TWO_CNT
+			FROM (
+				SELECT
+					DATE(SA.CREATE_DATE) CREATE_DATE
+					, SA.STEP
+					, COUNT(SA.SA_IDX) CNT
+				FROM STAMP_ATTEMPT SA
+				WHERE 1 = 1
+				<if test="evntId != null">
+					AND EVNT_ID = #{evntId}
+				</if>
+				GROUP BY CREATE_DATE, STEP
+			) A
+			GROUP BY CREATE_DATE
+		) ATTEND ON SH.CREATE_DATE = ATTEND.CREATE_DATE
+		WHERE 1 = 1
+		<if test="startDate != null">
+			<![CDATA[
+				AND SH.CREATE_DATE >= DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND SH.CREATE_DATE <= DATE(#{endDate})
+			]]>
+		</if>
+		<choose>
+			<when test="ordered eq 'ASC'">
+				ORDER BY SH.CREATE_DATE ASC
+			</when>
+			<when test="ordered eq 'DESC'">
+				ORDER BY SH.CREATE_DATE DESC
+			</when>
+		</choose>
+		<if test="offset != null">
+			LIMIT #{offset}, 20
+		</if>
+	</select>
+	
+	<select id="selectStampStatsCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			COUNT(SH.CREATE_DATE) CNT
+		FROM (
+			SELECT DISTINCT DATE(CREATE_DATE) CREATE_DATE FROM STAMP_HISTORY
+		) SH
+		LEFT OUTER JOIN (
+			SELECT 
+				DATE(CREATE_DATE) CREATE_DATE
+				, COUNT(STP_ID) CNT
+			FROM STAMP_HISTORY
+			WHERE 1 = 1
+			<if test="evntId != null">
+				AND EVNT_ID = #{evntId}
+			</if>
+			GROUP BY DATE(CREATE_DATE)
+		) STP ON SH.CREATE_DATE = STP.CREATE_DATE
+		LEFT OUTER JOIN (
+			SELECT 
+				  A.CREATE_DATE
+				, COUNT(CASE WHEN A.CNT > 0 THEN A.CNT end) ONE_CNT
+				, COUNT(CASE WHEN A.CNT > 1 THEN A.CNT end) TWO_CNT
+			FROM (
+				SELECT
+					STP_ID, EVNT_ID, SNS_ID, DATE(CREATE_DATE) CREATE_DATE, COUNT(STP_ID) CNT
+				FROM STAMP_HISTORY
+				WHERE 1 = 1
+				<if test="evntId != null">
+					AND EVNT_ID = #{evntId}
+				</if>
+				GROUP BY SNS_ID
+			) A
+			GROUP BY CREATE_DATE
+		) MISSION ON SH.CREATE_DATE = MISSION.CREATE_DATE
+		LEFT OUTER JOIN (
+			SELECT A.CREATE_DATE
+				, SUM(CASE WHEN A.STEP = 1 THEN A.CNT end) ONE_CNT
+				, SUM(CASE WHEN A.STEP != 1 THEN A.CNT end) TWO_CNT
+			FROM (
+				SELECT
+					DATE(SA.CREATE_DATE) CREATE_DATE
+					, SA.STEP
+					, COUNT(SA.SA_IDX) CNT
+				FROM STAMP_ATTEMPT SA
+				WHERE 1 = 1
+				<if test="evntId != null">
+					AND EVNT_ID = #{evntId}
+				</if>
+				GROUP BY CREATE_DATE, STEP
+			) A
+			GROUP BY CREATE_DATE
+		) ATTEND ON SH.CREATE_DATE = ATTEND.CREATE_DATE
+		WHERE 1 = 1
+		<if test="startDate != null">
+			<![CDATA[
+				AND SH.CREATE_DATE >= DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND SH.CREATE_DATE <= DATE(#{endDate})
+			]]>
+		</if>
+		<choose>
+			<when test="ordered eq 'ASC'">
+				ORDER BY SH.CREATE_DATE ASC
+			</when>
+			<when test="ordered eq 'DESC'">
+				ORDER BY SH.CREATE_DATE DESC
+			</when>
+		</choose>
+	</select>
+	
+	<select id="selectStampStatsTotal" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			SH.CREATE_DATE
+			, SUM(IFNULL(STP.CNT, 0)) STP_SUM
+			, SUM(IFNULL(MISSION.ONE_CNT, 0)) ONE_MISSION_SUM
+			, SUM(IFNULL(ATTEND.ONE_CNT, 0)) ONE_ATTEND_SUM
+			, SUM(IFNULL(MISSION.TWO_CNT, 0)) TWO_MISSION_SUM
+			, SUM(IFNULL(ATTEND.TWO_CNT, 0)) TWO_ATTEND_SUM
+		FROM (
+			SELECT DISTINCT DATE(CREATE_DATE) CREATE_DATE FROM STAMP_HISTORY
+		) SH
+		LEFT OUTER JOIN (
+			SELECT 
+				DATE(CREATE_DATE) CREATE_DATE
+				, COUNT(STP_ID) CNT
+			FROM STAMP_HISTORY
+			WHERE 1 = 1
+			<if test="evntId != null">
+				AND EVNT_ID = #{evntId}
+			</if>
+			GROUP BY DATE(CREATE_DATE)
+		) STP ON SH.CREATE_DATE = STP.CREATE_DATE
+		LEFT OUTER JOIN (
+			SELECT 
+				  A.CREATE_DATE
+				, COUNT(CASE WHEN A.CNT > 0 THEN A.CNT end) ONE_CNT
+				, COUNT(CASE WHEN A.CNT > 1 THEN A.CNT end) TWO_CNT
+			FROM (
+				SELECT
+					STP_ID, EVNT_ID, SNS_ID, DATE(CREATE_DATE) CREATE_DATE, COUNT(STP_ID) CNT
+				FROM STAMP_HISTORY
+				WHERE 1 = 1
+				<if test="evntId != null">
+					AND EVNT_ID = #{evntId}
+				</if>
+				GROUP BY SNS_ID
+			) A
+			GROUP BY CREATE_DATE
+		) MISSION ON SH.CREATE_DATE = MISSION.CREATE_DATE
+		LEFT OUTER JOIN (
+			SELECT A.CREATE_DATE
+				, SUM(CASE WHEN A.STEP = 1 THEN A.CNT end) ONE_CNT
+				, SUM(CASE WHEN A.STEP != 1 THEN A.CNT end) TWO_CNT
+			FROM (
+				SELECT
+					DATE(SA.CREATE_DATE) CREATE_DATE
+					, SA.STEP
+					, COUNT(SA.SA_IDX) CNT
+				FROM STAMP_ATTEMPT SA
+				WHERE 1 = 1
+				<if test="evntId != null">
+					AND EVNT_ID = #{evntId}
+				</if>
+				GROUP BY CREATE_DATE, STEP
+			) A
+			GROUP BY CREATE_DATE
+		) ATTEND ON SH.CREATE_DATE = ATTEND.CREATE_DATE
+		WHERE 1 = 1
+		<if test="startDate != null">
+			<![CDATA[
+				AND SH.CREATE_DATE >= DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND SH.CREATE_DATE <= DATE(#{endDate})
+			]]>
+		</if>
+		<choose>
+			<when test="ordered eq 'ASC'">
+				ORDER BY SH.CREATE_DATE ASC
+			</when>
+			<when test="ordered eq 'DESC'">
+				ORDER BY SH.CREATE_DATE DESC
+			</when>
+		</choose>
+			LIMIT 0, 20
+	</select>
+</mapper>

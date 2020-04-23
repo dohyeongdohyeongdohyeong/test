@@ -1,0 +1,1335 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.DatabaseMapper">
+ 
+ <!-- related DATABASE table -->
+  <select id="databaseList" resultType="hashMap">
+		select 
+			A.COT_ID COT_ID,
+			A.CONTENT_ID CONTENT_ID,
+			A.CONTENT_TYPE CONTENT_TYPE,
+			category(D.CAT3) CATEGORY, 
+			areacode(D.AREA_CODE) AREA_NAME, 
+			siguguncode(D.AREA_CODE, D.SIGUGUN_CODE) AREA_SUB_NAME, 
+			A.TITLE TITLE,
+			mastertag(A.COT_ID) MASTER_TAG
+			,    if(A.CONTENT_STATUS=0,'작업 미완료', if(A.CONTENT_STATUS=1, '상태 미등록', if(A.CONTENT_STATUS=2, '작업 완료', if(A.CONTENT_STATUS=3, '작업 완료'
+		,if(A.CONTENT_STATUS=4, '상태 미등록', if(A.CONTENT_STATUS=5, '작업 완료', if(A.CONTENT_STATUS=6, '상태 미등록', if(A.CONTENT_STATUS=7, '비노출'
+		,if(A.CONTENT_STATUS=8, '삭제', if(A.CONTENT_STATUS=9, '작업보류', '상태 미등록')))))))))) 
+	CONTENT_STATUS
+<!-- 			cstatus(A.CONTENT_STATUS) CONTENT_STATUS -->
+			,eventdate(A.COT_ID) EVENT_DATE,
+			A.MODIFIED_DATE MODIFIED_DATE, 
+			A.CREATE_DATE CREATE_DATE,
+			D.CAT1, D.CAT2, D.CAT3,
+			username(A.CREATE_USR_ID) USER_NAME,
+			D.ADMIN_TEL
+			, (SELECT CONTACT_INFO FROM EATERY_INTRO CT WHERE A.COT_ID = CT.COT_ID)	as eateryNo
+		    , (SELECT INFO_CENTER FROM LEPORTS_INTRO CT WHERE A.COT_ID = CT.COT_ID)	as leportsNo
+		    , (SELECT INFO_CENTER FROM CULTURAL_FACILITIES_INTRO CT WHERE A.COT_ID = CT.COT_ID)	as culturalNo
+		    , (SELECT INFO_CENTER FROM TOURIST_SPOT_INTRO CT WHERE A.COT_ID = CT.COT_ID) as touristNo
+		    , (SELECT CONTACT_INFO FROM ACCOMMODATION_INTRO CT WHERE A.COT_ID = CT.COT_ID)	as accommodationNo
+		    , (SELECT CONTACT_INFO FROM SHOPPING_INTRO CT WHERE A.COT_ID = CT.COT_ID)	as shoppingNo,
+			D.ADDR1,
+			D.HOMEPAGE
+		from CONTENT_MASTER A, DATABASE_MASTER D
+		where A.COT_ID = D.COT_ID
+		<choose>
+			<when test="mode == 1">
+			 and A.CONTENT_ID=#{keyword}
+			</when>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+			<when test="mode == 2">
+			 and A.COT_ID in (select DISTINCT COT_ID from TAGS A, CONTENT_TAGS B where A.TAG_ID = B.TAG_ID and A.TAG_NAME REGEXP #{keyword})
+			</when>
+		</choose>
+		<choose>
+			<when test="dateType == 0">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="areaCode != null">
+			 and D.AREA_CODE = #{areaCode}
+			</when>
+		</choose>
+		<choose>
+			<when test="areaSubCode != null">
+			 and D.SIGUGUN_CODE = #{areaSubCode}
+			</when>
+		</choose>
+		<choose>
+			<when test="contentPart == 1"> 
+			 <!-- and D.COT_ID in (SELECT COT_ID FROM TOURIST_SPOT_INTRO) -->
+				 and A.CONTENT_TYPE = '12'
+			</when>
+			<when test="contentPart == 2"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CULTURAL_FACILITIES_INTRO) -->
+				 and A.CONTENT_TYPE = '14'
+			</when>
+			<when test="contentPart == 3"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM LEPORTS_INTRO) -->
+				 and A.CONTENT_TYPE = '28'
+			</when>
+			<when test="contentPart == 4"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM ACCOMMODATION_INTRO) -->
+				and A.CONTENT_TYPE = '32'
+			</when>
+			<when test="contentPart == 5"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM SHOPPING_INTRO) -->
+				and A.CONTENT_TYPE = '38'
+			</when>
+			<when test="contentPart == 6"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM EATERY_INTRO) -->
+				and A.CONTENT_TYPE = '39'
+			</when>
+			<when test="contentPart == 7"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM COURSE_INTRO) -->
+				and A.CONTENT_TYPE = '25'
+			</when>
+			<when test="contentPart == 8"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM FESTIVAL_INTRO) -->
+				and A.CONTENT_TYPE = '15'
+			</when>
+			<when test="contentPart == 9"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CONTENT_MASTER WHERE CONTENT_TYPE=2000) -->
+				and A.CONTENT_TYPE = '2000'
+			</when>
+			<when test="contentPart == 10"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CONTENT_MASTER WHERE CONTENT_TYPE=25000) -->
+				and A.CONTENT_TYPE = '25000'
+			</when>
+		</choose>
+		<if test="OTD_ID != null">
+		 and A.COT_ID in (select COT_ID from OTHER_DEPARTMENT_CONTENT where OTD_ID = #{OTD_ID})
+		</if>
+		<!-- order by A.MODIFIED_DATE desc -->
+        limit #{offset}, 20
+        
+  </select>
+  
+    <select id="databaseListCnt" resultType="hashMap">
+     SELECT count(*) CNT FROM (
+		select 
+			A.COT_ID COT_ID,
+			A.CONTENT_ID CONTENT_ID,
+			A.CONTENT_TYPE CONTENT_TYPE,
+			category(D.CAT3) CATEGORY, 
+			areacode(D.AREA_CODE) AREA_NAME, 
+			siguguncode(D.AREA_CODE, D.SIGUGUN_CODE) AREA_SUB_NAME, 
+			A.TITLE TITLE,
+			mastertag(A.COT_ID) MASTER_TAG
+			,    if(A.CONTENT_STATUS=0,'작업 미완료', if(A.CONTENT_STATUS=1, '상태 미등록', if(A.CONTENT_STATUS=2, '작업 완료', if(A.CONTENT_STATUS=3, '작업 완료'
+		,if(A.CONTENT_STATUS=4, '상태 미등록', if(A.CONTENT_STATUS=5, '작업 완료', if(A.CONTENT_STATUS=6, '상태 미등록', if(A.CONTENT_STATUS=7, '비노출'
+		,if(A.CONTENT_STATUS=8, '삭제', if(A.CONTENT_STATUS=9, '작업보류', '상태 미등록')))))))))) 
+	CONTENT_STATUS
+<!-- 			cstatus(A.CONTENT_STATUS) CONTENT_STATUS -->
+			,eventdate(A.COT_ID) EVENT_DATE,
+			A.MODIFIED_DATE MODIFIED_DATE, 
+			A.CREATE_DATE CREATE_DATE,
+			D.CAT1, D.CAT2, D.CAT3,
+			username(A.CREATE_USR_ID) USER_NAME
+		from CONTENT_MASTER A, DATABASE_MASTER D
+		where A.COT_ID = D.COT_ID
+		<choose>
+			<when test="mode == 1">
+			 and A.CONTENT_ID=#{keyword}
+			</when>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+			<when test="mode == 2">
+			 and A.COT_ID in (select DISTINCT COT_ID from TAGS A, CONTENT_TAGS B where A.TAG_ID = B.TAG_ID and A.TAG_NAME REGEXP #{keyword})
+			</when>
+		</choose>
+		<choose>
+			<when test="dateType == 0">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="areaCode != null">
+			 and D.AREA_CODE = #{areaCode}
+			</when>
+		</choose>
+		<choose>
+			<when test="areaSubCode != null">
+			 and D.SIGUGUN_CODE = #{areaSubCode}
+			</when>
+		</choose>
+		<choose>
+			<when test="contentPart == 1"> 
+			 and D.COT_ID in (SELECT COT_ID FROM TOURIST_SPOT_INTRO)
+			</when>
+			<when test="contentPart == 2"> 
+			 and D.COT_ID in (SELECT COT_ID FROM CULTURAL_FACILITIES_INTRO)
+			</when>
+			<when test="contentPart == 3"> 
+			 and D.COT_ID in (SELECT COT_ID FROM LEPORTS_INTRO)
+			</when>
+			<when test="contentPart == 4"> 
+			 and D.COT_ID in (SELECT COT_ID FROM ACCOMMODATION_INTRO)
+			</when>
+			<when test="contentPart == 5"> 
+			 and D.COT_ID in (SELECT COT_ID FROM SHOPPING_INTRO)
+			</when>
+			<when test="contentPart == 6"> 
+			 and D.COT_ID in (SELECT COT_ID FROM EATERY_INTRO)
+			</when>
+			<when test="contentPart == 7"> 
+			 and D.COT_ID in (SELECT COT_ID FROM COURSE_INTRO)
+			</when>
+			<when test="contentPart == 8"> 
+			 and D.COT_ID in (SELECT COT_ID FROM FESTIVAL_INTRO)
+			</when>
+			<when test="contentPart == 9"> 
+			 and D.COT_ID in (SELECT COT_ID FROM CONTENT_MASTER WHERE CONTENT_TYPE=2000)
+			</when>
+			<when test="contentPart == 10"> 
+			 and D.COT_ID in (SELECT COT_ID FROM CONTENT_MASTER WHERE CONTENT_TYPE=25000)
+			</when>
+		</choose>
+		<if test="OTD_ID != null">
+		 and A.COT_ID in (select COT_ID from OTHER_DEPARTMENT_CONTENT where OTD_ID = #{OTD_ID})
+		</if>
+       ) AAA
+  </select>
+  
+  <select id="getDatabaseMaster" parameterType="hashMap" resultType="hashMap">
+	select 'DATABASE_MASTER' TABLE_NAME, A.* from DATABASE_MASTER A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getNotice" parameterType="hashMap" resultType="hashMap">
+	select 'NOTICE' TABLE_NAME, A.* from NOTICE A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getDetailInfo" parameterType="hashMap" resultType="hashMap">
+	select 'DETAIL_INFO' TABLE_NAME, A.* from DETAIL_INFO A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getBarrierFreeInfo" parameterType="hashMap" resultType="hashMap">
+<!--       select 'BARRIER_FREE' TABLE_NAME, A.COT_ID, '1111' CID, '1' as KIND, DISPLAY_TITLE TITLE, CONTENT_BODY DETAIL_TEXT, 'index' as "INDEX", '1' as "ORDERING" from DETAIL_INFO A  -->
+<!--       where A.COT_ID = #{cotId} and FLD_GUBUN=5; -->
+	select 'BARRIER_FREE' TABLE_NAME, A.* from BARRIER_FREE A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getAccommodationInfo" parameterType="hashMap" resultType="hashMap">
+	select 'ACCOMMODATION_INFO' TABLE_NAME, A.* from ACCOMMODATION_INFO A where A.COT_ID = #{cotId}
+	order by A.ROOM_ORDER , A.ROOM_CODE
+  </select>
+  
+  <select id="getCourseInfo" parameterType="hashMap" resultType="hashMap">
+	select 'COURSE_INFO' TABLE_NAME, A.* from COURSE_INFO A where A.COT_ID = #{cotId} order by SUB_NUM asc;
+  </select>
+  
+  <select id="getCitytourInfo" parameterType="hashMap" resultType="hashMap">
+  	select 'CITYTOUR_INFO' TABLE_NAME, B.* from CITYTOUR_INTRO A, CITYTOUR_INFO B where A.COT_ID = #{cotId} and A.CTI_ID = B.CTI_ID order by B.`ORDERING` ASC 
+  </select>
+  
+  <select id="getTouristSpotIntro" parameterType="hashMap" resultType="hashMap">
+	select 'TOURIST_SPOT_INTRO' TABLE_NAME, A.* from TOURIST_SPOT_INTRO A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getCulturlaFacilitiesIntro" parameterType="hashMap" resultType="hashMap">
+	select 'CULTURAL_FACILITIES_INTRO' TABLE_NAME, A.* from CULTURAL_FACILITIES_INTRO A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getLeportsIntro" parameterType="hashMap" resultType="hashMap">
+	select 'LEPORTS_INTRO' TABLE_NAME, A.* from LEPORTS_INTRO A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getAccommodationIntro" parameterType="hashMap" resultType="hashMap">
+	select 'ACCOMMODATION_INTRO' TABLE_NAME, A.* from ACCOMMODATION_INTRO A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getShoppingIntro" parameterType="hashMap" resultType="hashMap">
+	select 'SHOPPING_INTRO' TABLE_NAME, A.* from SHOPPING_INTRO A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getEateryIntro" parameterType="hashMap" resultType="hashMap">
+	select 'EATERY_INTRO' TABLE_NAME, A.* from EATERY_INTRO A where A. COT_ID = #{cotId};
+  </select>
+  
+  <select id="getCourseItro" parameterType="hashMap" resultType="hashMap">
+	select 'COURSE_INTRO' TABLE_NAME, A.* from COURSE_INTRO A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getCitytourIntro" parameterType="hashMap" resultType="hashMap">
+	select 'CITYTOUR_INTRO' TABLE_NAME, A.* from CITYTOUR_INTRO A where A.COT_ID = #{cotId};
+  </select>
+  
+  <select id="getFestivalIntro" parameterType="hashMap" resultType="hashMap">
+	select 'FESTIVAL_INTRO' TABLE_NAME, A.* from FESTIVAL_INTRO A where A.COT_ID = #{cotId};
+  </select>
+  <select id="SelectAccommodationImages" parameterType="hashMap" resultType="hashMap">
+  select IMG_ID, IMAGE_PATH, IMAGE_DESCRIPTION, IS_VISIABLE from IMAGE WHERE IMG_ID  IN ( 
+					   SELECT B.IMG_ID FROM (
+			           SELECT X.ROOM_IMG1 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE  X.ROOM_IMG1 IS NOT NULL AND X.ROOM_IMG1 = Y.IMG_ID AND X.COT_ID = #{cotId}  
+			           UNION ALL
+			           SELECT X.ROOM_IMG2 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE  X.ROOM_IMG2 IS NOT NULL AND X.ROOM_IMG2 = Y.IMG_ID AND X.COT_ID = #{cotId}  
+			           UNION ALL
+			           SELECT X.ROOM_IMG3 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE  X.ROOM_IMG3 IS NOT NULL AND X.ROOM_IMG3 = Y.IMG_ID AND X.COT_ID = #{cotId}
+			           UNION ALL
+			           SELECT X.ROOM_IMG4 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE X.ROOM_IMG4 IS NOT NULL AND X.ROOM_IMG4 = Y.IMG_ID AND X.COT_ID = #{cotId}
+			           UNION ALL
+			           SELECT X.ROOM_IMG5 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE  X.ROOM_IMG5 IS NOT NULL AND X.ROOM_IMG5 = Y.IMG_ID AND X.COT_ID = #{cotId} ) B
+			           )
+  </select>
+  <delete id="deleteCourseItem" parameterType="hashMap">
+	delete from COURSE_INFO WHERE COT_ID = #{cotId} and SUB_CONTENT_ID = #{subContentId};
+  </delete>
+  
+  <insert id="insertCourseItem" parameterType="hashMap">
+	insert into COURSE_INFO(COT_ID, SUB_CONTENT_ID, SUB_DETAIL_IMG, SUB_DETAIL_OVERVIEW, SUB_NAME) values( #{cotId}, #{cid}, #{imgId}, #{overview}, #{title});
+  </insert>
+  
+  <insert id="insertImage" parameterType="hashMap">
+	insert into IMAGE(IMG_ID, COT_ID, IMAGE_PATH) values( #{imgId}, #{cotId}, #{imagePath});
+  </insert>
+  
+  <update id="UpdateContentImages" parameterType="hashMap" >
+  	UPDATE IMAGE 
+  	SET `ORDER`= ${ImgOrder} , IMAGE_DESCRIPTION= #{ImgDesc}  , IS_VISIABLE = ${IS_VISIABLE}
+  	  WHERE COT_ID = #{cotId} AND IMG_ID = #{ImgId}
+  </update>
+  <update id="UpdateAccommodationImages" parameterType="hashMap" >
+  	UPDATE ACCOMMODATION_INFO 
+  	SET ROOM_ORDER = ${ROOM_ORDER} 
+  	, ROOM_IMG1= #{ROOM_IMG1} 
+  	, ROOM_IMG2= #{ROOM_IMG2} 
+  	, ROOM_IMG3= #{ROOM_IMG3} 
+  	, ROOM_IMG4= #{ROOM_IMG4} 
+  	, ROOM_IMG5= #{ROOM_IMG5} 
+  	  WHERE COT_ID = #{cotId} AND ROOM_CODE = #{ROOM_CODE}
+  </update>
+  <delete id="DeleteContentImage" parameterType="hashMap">
+ 	Delete From IMAGE
+ 	WHERE IMG_ID in (${DeleteList}) AND COT_ID = #{cotId}
+  </delete>
+  <delete id="DeleteAccommodation" parameterType="hashMap">
+ 	Delete From ACCOMMODATION_INFO
+ 	WHERE ROOM_CODE in (${DeleteList}) AND COT_ID = #{cotId}
+  </delete>
+  <update id="UpdateAccommodationVisiable" parameterType="hashMap">
+ 	update IMAGE SET IS_VISIABLE = 1
+ 	WHERE IMG_ID in (${VisiableImages}) AND COT_ID = #{cotId}
+  </update>
+  <update id="UpdateAccommodationNotVisiable" parameterType="hashMap">
+ 	update IMAGE SET IS_VISIABLE = 0
+ 	WHERE IMG_ID in (${NotVisiableImages}) AND COT_ID = #{cotId}
+  </update>
+  <update id="updateCourseImage" parameterType="hashMap">
+	update COURSE_INFO SET SUB_DETAIL_IMG=#{imgId} WHERE COT_ID = #{cotId} and SUB_CONTENT_ID = #{subContentId};
+  </update>
+   <update id="updateForModifiedDate" parameterType="hashMap">
+  		UPDATE CONTENT_MASTER SET MODIFIED_DATE=now() WHERE COT_ID = #{cotId}
+  </update>
+  <update id="updateForModifiedDateImg" parameterType="hashMap">
+      UPDATE CONTENT_MASTER A, IMAGE B SET MODIFIED_DATE=now() WHERE  B.IMG_ID = #{imgId} and A.COT_ID = B.COT_ID
+  </update>
+  <select id="getCountTableRow" parameterType="hashMap" resultType="hashMap">
+	select count(*) CNT from ${tbl} where COT_ID = #{cotId}
+	<choose>
+		<when test="tbl.equalsIgnoreCase('DETAIL_INFO')">
+		 and DISPLAY_TITLE=#{colTitle}
+		</when>
+		<when test="tbl.equalsIgnoreCase('ACCOMMODATION_INFO')">
+		 and ROOM_CODE=#{roomCode}
+		</when>
+		<when test="tbl.equalsIgnoreCase('COURSE_INFO')">
+		 and SUB_CONTENT_ID=#{subContentId}
+		</when>
+	</choose>
+  </select>
+ 
+  <insert id="insertTableRow" parameterType="hashMap">
+	<choose>
+		<when test="tbl.equalsIgnoreCase('DETAIL_INFO')">
+		  	insert into DETAIL_INFO (COT_ID, DISPLAY_TITLE, CONTENT_BODY) values (#{cotId}, #{colTitle}, #{value});
+		</when>
+		<when test="tbl.equalsIgnoreCase('ADDITIONAL_INFORMATION')">
+		  	insert into ADDITIONAL_INFORMATION 
+		  	(COT_ID, LINK_TYPE, CONTENT_ORDER, CHK_USE, DISPLAY_TITLE, LINK_URL, IMG_ID, BACKGROUND_COLOR, TEXT_COLOR, ADI_ID ) 
+		  	values 
+		  	(#{cotId}, #{linkType}, #{contentOrder}, #{chkUse}, #{displayTitle}, #{linkUrl}, #{imgId}, #{backgroundColor}, #{textColor}, #{adiId});
+		</when>
+	</choose>  
+  </insert>
+ 
+  <update id="updateTableRow" parameterType="hashMap">
+  	update ${tbl} set 
+ 	<choose>
+		<when test="tbl.equalsIgnoreCase('DETAIL_INFO')">
+		 	CONTENT_BODY=#{value} 
+		</when>
+		<when test="tbl.equalsIgnoreCase('COURSE_INFO')">
+		 	${colTitle}=#{value} 
+		</when>
+		<otherwise>
+			${colTitle}=#{value}
+		</otherwise>
+	</choose>
+  	where COT_ID = #{cotId}
+	<choose>
+		<when test="tbl.equalsIgnoreCase('DETAIL_INFO')">
+		 and DISPLAY_TITLE=#{colTitle}
+		</when>
+		<when test="tbl.equalsIgnoreCase('ACCOMMODATION_INFO')">
+		 and ROOM_CODE=#{roomCode}
+		</when>
+		<when test="tbl.equalsIgnoreCase('COURSE_INFO')">
+		 and SUB_CONTENT_ID=#{subContentId}
+		</when>
+		<when test="tbl.equalsIgnoreCase('ADDITIONAL_INFORMATION')">
+		 and ADI_ID=#{adiId}
+		</when>
+	</choose>
+  </update>
+  
+  <update id="updateAllCitytourTableRow" parameterType="hashMap">
+  	update CITYTOUR_INFO set 
+  		TITLE=#{title}, 
+  		SUMMARY=#{summary}, 
+  		FEE=#{fee}, 
+  		SERVICE_DATE=#{serviceDate}, 
+  		SERVICE_TIME=#{serviceTime}, 
+  		ADDITIONAL_INFORMATION=#{addInfo}, 
+  		ORDERING=#{ordering} 
+  	where CTF_ID=#{ctfId}
+  </update> 
+
+  <insert id="insertCitytourTableRow" parameterType="hashMap">
+  	insert into CITYTOUR_INFO 
+  		(	CTF_ID, CTI_ID, FEE, SUMMARY, ORDERING, TITLE, SERVICE_DATE, SERVICE_TIME, ADDITIONAL_INFORMATION )
+  	values (
+  		#{ctfId},
+  		#{ctiId},
+  		#{fee},
+  		#{summary},
+  		#{ordering},
+  		#{title},
+  		#{serviceDate},
+  		#{serviceTime},
+  		#{addInfo}
+  		
+  	)
+  </insert>
+ 
+  <update id="updateCitytourTableRow" parameterType="hashMap">
+  	update CITYTOUR_INFO set ${colTitle}=#{value} where CTF_ID=#{ctfId}
+  </update>
+ 
+  <delete id="deleteCitytourTableRow" parameterType="hashMap">
+  	delete from CITYTOUR_INFO where CTF_ID=#{ctfId}
+  </delete>
+ 
+  <select id="getCourseList" parameterType="hashMap" resultType="hashMap">
+    select
+		cid(A.COT_ID) CID,  
+		A.TITLE TITLE, 
+		B.OVER_VIEW OVER_VIEW, 
+		areacode(B.AREA_CODE) AREA_NAME,
+		mastertag(A.COT_ID) MASTER_TAG,
+		FIRST_IMAGE IMG_ID
+	from 
+		CONTENT_MASTER A, DATABASE_MASTER B 
+	where 
+		A.COT_ID = B.COT_ID 
+		and A.COT_ID not in (select COT_ID from COURSE_INTRO)
+	<choose>
+		<when test="mode == 0">
+		and A.TITLE REGEXP #{keyword}
+		</when>
+		<when test="mode == 1">
+		and A.COT_ID = cotid(${keyword})
+		</when>
+	</choose>
+  </select>
+
+  <select id="getAllCategories" parameterType="hashMap" resultType="hashMap">
+	select BIG_CATEGORY, MID_CATEGORY, SML_CATEGORY, SUB_CATEGORY, VALUE 
+	from CODE 
+	where CODE_TYPE=1 AND STATUS = 1
+	GROUP BY BIG_CATEGORY, MID_CATEGORY, SML_CATEGORY, SUB_CATEGORY
+  </select>  
+
+  <select id="selectBaseWithCotId" parameterType="hashMap" resultType="hashMap">
+    select
+		A.COT_ID,
+		cid(A.COT_ID) CID, 
+		A.CONTENT_TYPE,
+		A.TITLE TITLE, 
+		B.OVER_VIEW OVER_VIEW,
+		B.AREA_CODE,
+		areacode(B.AREA_CODE) AREA_NAME,
+		B.SIGUGUN_CODE,
+		siguguncode(B.AREA_CODE, B.SIGUGUN_CODE) SIGUGUN_NAME,    if(A.CONTENT_STATUS=0,'작업 미완료', if(A.CONTENT_STATUS=1, '상태 미등록', if(A.CONTENT_STATUS=2, '작업 완료', if(A.CONTENT_STATUS=3, '작업 완료'
+		,if(A.CONTENT_STATUS=4, '상태 미등록', if(A.CONTENT_STATUS=5, '작업 완료', if(A.CONTENT_STATUS=6, '상태 미등록', if(A.CONTENT_STATUS=7, '비노출'
+		,if(A.CONTENT_STATUS=8, '삭제', if(A.CONTENT_STATUS=9, '작업 보류', '상태 미등록')))))))))) 
+	CONTENT_STATUS,
+		A.MODIFIED_DATE,
+		A.CREATE_DATE,
+		B.CAT1,
+		B.CAT2,
+		B.CAT3,
+		B.FIRST_IMAGE IMG_ID,
+		A.AUTH_CODE,
+		username(A.CREATE_USR_ID) USER_NAME
+	from 
+		CONTENT_MASTER A, 
+		DATABASE_MASTER B 
+	where 
+		A.COT_ID = B.COT_ID 
+		and A.COT_ID = #{cotId}
+  </select>
+  <select id="selectFestivalBaseWithCotId" parameterType="hashMap" resultType="hashMap">
+    select
+		A.COT_ID,
+		cid(A.COT_ID) CID, 
+		A.CONTENT_TYPE,
+		A.TITLE TITLE, 
+		B.OVER_VIEW OVER_VIEW,
+		B.AREA_CODE,
+		areacode(B.AREA_CODE) AREA_NAME,
+		B.SIGUGUN_CODE,
+		siguguncode(B.AREA_CODE, B.SIGUGUN_CODE) SIGUGUN_NAME,    if(A.CONTENT_STATUS=0,'작업 미완료', if(A.CONTENT_STATUS=1, '상태 미등록', if(A.CONTENT_STATUS=2, '작업 완료', if(A.CONTENT_STATUS=3, '작업 완료'
+		,if(A.CONTENT_STATUS=4, '상태 미등록', if(A.CONTENT_STATUS=5, '작업 완료', if(A.CONTENT_STATUS=6, '상태 미등록', if(A.CONTENT_STATUS=7, '비노출'
+		,if(A.CONTENT_STATUS=8, '삭제', if(A.CONTENT_STATUS=9, '작업보류', '상태 미등록')))))))))) 
+	CONTENT_STATUS,
+		A.MODIFIED_DATE,
+		A.CREATE_DATE,
+		B.CAT1,
+		B.CAT2,
+		B.CAT3,
+		B.FIRST_IMAGE IMG_ID,
+		username(A.CREATE_USR_ID) USER_NAME
+	from 
+		CONTENT_MASTER A, 
+		DATABASE_MASTER B,
+		FESTIVAL_INTRO C
+	where 
+		A.COT_ID = B.COT_ID 
+		and A.COT_ID = C.COT_ID
+		and A.COT_ID = #{cotId}
+  </select>
+  
+    <select id="selectBaseWithCrsId" parameterType="hashMap" resultType="hashMap">
+	select
+		AA.CRS_ID,
+		0 AS CID,
+		14 AS CONTENT_TYPE,
+		AA.TITLE,
+		BB.OVER_VIEW,
+		BB.AREA_CODE,
+		KTO.areacode(BB.AREA_CODE) AREA_NAME,
+		BB.SIGUGUN_CODE,
+		KTO.siguguncode(BB.AREA_CODE, BB.SIGUGUN_CODE) SIGUGUN_NAME,
+		'작업 완료' AS CONTENT_STATUS,
+		AA.UPDATE_DATE AS MODIFIED_DATE,
+		AA.CREATE_DATE,
+		BB.CAT1,
+		BB.CAT2,
+		BB.CAT3,
+		BB.FIRST_IMAGE AS IMG_ID,
+		(select CC.SNS_USR_NAME from KTO.SNS CC where CC.SNS_ID = AA.SNS_ID) SNS_ID
+	from
+		(select A.CRS_ID, A.SNS_ID, A.TITLE, A.CREATE_DATE, A.IS_OPEN, A.`DESC`, A.UPDATE_DATE, B.COT_ID from KTO.SNS_COURSE A, KTO.SNS_COURSE_DETAILS B WHERE A.CRS_ID = B.CRS_ID AND A.CRS_ID=#{crsId} ORDER BY B.CREATE_DATE DESC LIMIT 1) AA, 
+		KTO.DATABASE_MASTER BB
+	where
+		AA.COT_ID = BB.COT_ID
+  </select>
+  
+  <select id="selectEtcWithCotId" parameterType="hashMap" resultType="hashMap">
+    select
+		A.COT_ID,
+		cid(A.COT_ID) CID, 
+		B.ADDR1,
+		B.ADDR2,
+		A.DEPT_VIEW,
+		A.TEL,
+		D.SNS_USR_NAME OFFER,
+		D.SNS_ID,
+		C.IS_VIEW OFFER_ISVIEW,
+		C.IS_NOT_SNS,
+		C.NAME,
+		username(A.CREATE_USR_ID) USER_NAME, 
+		EI.LCNS_NO 
+	from 
+		DATABASE_MASTER B INNER JOIN CONTENT_MASTER A ON B.COT_ID = A.COT_ID 
+		LEFT OUTER JOIN DATABASE_OFFER C ON A.COT_ID = C.COT_ID
+		LEFT OUTER JOIN SNS D ON D.SNS_ID = C.SNS_ID
+		LEFT OUTER JOIN EATERY_INTRO EI ON B.COT_ID = EI.COT_ID 
+	where 
+		1=1 
+		and A.COT_ID = #{cotId}
+  </select>
+
+  <select id="selectCatchplaceWithCotId" parameterType="hashMap" resultType="hashMap">
+    select
+		A.*,
+		I.IMAGE_PATH
+	from 
+		CATCH_PLACE A LEFT OUTER JOIN IMAGE I ON A.IMG_ID = I.IMG_ID
+	where 
+		A.COT_ID = #{cotId}
+  </select>
+  
+  <select id="selectPamphletWithCotId" parameterType="hashMap" resultType="hashMap">
+    SELECT 
+    	P.PPL_ID,
+		P.COT_ID,
+		P.TITLE,
+		P.TEXT_COLOR,
+		P.`VIEW`,
+		P.IDX
+	FROM KTO.PAMPHLET P
+	WHERE P.COT_ID = #{cotId}
+	ORDER BY P.IDX
+  </select>
+  
+  <select id="getPamphletContents" parameterType="hashMap" resultType="hashMap">
+  	SELECT 
+		C.PPC_ID, C.PPL_ID, C.IDX, C.IMG_ID, C.ALT, I.IMAGE_PATH, I.IMAGE_DESCRIPTION
+	FROM 
+		KTO.PAMPHLET_CONTENT C LEFT OUTER JOIN IMAGE I ON C.IMG_ID = I.IMG_ID
+	WHERE C.PPL_ID = #{pplId}
+	ORDER BY C.IDX
+  </select>
+
+  <select id="getAllLinks" parameterType="hashMap" resultType="hashMap">
+	select * from ADDITIONAL_INFORMATION WHERE COT_ID = #{cotId} order by CONTENT_ORDER
+  </select>
+ 
+  <delete id="removeAdditionalInformation" parameterType="hashMap">
+  	delete from ADDITIONAL_INFORMATION WHERE ADI_ID = #{adiId}
+  </delete>
+   <update id="indexBeforeAdditionalInformation" parameterType="hashMap">
+   	update ADDITIONAL_INFORMATION set CONTENT_ORDER = #{AfterIndex}
+   	where ADI_ID = #{BeforeadiId}
+  </update>
+  <update id="indexAfterAdditionalInformation" parameterType="hashMap">
+   	update ADDITIONAL_INFORMATION set CONTENT_ORDER = #{BeforeIndex}
+   	where ADI_ID = #{AfteradiId}
+  </update>
+  <select id="selectDatabaseContentWithContentId" parameterType="hashMap" resultType="hashMap">
+   select count(1) as CNT from KTO.CONTENT_MASTER CM
+   inner join KTO.DATABASE_MASTER DM
+   on CM.COT_ID = DM.COT_ID
+   where CM.CONTENT_ID = #{CONTENT_ID}
+  </select>
+  
+  <insert id="insertContentmaster" parameterType="hashMap">
+	INSERT INTO KTO.CONTENT_MASTER
+	(COT_ID, CONTENT_ID, CONTENT_TYPE, CONTENT_STATUS, TITLE, DISPLAY_TITLE, CREATE_DATE, MODIFIED_DATE)
+	VALUES
+	(#{COT_ID}, #{CONTENT_ID}, #{CONTENT_TYPE}, 0, #{TITLE}, #{TITLE}, NOW(), NOW())
+  </insert>
+	<insert id="insertDatabasemaster" parameterType="hashMap">
+	INSERT INTO KTO.DATABASE_MASTER(COT_ID) VALUES(#{COT_ID})
+	</insert>
+  	<insert id="insertTouristspotIntro" parameterType="hashMap">
+  	INSERT INTO KTO.TOURIST_SPOT_INTRO(COT_ID) VALUES(#{COT_ID})
+	</insert>
+	<insert id="insertCulturalFacilitiesIntro" parameterType="hashMap">
+	  INSERT INTO KTO.CULTURAL_FACILITIES_INTRO(COT_ID) VALUES(#{COT_ID})
+	</insert>
+	<insert id="insertFestivalIntro" parameterType="hashMap">
+	  INSERT INTO KTO.FESTIVAL_INTRO(COT_ID) VALUES(#{COT_ID})
+	</insert>
+	<insert id="insertCourseIntro" parameterType="hashMap">
+	  INSERT INTO KTO.COURSE_INTRO(COT_ID) VALUES(#{COT_ID})
+	</insert>
+	<insert id="insertLeportsIntro" parameterType="hashMap">
+	  INSERT INTO KTO.LEPORTS_INTRO (COT_ID) VALUES(#{COT_ID})
+	</insert>
+	<insert id="insertAccommodationIntro" parameterType="hashMap">
+	  INSERT INTO KTO.ACCOMMODATION_INTRO (COT_ID) VALUES(#{COT_ID})
+	</insert>
+	<insert id="insertShoppingIntro" parameterType="hashMap">
+	  INSERT INTO KTO.SHOPPING_INTRO(COT_ID) VALUES(#{COT_ID})
+	</insert>
+	<insert id="insertEateryIntro" parameterType="hashMap">
+	  INSERT INTO KTO.EATERY_INTRO(COT_ID) VALUES(#{COT_ID})
+	</insert>
+	<insert id="insertCitytourIntro" parameterType="hashMap">
+	  INSERT INTO KTO.CITYTOUR_INTRO(CTI_ID, COT_ID, CREATE_DATE) VALUES(UUID(), #{COT_ID}, now())
+	</insert>
+	
+	<insert id="insertOtherDepartmentContent" parameterType="hashMap">
+		INSERT INTO KTO.OTHER_DEPARTMENT_CONTENT (COT_ID, OTD_ID) VALUES(#{COT_ID}, #{OTD_ID})
+	</insert>
+	
+	<insert id="insertCatchplace" parameterType="hashMap">
+		INSERT INTO KTO.CATCH_PLACE (
+			CTP_ID, COT_ID
+			<if test="CONTENTS != null">
+				, CONTENTS
+			</if>
+			<if test="imgId != null">
+				, IMG_ID
+			</if>
+			<if test="TEXT_COLOR != null">
+			, TEXT_COLOR
+			</if>
+			, IS_USE, SELECT_BG, IS_FLOW, CREATE_DATE
+		) VALUES (
+			UUID(), #{COT_ID}
+			<if test="CONTENTS != null">
+				, #{CONTENTS}
+			</if>
+			<if test="imgId != null">
+				, #{imgId}
+			</if>
+			<if test="TEXT_COLOR != null">
+				, #{TEXT_COLOR}
+			</if>
+			, #{IS_USE}, #{SELECT_BG}, #{IS_FLOW}, NOW()
+		)
+	</insert>
+	<update id="updateCatchplace" parameterType="hashMap">
+		UPDATE KTO.CATCH_PLACE
+		SET CONTENTS = #{CONTENTS}, IS_USE = #{IS_USE}, SELECT_BG = #{SELECT_BG}
+		<if test="SELECT_BG == 1">
+			, IMG_ID = #{imgId}
+		</if>
+		, TEXT_COLOR = #{TEXT_COLOR}, IS_FLOW = #{IS_FLOW}
+		WHERE COT_ID = #{COT_ID}
+	</update>
+	
+	<insert id="insertDatabaseOffer" parameterType="hashMap">
+		INSERT INTO KTO.DATABASE_OFFER (
+			COT_ID
+			<if test="snsId != null">
+			, SNS_ID 
+			</if>
+			<if test="Directoffer != null">
+				, NAME 
+			</if>
+			<if test="isOfferView != null">
+				, IS_VIEW 
+			</if>
+			<if test="isOfferNotSNS != null">
+				, IS_NOT_SNS 
+			</if>
+		
+		) VALUES(
+			#{cotId}
+			<if test="snsId != null">
+			, #{snsId} 
+			</if>
+			<if test="Directoffer != null">
+				, #{Directoffer} 
+			</if>
+			<if test="isOfferView != null">
+				, #{isOfferView} 
+			</if>
+			<if test="isOfferNotSNS != null">
+				, #{isOfferNotSNS} 
+			</if>
+		)
+	</insert>
+	
+	<update id="updateDatabaseOffer" parameterType="hashMap">
+		UPDATE KTO.DATABASE_OFFER SET 
+		<choose>
+			<when test="isView != null">
+				IS_VIEW = #{isView}
+			</when>
+		</choose>
+		<choose>
+			<when test="isNotSNS != null">
+				IS_NOT_SNS = #{isNotSNS}
+			</when>
+		</choose>
+		<choose>
+			<when test="snsId != null">
+				SNS_ID = #{snsId}
+			</when>
+		</choose>
+		<choose>
+			<when test="Name != null">
+				NAME = #{Name}
+			</when>
+		</choose>
+		WHERE COT_ID = #{cotId}
+	</update>
+	
+	<select id="selectDatabaseImage" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			A.COT_ID cotId,
+			A.TITLE title,
+			(SELECT I.CREATE_DATE FROM KTO.USER_IMAGE I WHERE I.COT_ID = A.COT_ID ORDER BY CREATE_DATE DESC LIMIT 1) date,
+			(SELECT COUNT(I.IMG_ID) FROM KTO.USER_IMAGE I WHERE I.COT_ID = A.COT_ID) imgCnt
+		FROM
+			CONTENT_MASTER A INNER JOIN DATABASE_MASTER B ON A.COT_ID = B.COT_ID
+			INNER JOIN (select distinct COT_ID from KTO.USER_IMAGE) I ON A.COT_ID = I.COT_ID
+		WHERE
+			A.TITLE REGEXP #{title}
+		ORDER BY date DESC
+        limit #{offset}, 20
+	</select>
+	<select id="selectDatabaseImageCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			COUNT(A.COT_ID) CNT
+		FROM
+			CONTENT_MASTER A INNER JOIN DATABASE_MASTER B ON A.COT_ID = B.COT_ID
+			INNER JOIN (select distinct COT_ID from KTO.USER_IMAGE) I ON A.COT_ID = I.COT_ID
+		WHERE
+			A.TITLE REGEXP #{title}
+	</select>
+	<select id="selectUserImgAllCnt" parameterType="hashMap" resultType="hashMap">
+			SELECT 
+		(SELECT 
+			COUNT(I.IMG_ID)
+		FROM USER_IMAGE I left join IMAGE D on I.IMG_ID = D.IMG_ID
+		WHERE I.COT_ID in(
+			SELECT A.COT_ID
+			FROM CONTENT_MASTER A INNER JOIN DATABASE_MASTER B ON A.COT_ID = B.COT_ID
+			WHERE A.TITLE REGEXP #{title})
+			AND D.IS_VISIABLE = 0 ) NOT_VISIABLE_IMGCNT,
+		(SELECT 
+			COUNT(I.IMG_ID)
+		FROM USER_IMAGE I left join IMAGE D on I.IMG_ID = D.IMG_ID
+		WHERE I.COT_ID in(
+			SELECT A.COT_ID
+			FROM CONTENT_MASTER A INNER JOIN DATABASE_MASTER B ON A.COT_ID = B.COT_ID
+			WHERE A.TITLE REGEXP #{title})
+			AND D.IS_VISIABLE = 1 ) VISIABLE_IMGCNT
+	</select>
+	
+	<delete id="deletePamphletWithCotId" parameterType="hashMap">
+		DELETE FROM PAMPHLET WHERE COT_ID = #{cotId}
+	</delete>
+	
+	<delete id="deletePamphletContent" parameterType="hashMap">
+		DELETE FROM PAMPHLET_CONTENT WHERE PPL_ID = #{pplId}
+	</delete>
+	
+	<insert id="insertPamphlet" parameterType="hashMap">
+		 INSERT INTO PAMPHLET (
+			 PPL_ID, COT_ID
+			 <if test="title != null">
+				 , TITLE
+			 </if>
+		 	 <if test="textColor != null">
+			  , TEXT_COLOR
+			 </if>
+			 , VIEW, IDX, CREATE_DATE
+		 ) VALUES (
+			 #{pplId}, #{cotId}
+			 <if test="title != null">
+		 		 , #{title}
+			 </if>
+		 	 <if test="textColor != null">
+	 		 	 , #{textColor}
+	 		 </if>
+	 		 , #{view}, #{idx}, NOW()
+	 	 )
+	 	 ON DUPLICATE KEY UPDATE 
+		 <if test="title != null">
+			 TITLE = #{title}
+		 </if>
+	 	 <if test="textColor != null">
+		 	 , TEXT_COLOR = #{textColor}
+		 </if>
+		 , VIEW = #{view}
+		 , IDX = #{idx}
+	</insert>
+	<insert id="insertPamphletContent" parameterType="hashMap">
+		 INSERT INTO PAMPHLET_CONTENT (PPC_ID, PPL_ID, IDX, IMG_ID)
+		 VALUES (#{ppcId}, #{pplId}, #{idx}, #{imgId})
+		 ON DUPLICATE KEY UPDATE IDX = #{idx}, IMG_ID = #{imgId}
+		 
+<!-- 		<foreach collection="list" item="item" separator=","> -->
+<!-- 		 (#{item.ppcId}, #{item.pplId}, #{item.idx}, #{item.imgId}) -->
+<!-- 		</foreach> -->
+	</insert>
+	<update id="UpdateDatabaseMaster" parameterType="hashMap">
+		UPDATE DATABASE_MASTER
+		SET COT_ID = #{cotId}
+		<if test="midcategory != null">
+		, CAT1 = #{bigcategory}
+		</if>
+		<if test="midcategory != null">
+		, CAT2 = #{midcategory}
+		</if>
+		<if test="smlcategory != null">
+		, CAT3 = #{smlcategory}
+		</if>
+		<if test="bigarea != null">
+		, AREA_CODE = #{bigarea}
+		</if>
+		<if test="midarea != null">
+		, SIGUGUN_CODE = #{midarea}
+		</if>
+		<if test="address != null">
+		, ADDR1 = #{address}
+		</if>
+		<if test="addressDetail != null">
+		, ADDR2 = #{addressDetail}
+		</if>
+		
+		
+		WHERE COT_ID = #{cotId}
+	</update>
+	<update id="UpdateContentMaster" parameterType="hashMap">
+		UPDATE CONTENT_MASTER
+		SET MODIFIED_DATE = now()
+		, FINAL_MODIFIED_DATE = now()
+		, CONTENT_STATUS = #{status}
+		<if test="title != null">
+			, TITLE = #{title}
+		</if>
+		<if test="department != null">
+			, DEPT_VIEW = #{department}
+		</if>
+		<if test="contactInformation != null">
+			, TEL = #{contactInformation}
+		</if>
+		<if test="authcode != null">
+			, AUTH_CODE = #{authcode}
+		</if>
+		WHERE COT_ID = #{cotId}
+	</update>
+	<update id="UpdateDatabaseOfferDB" parameterType="hashMap">
+		UPDATE DATABASE_OFFER
+		SET COT_ID = #{cotId}
+		<if test="snsId != null">
+			, SNS_ID = #{snsId}
+		</if>
+		<if test="Directoffer != null">
+			, NAME = #{Directoffer}
+		</if>
+		<if test="isOfferView != null">
+			, IS_VIEW = #{isOfferView}
+		</if>
+		<if test="isOfferNotSNS != null">
+			, IS_NOT_SNS = #{isOfferNotSNS}
+		</if>
+		WHERE COT_ID = #{cotId}
+	</update>
+	<update id="UpdateFestivalDate" parameterType="hashMap">
+		UPDATE FESTIVAL_INTRO
+		SET EVENT_START_DATE = #{startdate}
+			, EVENT_END_DATE = #{enddate}
+		WHERE COT_ID = #{cotId}
+	</update>
+	<select id="DatabaseOfferCnt" parameterType="hashMap" resultType="int">
+		select count(COT_ID) cnt 
+		from DATABASE_OFFER 
+		where COT_ID = #{cotId}
+	</select>
+	<insert id="InsertAdditionalInfo"  parameterType="hashMap">
+		INSERT INTO ADDITIONAL_INFORMATION (
+		ADI_ID,COT_ID
+		<if test="contentOrder != null">
+			,CONTENT_ORDER
+		</if>
+		<if test="chkUse != null">
+			,CHK_USE
+		</if>
+		<if test="displayTitle != null">
+			,DISPLAY_TITLE
+		</if>
+		<if test="link != null">
+			,LINK_URL
+		</if>
+		<if test="imgId != null">
+			,IMG_ID
+		</if>
+		<if test="backgroundColor != null">
+			,BACKGROUND_COLOR
+		</if>
+		<if test="textColor != null">
+			,TEXT_COLOR
+		</if>
+		<if test="LinkDetailType != null">
+			,LINK_TYPE
+		</if>
+		)
+		 VALUES (
+		 #{adiId},#{cotId}
+		<if test="contentOrder != null">
+			,#{contentOrder}
+		</if>
+		<if test="chkUse != null">
+			,#{chkUse}
+		</if>
+		<if test="displayTitle != null">
+			,#{displayTitle}
+		</if>
+		<if test="link != null">
+			,#{link}
+		</if>
+		<if test="imgId != null">
+			,#{imgId}
+		</if>
+		<if test="backgroundColor != null">
+			,#{backgroundColor}
+		</if>
+		<if test="textColor != null">
+			,#{textColor}
+		</if>
+		<if test="LinkDetailType != null">
+			,#{LinkDetailType}
+		</if>
+		 )
+		 ON DUPLICATE KEY UPDATE COT_ID = #{cotId}
+		 <if test="contentOrder != null">
+			,CONTENT_ORDER = #{contentOrder}
+		</if>
+		<if test="chkUse != null">
+			,CHK_USE = #{chkUse}
+		</if>
+		<if test="displayTitle != null">
+			,DISPLAY_TITLE = #{displayTitle}
+		</if>
+		<if test="link != null">
+			,LINK_URL = #{link}
+		</if>
+		<if test="imgId != null">
+			,IMG_ID = #{imgId}
+		</if>
+		<if test="backgroundColor != null">
+			,BACKGROUND_COLOR = #{backgroundColor}
+		</if>
+		<if test="textColor != null">
+			,TEXT_COLOR = #{textColor}
+		</if>
+		<if test="LinkDetailType != null">
+			, LINK_TYPE = #{LinkDetailType}
+		</if>
+	</insert>
+	<delete id="DeleteAdditionalInfo" parameterType="hashMap">
+		Delete FROM ADDITIONAL_INFORMATION WHERE ADI_ID = #{adiId} AND COT_ID = #{cotId}
+	</delete>
+	<select id="SelectAdditionalImgId" parameterType="hashMap" resultType="String">
+		SELECT IMG_ID FROM ADDITIONAL_INFORMATION WHERE ADI_ID = #{adiId}
+	</select>
+	<select id="SelectListExcelDownload" parameterType="hashMap" resultType="hashMap">
+		select A.COT_ID cotId
+		<if test="cId == 1">
+			, A.CONTENT_ID
+		</if>
+		<if test="cotId == 1">
+			, A.COT_ID
+		</if>
+		<if test="title == 1">
+			, A.TITLE
+		</if>
+		<if test="typename == 1">
+			,case when A.CONTENT_TYPE = 12 then '관광지' when A.CONTENT_TYPE = 14 then '문화시설' when A.CONTENT_TYPE = 15 then '축제행사공연' when A.CONTENT_TYPE = 25 then '여행코스'
+			when A.CONTENT_TYPE = 28 then '레포츠' when A.CONTENT_TYPE = 32 then '숙박' when A.CONTENT_TYPE = 38 then '쇼핑' when A.CONTENT_TYPE = 39 then '음식점' when A.CONTENT_TYPE = 2000 then '생태관광' end as TYPE_NAME
+		</if>
+		<if test="contenttype == 1">
+			, A.CONTENT_TYPE
+		</if>
+		<if test="cat1 == 1">
+			, (select VALUE from CODE CS where B.CAT1 = CS.BIG_CATEGORY and CS.MID_CATEGORY = 0 and CODE_TYPE = 1) as CAT1
+		</if>
+		<if test="cat2 == 1">
+			, (select VALUE from CODE CS where B.CAT1 = CS.BIG_CATEGORY and SUBSTRING(B.CAT2,4,2) = CS.MID_CATEGORY and CS.SML_CATEGORY = '00' and CODE_TYPE = 1 limit 1) as CAT2
+		</if>
+		<if test="cat3 == 1">
+			, (select VALUE from CODE CS where B.CAT1 = CS.BIG_CATEGORY and SUBSTRING(B.CAT2,4,2) = CS.MID_CATEGORY and SUBSTRING(B.CAT3,6,2) = CS.SML_CATEGORY and SUBSTRING(B.CAT3,8,2) = CS.SUB_CATEGORY and CODE_TYPE = 1) as CAT3 
+		</if>
+		<if test="Sigungu == 1">
+			, (select VALUE from CODE CS where B.AREA_CODE = CS.BIG_CATEGORY and B.SIGUGUN_CODE = CS.MID_CATEGORY and CS.SML_CATEGORY = 0 and CODE_TYPE = 0) as SIGUNGU
+		</if>
+		<if test="Area == 1">
+			, (select VALUE from CODE CS where B.AREA_CODE = CS.BIG_CATEGORY and CS.MID_CATEGORY = 0 and CS.SML_CATEGORY = 0 and CODE_TYPE = 0) as AREA
+		</if>
+		<if test="status == 1">
+			,  case when A.CONTENT_STATUS = 0 then '작업 미완료' when A.CONTENT_STATUS = 1 then '상태 미등록' when A.CONTENT_STATUS = 2 then '작업 완료' when A.CONTENT_STATUS = 7 then '비노출' when A.CONTENT_STATUS = 8 then '삭제' when A.CONTENT_STATUS = 9 then '작업 보류' end as STATUS
+		</if>
+		<if test="create_date == 1">
+			, A.CREATE_DATE
+		</if>
+		<if test="update_date == 1">
+			, A.MODIFIED_DATE
+		</if>
+		<if test="stfId == 1">
+			, (SELECT STF_ID FROM STAFF S WHERE A.CREATE_USR_ID = S.USR_ID) STF_ID
+		</if>
+		<if test="otdId == 1">
+			, (SELECT GROUP_CONCAT(G.OTD_ID SEPARATOR ',')  			
+				        FROM OTHER_DEPARTMENT_CONTENT G			
+			        WHERE B.COT_ID = G.COT_ID					
+			        GROUP BY B.COT_ID) OTD_ID
+		</if>
+		<if test="catchphrase == 1">
+			, (select case when CP.IS_USE = 0 then '미적용' when CP.IS_USE = 1 then '적용' end from CATCH_PLACE CP where A.COT_ID = CP.COT_ID) CATCH_PLACE
+		</if>
+		<if test="authcode == 1">
+			, A.AUTH_CODE
+		</if>
+		<if test="setstatus == 1">
+			, B.SET_STATUS
+		</if>
+		<if test="fesSdate == 1">
+			, (select F.EVENT_START_DATE from FESTIVAL_INTRO F where A.COT_ID = F.COT_ID ) FES_SDATE
+		</if>
+		<if test="fesEdate == 1">
+			, (select F.EVENT_END_DATE from FESTIVAL_INTRO F where A.COT_ID = F.COT_ID ) FES_EDATE
+		</if>
+		from CONTENT_MASTER A , DATABASE_MASTER B
+		where A.COT_ID = B.COT_ID
+		<choose>
+			<when test="mode == 1">
+			 and A.CONTENT_ID=#{keyword}
+			</when>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+			<when test="mode == 2">
+			 and A.COT_ID in (select DISTINCT COT_ID from TAGS A, CONTENT_TAGS B where A.TAG_ID = B.TAG_ID and A.TAG_NAME REGEXP #{keyword})
+			</when>
+		</choose>
+		<choose>
+			<when test="dateType == 0">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="areaCode != null">
+			 and B.AREA_CODE = #{areaCode}
+			</when>
+		</choose>
+		<choose>
+			<when test="sigunguname != null">
+			 and B.SIGUGUN_CODE = #{sigunguname}
+			</when>
+		</choose>
+		<choose>
+			<when test="contentPart == 1"> 
+			 <!-- and D.COT_ID in (SELECT COT_ID FROM TOURIST_SPOT_INTRO) -->
+				 and A.CONTENT_TYPE = '12'
+			</when>
+			<when test="contentPart == 2"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CULTURAL_FACILITIES_INTRO) -->
+				 and A.CONTENT_TYPE = '14'
+			</when>
+			<when test="contentPart == 3"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM LEPORTS_INTRO) -->
+				 and A.CONTENT_TYPE = '28'
+			</when>
+			<when test="contentPart == 4"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM ACCOMMODATION_INTRO) -->
+				and A.CONTENT_TYPE = '32'
+			</when>
+			<when test="contentPart == 5"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM SHOPPING_INTRO) -->
+				and A.CONTENT_TYPE = '38'
+			</when>
+			<when test="contentPart == 6"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM EATERY_INTRO) -->
+				and A.CONTENT_TYPE = '39'
+			</when>
+			<when test="contentPart == 7"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM COURSE_INTRO) -->
+				and A.CONTENT_TYPE = '25'
+			</when>
+			<when test="contentPart == 8"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM FESTIVAL_INTRO) -->
+				and A.CONTENT_TYPE = '15'
+			</when>
+			<when test="contentPart == 9"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CONTENT_MASTER WHERE CONTENT_TYPE=2000) -->
+				and A.CONTENT_TYPE = '2000'
+			</when>
+			<when test="contentPart == 10"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CONTENT_MASTER WHERE CONTENT_TYPE=25000) -->
+				and A.CONTENT_TYPE = '25000'
+			</when>
+		</choose>
+		<choose>
+			<when test="StatusSearch != -1">
+			 	and A.CONTENT_STATUS = ${StatusSearch}
+			</when>
+		</choose>
+		<if test="OTD_ID != null">
+		 and A.COT_ID in (select COT_ID from OTHER_DEPARTMENT_CONTENT where OTD_ID = #{OTD_ID})
+		</if>
+		order by A.MODIFIED_DATE desc
+	</select>
+	<select id="SelectCountExcelDownload" parameterType="hashMap" resultType="int">
+		select count(A.COT_ID) cnt
+		from CONTENT_MASTER A , DATABASE_MASTER B
+		where A.COT_ID = B.COT_ID
+		<choose>
+			<when test="mode == 1">
+			 and A.CONTENT_ID=#{keyword}
+			</when>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+			<when test="mode == 2">
+			 and A.COT_ID in (select DISTINCT COT_ID from TAGS A, CONTENT_TAGS B where A.TAG_ID = B.TAG_ID and A.TAG_NAME REGEXP #{keyword})
+			</when>
+		</choose>
+		<choose>
+			<when test="dateType == 0">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="areaCode != null">
+			 and B.AREA_CODE = #{areaCode}
+			</when>
+		</choose>
+		<choose>
+			<when test="sigunguname != null">
+			 and B.SIGUGUN_CODE = #{sigunguname}
+			</when>
+		</choose>
+		<choose>
+			<when test="contentPart == 1"> 
+			 <!-- and D.COT_ID in (SELECT COT_ID FROM TOURIST_SPOT_INTRO) -->
+				 and A.CONTENT_TYPE = '12'
+			</when>
+			<when test="contentPart == 2"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CULTURAL_FACILITIES_INTRO) -->
+				 and A.CONTENT_TYPE = '14'
+			</when>
+			<when test="contentPart == 3"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM LEPORTS_INTRO) -->
+				 and A.CONTENT_TYPE = '28'
+			</when>
+			<when test="contentPart == 4"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM ACCOMMODATION_INTRO) -->
+				and A.CONTENT_TYPE = '32'
+			</when>
+			<when test="contentPart == 5"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM SHOPPING_INTRO) -->
+				and A.CONTENT_TYPE = '38'
+			</when>
+			<when test="contentPart == 6"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM EATERY_INTRO) -->
+				and A.CONTENT_TYPE = '39'
+			</when>
+			<when test="contentPart == 7"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM COURSE_INTRO) -->
+				and A.CONTENT_TYPE = '25'
+			</when>
+			<when test="contentPart == 8"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM FESTIVAL_INTRO) -->
+				and A.CONTENT_TYPE = '15'
+			</when>
+			<when test="contentPart == 9"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CONTENT_MASTER WHERE CONTENT_TYPE=2000) -->
+				and A.CONTENT_TYPE = '2000'
+			</when>
+			<when test="contentPart == 10"> 
+			<!-- and D.COT_ID in (SELECT COT_ID FROM CONTENT_MASTER WHERE CONTENT_TYPE=25000) -->
+				and A.CONTENT_TYPE = '25000'
+			</when>
+		</choose>
+		<choose>
+			<when test="StatusSearch != -1">
+			 	and A.CONTENT_STATUS = ${StatusSearch}
+			</when>
+		</choose>
+		<if test="OTD_ID != null">
+		 and A.COT_ID in (select COT_ID from OTHER_DEPARTMENT_CONTENT where OTD_ID = #{OTD_ID})
+		</if>
+	</select>
+  
+	<select id="validateAuthCode" parameterType="hashMap" resultType="int">
+		SELECT 
+			(
+				(SELECT COUNT(*) FROM CONTENT_MASTER WHERE AUTH_CODE=#{authCode }) 
+					+ 
+				(SELECT COUNT(*) FROM CONTENT_SPOT_HIST WHERE DI_AUTH_CODE=#{authCode }) 
+			) AS AMOUNT 
+		FROM DUAL 
+	</select>
+</mapper>
+

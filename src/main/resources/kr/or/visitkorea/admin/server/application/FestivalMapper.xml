@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.FestivalMapper">
+	
+	<select id="searchSeasonContent" parameterType="string" resultType="hashmap">
+		select 
+			A.TAG_ID, count(*) cnt
+		from 
+			TAGS A, CONTENT_TAGS B, FESTIVAL_INTRO C, CONTENT_MASTER D 
+		where 
+			A.TAG_ID = B.TAG_ID and C.COT_ID = B.COT_ID and D.COT_ID = C.COT_ID and 
+			A.TAG_NAME = #{keyword}
+	</select>
+	
+	<select id="searchTitleSeasonContent" parameterType="hashmap" resultType="hashmap">
+		select 
+			C.COT_ID COT_ID, D.TITLE TITLE, C.EVENT_START_DATE START_DATE, C.EVENT_END_DATE END_DATE, D.CONTENT_STATUS, C.PLACE_INFO, 
+			areacode(E.AREA_CODE) AREA,  
+			siguguncode(E.AREA_CODE, E.SIGUGUN_CODE) SIGUGUN
+		from 
+			TAGS A, CONTENT_TAGS B, FESTIVAL_INTRO C, CONTENT_MASTER D, DATABASE_MASTER E
+		where 
+			A.TAG_ID = B.TAG_ID and C.COT_ID = B.COT_ID and D.COT_ID = C.COT_ID and D.COT_ID = E.COT_ID and 
+			A.TAG_NAME = #{keyword} and D.TITLE like #{title} and D.CONTENT_STATUS = 2;
+	</select>
+	
+	
+	<select id="selectSeasonItem" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			*
+		FROM FESTIVAL_SEASON
+		WHERE SEASON_ID = #{SEASON_ID}
+  	</select>
+	<select id="selectSeasonTagsList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			FST.*, (SELECT COUNT(1) FROM KTO.FESTIVAL_SEASON_TAGS_CONTENTS FSTC WHERE FST.SAT_ID= FSTC.SAT_ID) AS CNT
+		FROM KTO.FESTIVAL_SEASON_TAGS FST 
+		WHERE FST.SEASON_ID = #{SEASON_ID}
+		ORDER BY FST.IDX
+  	</select>
+  	
+  	<!-- now -->
+	<select id="selectSeasonTagsContentsDetailList" parameterType="hashmap" resultType="hashmap">
+		select 
+			distinct C.COT_ID COT_ID, D.TITLE TITLE, C.EVENT_START_DATE START_DATE, C.EVENT_END_DATE END_DATE, D.CONTENT_STATUS, C.PLACE_INFO, 
+			KTO.areacode(E.AREA_CODE) AREA,  
+			KTO.siguguncode(E.AREA_CODE, E.SIGUGUN_CODE) SIGUGUN
+		from 
+			TAGS A, CONTENT_TAGS B, FESTIVAL_INTRO C, CONTENT_MASTER D, DATABASE_MASTER E
+		where 
+			A.TAG_ID = B.TAG_ID and C.COT_ID = B.COT_ID and D.COT_ID = C.COT_ID and D.COT_ID = E.COT_ID and 
+			 C.COT_ID = #{COT_ID}
+	</select>
+	
+	<select id="selectSeasonDetail" parameterType="string" resultType="hashmap">
+		SELECT A.TAG_ID, A.TAG_NAME, count(*) TAGS_CNT 
+		FROM TAGS A, CONTENT_TAGS B, FESTIVAL_INTRO C, CONTENT_MASTER D 
+		where
+		A.TAG_ID = B.TAG_ID and C.COT_ID = B.COT_ID and D.COT_ID = C.COT_ID and
+		A.TAG_ID = #{TAG_ID}
+	</select>
+	
+	<select id="selectSeasonTagsContentsList" parameterType="hashMap" resultType="hashMap">
+  		SELECT * FROM KTO.FESTIVAL_SEASON_TAGS_CONTENTS WHERE SAT_ID = #{SAT_ID} ORDER BY IDX
+  	</select>
+	
+	<select id="selectSeason" parameterType="hashMap" resultType="hashMap">
+  		SELECT * FROM KTO.FESTIVAL_SEASON WHERE NAME = #{NAME}
+  	</select>
+	
+	<select id="selectSeasonList" parameterType="hashMap" resultType="hashMap">
+  		SELECT FS.SEASON_ID, FST.SAT_ID FROM KTO.FESTIVAL_SEASON FS INNER JOIN KTO.FESTIVAL_SEASON_TAGS FST ON FS.SEASON_ID = FST.SEASON_ID WHERE FS.NAME = #{NAME} ORDER BY FST.IDX
+  	</select>
+  	
+  	<select id="selectImageItem" parameterType="hashMap" resultType="hashMap">
+  		select IMG_ID, IMAGE_PATH, count(1) as CNT from KTO.IMAGE where IMG_ID = #{IMG_ID}
+  	</select>
+  	
+  	<insert id="insertImageItem" parameterType="hashMap" >
+		INSERT INTO KTO.IMAGE(
+		IMG_ID
+		<if test="IMAGE_PATH != ''">, IMAGE_PATH</if> 
+		)VALUES(
+		#{IMG_ID}
+		<if test="IMAGE_PATH != ''">, #{IMAGE_PATH}</if> 
+		);
+	</insert>
+	
+  	<update id="updateFestivalSeasonItem" parameterType="hashMap" >
+		UPDATE KTO.FESTIVAL_SEASON SET IMG_ID=#{IMG_ID} WHERE SEASON_ID=#{SEASON_ID}
+	</update>
+	
+	<insert id="insertSeasonTagsItem" parameterType="hashMap" >
+		INSERT INTO KTO.FESTIVAL_SEASON_TAGS (SAT_ID, TAG_ID, SEASON_ID, IMG_ID, IS_AUTO, IDX) VALUES (#{SAT_ID}, #{TAG_ID}, #{SEASON_ID}, #{IMG_ID}, #{IS_AUTO}, #{IDX})
+	</insert>
+	
+	<insert id="insertSeasonTagsContentsItem" parameterType="hashMap" >
+		INSERT INTO KTO.FESTIVAL_SEASON_TAGS_CONTENTS (SAT_ID, COT_ID, IDX) VALUES(#{SAT_ID}, #{COT_ID}, #{IDX})
+	</insert>
+	
+	<delete id="deleteImageItem" parameterType="hashMap" >
+		DELETE from IMAGE WHERE IMG_ID = #{IMG_ID}
+	</delete>
+	
+	<delete id="deleteSeasonTagsItem" parameterType="hashMap" >
+		DELETE FROM KTO.FESTIVAL_SEASON_TAGS WHERE SEASON_ID=#{SEASON_ID};
+	</delete>
+	
+	<delete id="deleteSeasonTagsContentsItem" parameterType="hashMap" >
+		DELETE FROM KTO.FESTIVAL_SEASON_TAGS_CONTENTS WHERE SAT_ID= #{SAT_ID};
+	</delete>
+</mapper>

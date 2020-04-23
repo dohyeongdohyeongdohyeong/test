@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.GuideBookMapper">
+
+	<select id="select" parameterType="hashMap" resultType="hashMap">
+		SELECT G.GBID,
+		       G.TITLE,
+		       G.AREA_CODE,
+		       G.SIGUNGU_CODE,
+		       G.THEME_CODE,
+		       G.PUBLISHER,
+		       G.PUBLISH_DATE,
+		       (SELECT VALUE
+				  FROM CODE
+		         WHERE CODE_TYPE = 2
+				   AND BIG_CATEGORY = THEME_CODE
+		         LIMIT 1
+		       ) THEME_NAME,
+		       (SELECT VALUE
+				  FROM CODE
+		         WHERE CODE_TYPE = 0
+				   AND SML_CATEGORY = 0
+		           AND MID_CATEGORY = 0
+				   AND BIG_CATEGORY = AREA_CODE
+		         LIMIT 1
+		       ) AREA_NAME,
+		       (SELECT VALUE
+		          FROM CODE
+		         WHERE CODE_TYPE = 0
+		           AND SML_CATEGORY = 0
+		           AND BIG_CATEGORY = AREA_CODE
+		           AND MID_CATEGORY = SIGUNGU_CODE
+		       ) SIGUNGU_NAME,
+		       I.IMG_ID IMAGE,
+		       I.IMAGE_PATH IMAGE_PATH,
+		       I.IMAGE_DESCRIPTION IMAGE_DESC,
+		       G.PDF_LINK,
+		       G.`USE`,
+		       S.USR_ID,
+		       S.STF_ID AUTHOR,
+		       S.DISP_NAME AUTHOR_NAME,
+		       G.CREATE_DATE,
+		       G.UPDATE_DATE
+		  FROM GUIDE_BOOK G, IMAGE I, STAFF S
+		  WHERE G.IMAGE = I.IMG_ID
+		    AND G.AUTHOR = S.USR_ID
+			<if test="themeCode != null">
+				AND G.THEME_CODE = #{themeCode}
+			</if>
+			<if test="areaCode != null">
+				AND G.AREA_CODE = #{areaCode}
+			</if>
+			<if test="sigunguCode != null">
+				AND G.SIGUNGU_CODE = #{sigunguCode}
+			</if>
+			<if test="keyword != null">
+				AND G.TITLE REGEXP #{keyword}
+			</if>
+		 ORDER BY G.UPDATE_DATE DESC,
+			      G.TITLE,
+			      G.AREA_CODE,
+			      G.SIGUNGU_CODE
+		 LIMIT #{rowCount}
+		OFFSET #{offset}
+	</select>
+	
+	<insert id="insert" parameterType="hashMap">
+		INSERT INTO GUIDE_BOOK (
+		  GBID,
+		  TITLE,
+	      THEME_CODE,
+	      PUBLISHER,
+	      PUBLISH_DATE,
+		  AREA_CODE,
+		  SIGUNGU_CODE,
+		  IMAGE,
+		  PDF_LINK,
+		  `USE`,
+		  AUTHOR,
+		  CREATE_DATE,
+		  UPDATE_DATE
+		) VALUES (
+		  #{gbId},
+		  #{title},
+		  #{themeCode},
+		  #{publisher},
+		  #{publishDate},
+		  #{areaCode},
+		  #{sigunguCode},
+		  #{image},
+		  #{pdfLink},
+		  #{use},
+		  #{author},
+		  NOW(),
+		  NOW()
+		)
+	</insert>
+	
+	<update id="update" parameterType="hashMap">
+		UPDATE GUIDE_BOOK
+		   <set>
+		       <if test="title != null">
+		       		TITLE = #{title},
+		       </if>
+		       <if test="pdfLink != null">
+		       		PDF_LINK = #{pdfLink},
+		       </if>
+		       <if test="image != null">
+		       		IMAGE = #{image},
+		       </if>
+		       <if test="startDate != null">
+		       		START_DATE = #{startDate},
+		       </if>
+		       <if test="endDate != null">
+		       		END_DATE = #{endDate},
+		       </if>
+		       <if test="themeCode != null">
+		       		THEME_CODE = #{themeCode},
+		       </if>
+		       <if test="publisher != null">
+		       		PUBLISHER = #{publisher},
+		       </if>
+		       <if test="publishDate != null">
+		       		PUBLISH_DATE = #{publishDate},
+		       </if>
+		       <if test="areaCode != null">
+		       		AREA_CODE = #{areaCode},
+		       </if>
+			   <if test="use != null">
+			   		`USE` = #{use},
+			   </if>
+			   SIGUNGU_CODE = #{sigunguCode},
+		       UPDATE_DATE = NOW()
+	       </set>
+		 WHERE GBID = #{gbId}
+	</update>
+	
+	<delete id="delete" parameterType="string">
+		DELETE FROM GUIDE_BOOK WHERE GBID = #{gbId}
+	</delete>
+	
+</mapper>

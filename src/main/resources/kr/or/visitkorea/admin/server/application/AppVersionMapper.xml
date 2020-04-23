@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.AppVersionMapper">
+
+    <select id="select" parameterType="string" resultType="hashMap">
+        SELECT AP_ID,
+               VER,
+               VER_MIN,
+               URL,
+               UPDATE_DATE
+               ,HEADER_COLOR headerColor
+          FROM APP_VERSION
+        <where>
+            <if test="value != null">AP_ID = #{value}</if>
+        </where>
+         ORDER BY UPDATE_DATE DESC
+    </select>
+
+    <insert id="insert" parameterType="hashMap">
+        INSERT INTO APP_VERSION (AP_ID, VER, VER_MIN, URL, UPDATE_DATE, HEADER_COLOR)
+        VALUES (#{apId}, #{ver}, #{min_ver}, #{url}, NOW(), #{header_color})
+    </insert>
+
+    <update id="update" parameterType="hashMap">
+        UPDATE APP_VERSION
+        <set>
+            <if test="ver != null">VER = #{ver},</if>
+            <if test="min_ver != null">VER_MIN = #{min_ver},</if>
+            <if test="url != null">URL = #{url},</if>
+            <if test="header_color != null">HEADER_COLOR = #{header_color},</if>
+            UPDATE_DATE = NOW()
+        </set>
+        WHERE AP_ID = #{apId}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM APP_VERSION WHERE AP_ID = #{apId}
+    </delete>
+</mapper>

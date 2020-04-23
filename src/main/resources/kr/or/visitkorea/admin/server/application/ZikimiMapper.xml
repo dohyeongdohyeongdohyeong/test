@@ -1,0 +1,405 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.ZikimiMapper">
+   <select id="selectZikimiList" parameterType="hashMap" resultType="hashMap">
+		select A.ZIK_ID zikid, A.REQ_TITLE reqtitle, A.REQ_URL requrl, B.SNS_TYPE utype, A.REQ_TYPE reqType, A.CONTENT_TYPE AS contenttypeCheck, D.TITLE title,D.CONTENT_TYPE contenttype, B.SNS_USR_NAME snsid,  A.CREATE_DATE cdate, A.UPDATE_DATE udate, A.BODY body, A.STATUS status
+				, A.SNS_ID, (select if(USR_ID is null or USR_ID='', if(ZIK_ID=PARENT_ID, '-', '[신규댓글]'), '') from ZIKIMI D where A.ZIK_ID=D.PARENT_ID order by D.CREATE_DATE desc limit 1) res
+		from ZIKIMI A, SNS B, CONTENT_MASTER D
+		where A.SNS_ID=B.SNS_ID and A.ZIK_ID=A.PARENT_ID and A.COT_ID=D.COT_ID 
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="utype != null">
+				 <choose>
+					<when test="utype == 10">
+					 and B.SNS_TYPE = 10
+					</when>
+					<otherwise>
+					 and B.SNS_TYPE != 10
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="reqType != null">
+				 <choose>
+					<when test="reqType >= 0">
+					 and A.REQ_TYPE = #{reqType}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			 and D.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+		<choose>
+			<when test="status != null">
+			 and A.STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			 and D.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			 and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		<choose>
+			<when test="order == null">
+			 order by status, A.CREATE_DATE desc
+			</when>
+			<when test="order != null">
+				<choose>
+					<when test="order == 1">
+					 order by A.CREATE_DATE asc
+					</when>
+				</choose>
+				<choose>
+					<when test="order == 2">
+					 	 order by A.CREATE_DATE desc
+					</when>
+				</choose>
+				<choose>
+					<when test="order == 3">
+					 	 order by A.UPDATE_DATE asc
+					</when>
+				</choose>
+				<choose>
+					<when test="order == 4">
+					 	 order by A.UPDATE_DATE desc
+					</when>
+				</choose>
+				<choose>
+					<when test="order == 5">
+				 	  order by res desc, A.CREATE_DATE desc
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+   </select>
+   <select id="selectZikimiListCnt" parameterType="hashMap" resultType="hashMap">
+		select count(*) CNT from (
+		select A.ZIK_ID zikid, A.REQ_TITLE reqtitle, A.REQ_URL requrl, B.SNS_TYPE utype, A.REQ_TYPE reqType, A.CONTENT_TYPE AS contenttypeCheck, D.TITLE title,D.CONTENT_TYPE contenttype, B.SNS_USR_NAME snsid,  A.CREATE_DATE cdate, A.UPDATE_DATE udate, A.BODY body, A.STATUS status
+				,(select if(USR_ID is null or USR_ID='', if(ZIK_ID=PARENT_ID, '-', '[신규댓글]'), '') from ZIKIMI D where A.ZIK_ID=D.PARENT_ID order by D.CREATE_DATE desc limit 1) res
+		from ZIKIMI A, SNS B, CONTENT_MASTER D
+		where A.SNS_ID=B.SNS_ID and A.ZIK_ID=A.PARENT_ID and A.COT_ID=D.COT_ID 
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="utype != null">
+				 <choose>
+					<when test="utype == 10">
+					 and B.SNS_TYPE = 10
+					</when>
+					<otherwise>
+					 and B.SNS_TYPE != 10
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="reqType != null">
+				 <choose>
+					<when test="reqType >= 0">
+					 and A.REQ_TYPE = #{reqType}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			and D.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+		<choose>
+			<when test="status != null">
+			and A.STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			and D.TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		order by res desc, A.CREATE_DATE desc
+		) AAA
+   </select>
+   
+   <select id="selectNewZikimiList" parameterType="hashMap" resultType="hashMap">
+   select
+		A.SNS_ID, A.ZIK_ID zikid, A.REQ_TITLE reqtitle, A.REQ_URL requrl, B.SNS_TYPE utype, A.REQ_TYPE reqType, A.CONTENT_TYPE AS contenttype, B.SNS_USR_NAME snsid, A.CREATE_DATE cdate, A.UPDATE_DATE udate, A.BODY body, A.STATUS status
+	from
+		ZIKIMI A, SNS B
+	where A.SNS_ID = B.SNS_ID and A.ZIK_ID = A.PARENT_ID
+  		<choose>
+		<when test="sdate != null">
+		 and A.CREATE_DATE >= #{sdate}
+		</when>
+	</choose>
+	<choose>
+		<when test="edate != null">
+		 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+		</when>
+	</choose>
+	<choose>
+		<when test="utype != null">
+			 <choose>
+				<when test="utype == 10">
+				 and B.SNS_TYPE = 10
+				</when>
+				<otherwise>
+				 and B.SNS_TYPE != 10
+				</otherwise>
+			</choose>
+		</when>
+	</choose>
+	<choose>
+			<when test="reqType != null">
+				 <choose>
+					<when test="reqType >= 0">
+					 and A.REQ_TYPE = #{reqType}
+					</when>
+				</choose>
+			</when>
+		</choose>
+	<choose>
+		<when test="contenttype != null">
+		 and A.CONTENT_TYPE = #{contenttype}
+		</when>
+	</choose>
+	<choose>
+		<when test="status != null">
+		 and A.STATUS = #{status}
+		</when>
+	</choose>
+	<choose>
+		<when test="title != null">
+		 and A.REQ_TITLE REGEXP #{title}
+		</when>
+	</choose>
+	<choose>
+		<when test="id != null">
+		 and B.SNS_IDENTIFY REGEXP #{id}
+		</when>
+	</choose>
+	<choose>
+		<when test="name != null">
+		 and B.SNS_USR_NAME REGEXP #{name}
+		</when>
+	</choose>
+	order by A.CREATE_DATE desc
+	<choose>
+		<when test="offset != null">
+			limit #{offset}, 20
+		</when>
+	</choose>
+   </select>
+   
+   <select id="selectNewZikimiListCnt" parameterType="hashMap" resultType="hashMap">
+		select count(*) CNT from (
+		select
+			A.ZIK_ID zikid, A.REQ_TITLE reqtitle, A.REQ_URL requrl, B.SNS_TYPE utype, A.REQ_TYPE reqType, A.CONTENT_TYPE AS contenttype, B.SNS_USR_NAME snsid, A.CREATE_DATE cdate, A.UPDATE_DATE udate, A.BODY body, A.STATUS status
+		from
+			ZIKIMI A, SNS B
+		where A.SNS_ID = B.SNS_ID and A.ZIK_ID = A.PARENT_ID 
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="utype != null">
+				 <choose>
+					<when test="utype == 10">
+					 and B.SNS_TYPE = 10
+					</when>
+					<otherwise>
+					 and B.SNS_TYPE != 10
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="reqType != null">
+				 <choose>
+					<when test="reqType >= 0">
+					 and A.REQ_TYPE = #{reqType}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="contenttype != null">
+			and A.CONTENT_TYPE = #{contenttype}
+			</when>
+		</choose>
+		<choose>
+			<when test="status != null">
+			and A.STATUS = #{status}
+			</when>
+		</choose>
+		<choose>
+			<when test="title != null">
+			and A.REQ_TITLE REGEXP #{title}
+			</when>
+		</choose>
+		<choose>
+			<when test="id != null">
+			and B.SNS_IDENTIFY REGEXP #{id}
+			</when>
+		</choose>
+		<choose>
+			<when test="name != null">
+			 and B.SNS_USR_NAME REGEXP #{name}
+			</when>
+		</choose>
+		order by A.CREATE_DATE desc
+		) AAA
+   </select>
+   
+<!--   <update id="updateZikimiComment" parameterType="hashMap"> -->
+<!--   	update SNS_COMMENT set  -->
+<!-- 		<choose> -->
+<!-- 			<when test="isview != null"> -->
+<!-- 	  		IS_VIEW=#{isview}  -->
+<!-- 			</when> -->
+<!-- 		</choose> -->
+<!--   	where CMT_ID=#{cmtid} -->
+<!--   </update> -->
+
+   <select id="selectZikimiAnswerList" parameterType="hashMap" resultType="hashMap">
+		select A.ZIK_ID zikid, B.SNS_IDENTIFY snsid, A.REQ_TYPE reqType, A.CREATE_DATE date, A.BODY body, A.USR_ID usrid, C.STF_ID stfid
+			,(select bb.IMAGE_PATH from SNS aa left outer join IMAGE bb on aa.IMG_ID=bb.IMG_ID where aa.SNS_ID=B.SNS_ID limit 1) imgpath
+		from ZIKIMI A left outer join SNS B on A.SNS_ID=B.SNS_ID left outer join STAFF C on C.USR_ID=A.USR_ID
+		where A.ZIK_ID!=A.PARENT_ID
+		<choose>
+			<when test="zikid != null">
+			 and A.PARENT_ID = #{zikid}
+			</when>
+		</choose>
+		order by A.CREATE_DATE
+   </select>
+   <select id="selectZikimiFiles" parameterType="hashMap" resultType="hashMap">
+		select A.ZIK_ID zikid, A.LINK_FILE_URL lnfileurl, A.TITLE title
+		from ZIKIMI_FILES A
+		where 1=1
+		<choose>
+			<when test="zikid != null">
+			 and A.ZIK_ID = #{zikid}
+			</when>
+		</choose>
+   </select>   
+   
+   <insert id="insertZikimiAnswer" parameterType="hashMap">
+  	insert into ZIKIMI (	ZIK_ID, PARENT_ID, BODY, USR_ID )
+  	values (
+  		#{zikid},
+  		#{parentid},
+  		#{body},
+  		#{usrid}
+  	)
+  </insert>
+  <delete id="deleteZikimiAnswer" parameterType="hashMap">
+  	delete from ZIKIMI where ZIK_ID=#{zikid}
+  </delete>
+  <update id="updateZikimi" parameterType="hashMap">
+  	update ZIKIMI set status=#{status}, UPDATE_DATE=now() where ZIK_ID=#{zikid}
+  </update>
+  
+	<update id="updateZikimiReqUrl" parameterType="hashMap">
+		update ZIKIMI set REQ_URL=#{requrl} where ZIK_ID=#{zikId}
+	</update> 
+	
+	<select id="selectZikimiListAll" parameterType="hashMap" resultType="hashMap">
+		select A.ZIK_ID zikid, A.REQ_TITLE reqtitle, A.REQ_URL requrl, B.SNS_TYPE utype, A.REQ_TYPE reqType, A.CONTENT_TYPE AS contenttypeCheck, 
+					D.TITLE title,D.CONTENT_TYPE contenttype, 
+			B.SNS_USR_NAME snsid,  A.CREATE_DATE cdate, A.UPDATE_DATE udate, A.BODY body, A.STATUS status
+					,(select if(USR_ID is null or USR_ID='', if(ZIK_ID=PARENT_ID, '-', '[신규댓글]'), '') from ZIKIMI D where A.ZIK_ID=D.PARENT_ID order by D.CREATE_DATE desc limit 1) res
+		from ZIKIMI A, SNS B, CONTENT_MASTER D
+		where A.SNS_ID=B.SNS_ID and A.ZIK_ID=A.PARENT_ID and A.COT_ID=D.COT_ID 
+		<choose>
+			<when test="utype != null">
+				 <choose>
+					<when test="utype == 10">
+					 and B.SNS_TYPE = 10
+					</when>
+					<otherwise>
+					 and B.SNS_TYPE != 10
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+		and A.REQ_TYPE = 0
+		UNION
+		select
+			A.ZIK_ID zikid, A.REQ_TITLE reqtitle, A.REQ_URL requrl, B.SNS_TYPE utype, A.REQ_TYPE reqType, A.CONTENT_TYPE AS contenttypeCheck, 
+			null AS title, null AS contenttype,
+			B.SNS_USR_NAME snsid, A.CREATE_DATE cdate, A.UPDATE_DATE udate, A.BODY body, A.STATUS status
+			, null AS res
+		from
+			ZIKIMI A, SNS B
+		where A.SNS_ID = B.SNS_ID and A.ZIK_ID = A.PARENT_ID
+		<choose>
+			<when test="utype != null">
+				 <choose>
+					<when test="utype == 10">
+					 and B.SNS_TYPE = 10
+					</when>
+					<otherwise>
+					 and B.SNS_TYPE != 10
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+		and A.REQ_TYPE = 1
+	</select>
+	
+</mapper>

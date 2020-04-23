@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.8.2//EN" "http://www.gwtproject.org/doctype/2.8.2/gwt-module.dtd">
+<module rename-to='VisitKoreaAdmin'>
+
+	<inherits name="com.google.gwt.user.User" />
+	<inherits name="com.google.gwt.dom.DOM" />
+	<inherits name="com.google.gwt.resources.Resources" />
+	<inherits name="com.gwtplatform.mvp.MvpWithEntryPoint" />
+	<inherits name="gwt.material.design.jquery.JQuery" />
+   
+	<extend-configuration-property name="gin.ginjector.modules" value="kr.or.visitkorea.admin.client.gin.ClientModule" />
+
+	<!-- Specify the paths for translatable code -->
+	<source path="client" />
+	<source path="shared" />
+
+	<!--GWT Material -->
+    <inherits name="gwt.material.design.amcharts.GwtMaterialAmCharts"/>
+	<inherits name="gwt.material.design.GwtMaterialWithJQueryDebug" />
+	<inherits name="gwt.material.design.themes.ThemeBlue" />
+	<inherits name="gwt.material.design.addins.GwtMaterialAddinsDebug" />
+	<inherits name="gwt.material.design.GwtMaterialTableDebug" />
+
+	<set-configuration-property name="CssResource.enableGss" value="true" />
+<!-- 
+	<replace-with
+		class="kr.or.visitkorea.admin.client.manager.widgets.dnd.client.util.impl.DOMUtilImplOpera">
+		<when-type-is class="kr.or.visitkorea.admin.client.manager.widgets.dnd.client.util.impl.DOMUtilImpl" />
+		<when-property-is name="user.agent" value="opera" />
+	</replace-with>
+
+	<replace-with
+		class="kr.or.visitkorea.admin.client.manager.widgets.dnd.client.util.impl.DOMUtilImplSafari">
+		<when-type-is class="kr.or.visitkorea.admin.client.manager.widgets.dnd.client.util.impl.DOMUtilImpl" />
+		<when-property-is name="user.agent" value="safari" />
+	</replace-with>
+
+	<replace-with class="kr.or.visitkorea.admin.client.manager.widgets.dnd.client.util.impl.DOMUtilImplIE6">
+		<when-type-is class="kr.or.visitkorea.admin.client.manager.widgets.dnd.client.util.impl.DOMUtilImpl" />
+		<any>
+			<when-property-is name="user.agent" value="ie6" />
+			<when-property-is name="user.agent" value="ie8" />
+			<when-property-is name="user.agent" value="ie9" />
+			<when-property-is name="user.agent" value="ie10" />
+		</any>
+	</replace-with>
+
+	<replace-with
+		class="kr.or.visitkorea.admin.client.manager.widgets.dnd.client.util.impl.DOMUtilImplMozilla">
+		<when-type-is class="kr.or.visitkorea.admin.client.manager.widgets.dnd.client.util.impl.DOMUtilImpl" />
+		<when-property-is name="user.agent" value="gecko1_8" />
+	</replace-with>
+ -->	
+	
+</module>

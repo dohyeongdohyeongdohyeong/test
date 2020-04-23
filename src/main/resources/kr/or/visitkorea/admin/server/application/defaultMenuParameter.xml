@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<parameter>
+
+	<!-- 서비스 -->
+	<menu caption="서비스 관리" app="WINDOW_KEY_SERVICE_MANAGEMENT" icon="BUILD">
+		<permission id="use" caption="사용여부" uuid="00000000-0000-0000-0000-000000000000">false</permission>
+		<bounds width="1500" height="700" />
+		<parameters>
+			<value id="OTD_ID" type="STRING">00000000-0000-0000-0000-000000000000</value>
+		</parameters>
+	</menu>
+	
+	<!-- 영역별  -->
+	<menu caption="영역별 컨텐츠" app="WINDOW_KEY_OTHER_DEPARTMENT_MAIN_CONTENT" icon="DASHBOARD">
+		<permission id="use" caption="사용여부" uuid="00000000-0000-0000-0000-000000000000">false</permission>
+		<bounds width="1500" height="700" />
+		<parameters>
+			<value id="OTD_ID" type="STRING">00000000-0000-0000-0000-000000000000</value>
+			<value id="IS_MAIN" type="BOOLEAN">false</value>
+			<value id="HELPS" type="MAP">
+				<value id="전체" type="STRING"><![CDATA[https://www.youtube.com/embed/JsledPjsfeA]]></value>
+				<value id="태그 관리" type="STRING"><![CDATA[https://www.youtube.com/embed/JsledPjsfeA?start=10&end=46]]></value>
+				<value id="쇼케이스 관리" type="STRING"><![CDATA[https://www.youtube.com/embed/JsledPjsfeA?start=47&end=92]]></value>
+				<value id="콘텐츠 관리" type="STRING"><![CDATA[https://www.youtube.com/embed/JsledPjsfeA?start=93]]></value>
+			</value>
+		</parameters>
+	</menu>
+	
+	<!-- 기사 -->
+	<menu caption="기사 컨텐츠" app="WINDOW_KEY_RECOMM_CONTENT" icon="CAMERA_ALT">
+		<permission id="use" caption="사용여부" uuid="00000000-0000-0000-0000-000000000000">false</permission>
+		<bounds width="1500" height="700" />
+		<parameters>
+			<value id="OTD_ID" type="STRING">00000000-0000-0000-0000-000000000000</value>
+			<value id="HELPS" type="MAP">
+				<value id="전체" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU]]></value>
+				<value id="CID 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=12&end=61]]></value>
+				<value id="제목 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=62&end=86]]></value>
+				<value id="태그 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=87&end=111]]></value>
+				<value id="기간, 지역 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=111&end=149]]></value>
+				<value id="전체 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=150&end=196]]></value>
+				<value id="신규 등록" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=197&end=215]]></value>
+				<value id="기본 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=216&end=359]]></value>
+				<value id="기타 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=360&end=482]]></value>
+				<value id="태그 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=483&end=555]]></value>
+				<value id="연관 컨텐츠 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=556&end=656]]></value>
+				<value id="본문 입력/수정" type="STRING"><![CDATA[https://www.youtube.com/embed/2t-Zjd6MATU?start=657]]></value>
+			</value>
+		</parameters>
+	</menu>
+	
+	<!-- 데이터베이스 -->
+	<menu caption="데이터베이스 컨텐츠" app="WINDOW_KEY_DATABASE_CONTENT" icon="LINEAR_SCALE">
+		<permission id="use" caption="사용여부" uuid="00000000-0000-0000-0000-000000000000">false</permission>
+		<bounds width="1500" height="700" />
+		<parameters>
+			<value id="OTD_ID" type="STRING">00000000-0000-0000-0000-000000000000</value>
+			<value id="IS_ADMIN" type="BOOLEAN">false</value>
+			<value id="HELPS" type="MAP">
+				<value id="전체" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc]]></value>
+				<value id="CID 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=11&end=55]]></value>
+				<value id="제목 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=56&end=77]]></value>
+				<value id="태그 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=78&end=107]]></value>
+				<value id="기간, 지역 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=108&end=158]]></value>
+				<value id="전체 검색" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=159&end=198]]></value>
+				<value id="기본 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=199&end=295]]></value>
+				<value id="기타 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=296&end=344]]></value>
+				<value id="태그 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=345&end=410]]></value>
+				<value id="링크(연결) 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=411&end=555]]></value>
+				<value id="상세 정보" type="STRING"><![CDATA[https://www.youtube.com/embed/C2HCO9RdVTc?start=556]]></value>
+			</value>
+		</parameters>
+	</menu>
+</parameter>

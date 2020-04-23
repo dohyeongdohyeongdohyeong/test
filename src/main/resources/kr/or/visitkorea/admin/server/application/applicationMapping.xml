@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<apps>
+	<app id="WINDOW_KEY_MOBILE_MAIN" class="kr.or.visitkorea.admin.client.manager.main.MainManagerApplication" />
+	<app id="WINDOW_KEY_PC_MAIN" class="kr.or.visitkorea.admin.client.manager.main.MainManagerApplication" />
+	<app id="WINDOW_KEY_ACCOUNT" class="kr.or.visitkorea.admin.client.manager.account.AccountApplication" />
+	<app id="WINDOW_KEY_TAGS" class="kr.or.visitkorea.admin.client.manager.tags.TagsApplication" />
+	<app id="WINDOW_KEY_RECOMM_MAIN" class="kr.or.visitkorea.admin.client.manager.otherDepartment.OtherDepartmentMainApplication" />
+	<app id="WINDOW_KEY_COURSE_MAIN" class="kr.or.visitkorea.admin.client.manager.otherDepartment.OtherDepartmentMainApplication" />
+	<app id="WINDOW_KEY_SIGHTS_MAIN" class="kr.or.visitkorea.admin.client.manager.otherDepartment.OtherDepartmentMainApplication" />
+	<app id="WINDOW_KEY_FESTIVAL_MAIN" class="kr.or.visitkorea.admin.client.manager.otherDepartment.OtherDepartmentMainApplication" />
+	<app id="WINDOW_KEY_RECOMM_CONTENT" class="kr.or.visitkorea.admin.client.manager.contents.recommand.RecommApplication" />
+	<app id="WINDOW_KEY_COURSE_CONTENT" class="kr.or.visitkorea.admin.client.manager.contents.course.CourseApplication" />
+	<app id="WINDOW_KEY_DATABASE_CONTENT" class="kr.or.visitkorea.admin.client.manager.contents.database.DatabaseApplication" />
+	<app id="WINDOW_KILLER_CONTENT_MANAGER" class="kr.or.visitkorea.admin.client.manager.contents.killercontent.KillerContentApplication" />
+	<app id="WINDOW_KEY_FOOD_API_MANAGER" class="kr.or.visitkorea.admin.client.manager.contents.foodApi.FoodApiManagementApplication" />
+	<app id="WINDOW_KEY_LOGIN" class="kr.or.visitkorea.admin.client.manager.login.LoginApplication" />
+	<app id="WINDOW_KEY_OTHER_DEPARTMENT_MAIN_CONTENT" class="kr.or.visitkorea.admin.client.manager.otherDepartment.OtherDepartmentMainApplication" />
+	<app id="WINDOW_KEY_MAIN_CONTENT" class="kr.or.visitkorea.admin.client.manager.otherDepartment.OtherDepartmentMainApplication" />
+	<app id="WINDOW_KEY_MAIN_CONTENT_RECOMM" class="kr.or.visitkorea.admin.client.manager.otherDepartment.OtherDepartmentMainApplication" />
+	<app id="WINDOW_KEY_CONTENT_PREVIEW" class="kr.or.visitkorea.admin.client.manager.preview.PreviewApplication" />
+	<app id="WINDOW_MAIN_SHOWCASE" class="kr.or.visitkorea.admin.client.manager.main.curation.CurationMainApplication" />
+	<app id="WINDOW_MAIN_MARKETING" class="kr.or.visitkorea.admin.client.manager.main.marketing.MarketingMainApplication" />
+	<app id="WINDOW_MAIN_CALENDAR" class="kr.or.visitkorea.admin.client.manager.main.calendar.CalendarMainApplication" />
+	<app id="WINDOW_MAIN_DEPARTMENT" class="kr.or.visitkorea.admin.client.manager.main.department.DepartmentMainApplication" />
+	<app id="WINDOW_KEY_NEWS" class="kr.or.visitkorea.admin.client.manager.news.NewsApplication" />
+	<app id="WINDOW_MEMBER" class="kr.or.visitkorea.admin.client.manager.member.MemberApplication" />
+	<app id="WINDOW_MEMBER_ACTIVITY" class="kr.or.visitkorea.admin.client.manager.memberActivity.ActivityApplication" />
+	<app id="WINDOW_ADBANNER_MANAGER" class="kr.or.visitkorea.admin.client.manager.contents.banner.AdbannerApplication" />
+	<app id="WINDOW_KEY_IMAGE_UPLOAD" class="kr.or.visitkorea.admin.client.manager.upload.excel.ExcelImageUploadApplication" />
+	<app id="WINDOW_KEY_IMAGE_MANAGER" class="kr.or.visitkorea.admin.client.manager.imageManager.ImageManagerApplication" />
+	<app id="WINDOW_KEY_IMAGE_PREVIEW" class="kr.or.visitkorea.admin.client.manager.imageManager.ImagePreviewApplication" />
+	<app id="WINDOW_KEY_APP_VERSION" class="kr.or.visitkorea.admin.client.manager.appVersion.AppVersionApplication" />
+	<app id="WINDOW_DEPARTMENT_MANAGER" class="kr.or.visitkorea.admin.client.manager.contents.department.DepartmentApplication" />
+	<app id="WINDOW_ANALYSIS_MAIN" class="kr.or.visitkorea.admin.client.manager.analysis.main.MainAnalysisApplication" />
+	<app id="WINDOW_ANALYSIS_TAG" class="kr.or.visitkorea.admin.client.manager.analysis.tag.TagAnalysisApplication" />
+	<app id="WINDOW_ANALYSIS_AREA" class="kr.or.visitkorea.admin.client.manager.analysis.area.AreaAnalysisApplication" />
+	<app id="WINDOW_ANALYSIS_CONTENTS" class="kr.or.visitkorea.admin.client.manager.analysis.contents.ContentsAnalysisApplication" />
+	<app id="WINDOW_ANALYSIS_BANNER" class="kr.or.visitkorea.admin.client.manager.analysis.banner.BannerAnalysisApplication" />
+	<app id="WINDOW_ANALYSIS_CONNECT" class="kr.or.visitkorea.admin.client.manager.analysis.connect.ConnectAnalysisApplication" />
+	<app id="WINDOW_ANALYSIS_OTHERDEP" class="kr.or.visitkorea.admin.client.manager.analysis.department.OtherDepAnalysisApplication" />
+	<app id="WINDOW_PARTNERS_CONTENT" class="kr.or.visitkorea.admin.client.manager.partners.content.PartnersContentApplication" />
+	<app id="WINDOW_PARTNERS_CHANNEL" class="kr.or.visitkorea.admin.client.manager.partners.channel.PartnersChannelApplication" />
+	<app id="WINDOW_PARTNERS_ACTIVITY" class="kr.or.visitkorea.admin.client.manager.memberActivity.ActivityApplication" />
+	<app id="WINDOW_KEY_FCM_PUSH" class="kr.or.visitkorea.admin.client.manager.fcm.FcmApplication" />
+	<app id="WINDOW_REPAIR" class="kr.or.visitkorea.admin.client.manager.repair.RepairApplication" />
+</apps>

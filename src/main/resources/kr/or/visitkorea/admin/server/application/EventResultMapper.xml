@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="kr.or.visitkorea.system.EventResultMapper">
+	<select id="selectEventResultImage" parameterType="hashMap" resultType="hashMap">
+		SELECT A.* , B.IMAGE_PATH, B.IMAGE_DESCRIPTION
+		FROM EVENT_WIN_IMAGE A, IMAGE B
+		WHERE A.IMG_ID = B.IMG_ID
+		AND A.EVT_ID = #{evtId}
+	</select>
+
+	<insert id="saveEventResultImage" parameterType="hashMap">
+		INSERT INTO EVENT_WIN_IMAGE (
+			EVT_ID, 
+			IMG_ID
+		) VALUES (
+			#{evtId}, 
+			#{imgId}
+		) ON DUPLICATE KEY UPDATE
+			IMG_ID = #{imgId}
+
+	</insert>
+	
+	<update id="saveEventResultWinDesc" parameterType="hashMap">
+		UPDATE EVENT_MASTER 
+		SET 
+		WIN_DESC = #{winDesc}, 
+		IS_WIN_DESC = #{isWinDesc}
+		WHERE EVT_ID = #{evtId}
+	</update>
+	
+	<select id="selectEventTypeCode" parameterType="hashMap" resultType="hashMap">
+		SELECT * 
+		FROM EVENT_TYPE_CODE
+		WHERE USE_YN = #{useYn}
+	</select>
+
+
+	<select id="selectEventSubList" parameterType="hashMap" resultType="hashMap">
+		SELECT A.*,
+		(SELECT EVT_TYPE_NM  FROM EVENT_TYPE_CODE WHERE EVT_TYPE_CD = A.EVT_TYPE_CD) AS EVT_TYPE_NM
+		FROM EVENT_SUB_INFO A
+		WHERE EVT_ID = #{evtId}
+	</select>
+	
+	
+	<select id="selectEventGiftList" parameterType="hashMap" resultType="hashMap">
+		SELECT * 
+		FROM EVENT_GIFT_INFO
+		WHERE SUB_EVT_ID = #{subEvtId}
+		<if test="isNotWin != null and  isNotWin != ''">
+		AND IS_NOT_WIN = #{isNotWin}
+		</if>
+	</select>
+	
+	<select id="selectEventGift" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+		A.*,
+		(SELECT COUNT(*) FROM EVENT_USER_WIN WHERE EVT_ID = A.EVT_ID AND SUB_EVT_ID = A.SUB_EVT_ID AND GFT_ID = A.GFT_ID) AS WIN_CNT
+		FROM EVENT_GIFT_INFO A
+		WHERE SUB_EVT_ID = #{subEvtId}
+		AND GFT_ID = #{gftId}
+	</select>
+	
+	<insert id="saveEventAnnouncePage" parameterType="hashMap">
+		INSERT INTO EVENT_ANNOUNCE_PAGE (
+			EAP_ID,
+			EVT_ID, 
+			SUB_EVT_ID,
+			GFT_ID,
+			PRIZE_NM,
+			GIFT_DESC,
+			SORT,
+			ANNOUNCE_INPUT_TYPE
+		) VALUES (
+			#{eapId},
+			#{evtId},
+			#{subEvtId},
+			#{giftId},
+			#{prizeNm},
+			#{giftDesc},
+			(
+				SELECT IFNULL(MAX(SORT)+1,0)
+				FROM 
+				EVENT_ANNOUNCE_PAGE AP
+				WHERE EVT_ID = #{evtId}
+			),
+			#{announceInputType}
+		) 
+	</insert>
+	
+	
+	<select id="selectEventAnnouncePageList" parameterType="hashMap" resultType="hashMap">
+		SELECT A.* ,
+        B.TITLE AS SUB_EVT_TITLE,
+        B.ELECT_TYPE,
+        C.TITLE AS GFT_TITLE,
+        C.COUNT AS GIFT_CNT,
+        (SELECT COUNT(*) FROM EVENT_USER_WIN WHERE EVT_ID = A.EVT_ID AND SUB_EVT_ID = B.SUB_EVT_ID AND GFT_ID = C.GFT_ID) AS WIN_CNT
+		FROM EVENT_ANNOUNCE_PAGE A, EVENT_SUB_INFO B, EVENT_GIFT_INFO C
+		WHERE  A.SUB_EVT_ID = B.SUB_EVT_ID
+        AND A.GFT_ID = C.GFT_ID
+        AND A.EVT_ID = #{evtId}
+        ORDER BY A.SORT ASC
+	</select>
+	
+	
+	<select id="selectEventUserEntryList" parameterType="hashMap" resultType="hashMap">
+		SELECT *
+		FROM EVENT_USER_ENTRY A
+		WHERE  1=1
+        AND TEL = #{tel}
+        AND TEL NOT IN (
+            SELECT ENTRY.TEL
+            FROM EVENT_USER_WIN WIN, EVENT_USER_ENTRY_PROGRAM PRM, EVENT_USER_ENTRY ENTRY
+            WHERE 1=1
+            AND WIN.EEU_ID = PRM.EEU_ID
+            AND WIN.EEU_ID = ENTRY.EEU_ID
+            AND WIN.SUB_EVT_ID = PRM.SUB_EVT_ID
+            AND WIN.SUB_EVT_ID = #{subEvtId}
+        )
+	</select>
+	
+	<insert id="saveEventUserWin" parameterType="hashMap">
+		INSERT INTO EVENT_USER_WIN (
+			EEU_ID, 
+			EVT_ID,
+			SUB_EVT_ID,
+			GFT_ID,
+			EAP_ID,
+			CREATE_DATE
+		) VALUES (
+			#{eeuId},
+			#{evtId}, 
+			#{subEvtId},
+			#{gftId},
+			#{eapId},
+			NOW()
+		)
+	</insert>
+	
+	<delete id="deleteEventUserWin" parameterType="hashMap">
+		DELETE FROM EVENT_USER_WIN
+		WHERE EVT_ID = #{evtId}
+		<if test="eeuId != null and  eeuId != ''">
+		AND EEU_ID = #{eeuId}
+		</if>
+		<if test="gftId != null and  gftId != ''">
+		AND GFT_ID = #{gftId}
+		</if>
+		<if test="subEvtId != null and  subEvtId != ''">
+		AND SUB_EVT_ID = #{subEvtId}
+		</if>
+	</delete>
+	
+	
+	<select id="selectEventUserWinList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+        A.*, 
+        B.NAME, 
+        B.TEL
+		FROM EVENT_USER_WIN A, EVENT_USER_ENTRY B
+		WHERE  A.EEU_ID = B.EEU_ID
+        AND A.SUB_EVT_ID = #{subEvtId}
+        AND A.GFT_ID = #{gftId}
+        <if test="tel != null and  tel != ''">
+        AND B.TEL = #{tel}
+        </if>
+	</select>
+	
+	<select id="selectEventUserRandomList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+        EEU_ID,
+        NAME,
+        TEL
+		FROM EVENT_USER_ENTRY A
+		WHERE  1=1
+        AND EEU_ID IN (
+			SELECT MAX(EEU_ID) FROM EVENT_USER_ENTRY 
+			WHERE EEU_ID IN (
+				SELECT EEU_ID FROM EVENT_USER_ENTRY_PROGRAM WHERE SUB_EVT_ID = #{subEvtId}
+				<if test='winCondUseYn == "Y"'>
+				 AND EEU_ID IN (SELECT  EEU_ID FROM EVENT_USER_OXQUIZ WHERE SUB_EVT_ID = #{subEvtId} AND RIGHT_ANSWER_CNT &gt;= #{winCondValue})
+				</if>
+			)
+			GROUP BY TEL
+        )
+        AND TEL NOT IN (
+            SELECT ENTRY.TEL
+            FROM EVENT_USER_WIN WIN, EVENT_USER_ENTRY_PROGRAM PRM, EVENT_USER_ENTRY ENTRY
+            WHERE 1=1
+            AND WIN.EEU_ID = PRM.EEU_ID
+            AND WIN.EEU_ID = ENTRY.EEU_ID
+            AND WIN.SUB_EVT_ID = PRM.SUB_EVT_ID
+            AND WIN.SUB_EVT_ID = #{subEvtId}
+            <if test='blacklistUseYn == "Y"'>
+            UNION ALL
+            SELECT HP FROM EVENT_BLACKLIST 
+            WHERE EVT_ID = #{evtId}
+            </if>
+        )
+		ORDER BY RAND() LIMIT #{limit}
+	</select>
+	
+	
+	<update id="saveEventResultAnnouncePageSort" parameterType="hashMap">
+		UPDATE EVENT_ANNOUNCE_PAGE 
+		SET 
+		SORT = #{sort}
+		WHERE EAP_ID = #{eapId}
+	</update>
+        
+	<delete id="deleteEventResultAnnouncePage" parameterType="hashMap">
+		DELETE FROM EVENT_ANNOUNCE_PAGE
+		WHERE EVT_ID = #{evtId}
+		<if test="eapId != null and  eapId != ''">
+		AND EAP_ID = #{eapId}
+		</if>
+		<if test="gftId != null and  gftId != ''">
+		AND GFT_ID = #{gftId}
+		</if>
+		<if test="subEvtId != null and  subEvtId != ''">
+		AND SUB_EVT_ID = #{subEvtId}
+		</if>
+	</delete>
+	
+	
+	
+	<select id="selectEventDashboardJoinList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+		DT,
+		CNT,
+		(
+			SELECT COUNT(DISTINCT(TEL))
+			FROM EVENT_USER_ENTRY
+			WHERE EEU_ID IN (
+				SELECT EEU_ID FROM EVENT_USER_ENTRY_PROGRAM WHERE SUB_EVT_ID = #{subEvtId}
+			)
+			AND DATE_FORMAT(CREATE_DATE,'%Y.%m.%d') = AA.DT
+		) DEDUP_CNT,
+		
+		(
+			SELECT COUNT(*)
+			FROM EVENT_USER_WIN
+			WHERE SUB_EVT_ID = #{subEvtId}
+			AND DATE_FORMAT(CREATE_DATE,'%Y.%m.%d') = AA.DT
+		) WIN_CNT,
+		(
+			SELECT 
+			COUNT(*) CNT
+			FROM EVENT_USER_ENTRY
+			WHERE EEU_ID IN (
+				SELECT EEU_ID FROM EVENT_USER_ENTRY_PROGRAM WHERE SUB_EVT_ID = #{subEvtId}
+			)
+		    AND DEVICE_TYPE = 'M'
+		    AND DATE_FORMAT(CREATE_DATE,'%Y.%m%.%d') = AA.DT
+		
+		) MCNT,
+		(
+			SELECT 
+			COUNT(*) CNT
+			FROM EVENT_USER_ENTRY
+			WHERE EEU_ID IN (
+				SELECT EEU_ID FROM EVENT_USER_ENTRY_PROGRAM WHERE SUB_EVT_ID = #{subEvtId}
+			)
+		    AND DEVICE_TYPE = 'P'
+		    AND DATE_FORMAT(CREATE_DATE,'%Y.%m.%d') = AA.DT
+		
+		) PCNT
+		
+		 FROM (
+			SELECT 
+			DATE_FORMAT(CREATE_DATE,'%Y.%m.%d') DT, 
+			COUNT(*) CNT
+			FROM EVENT_USER_ENTRY
+			WHERE EEU_ID IN (
+				SELECT EEU_ID FROM EVENT_USER_ENTRY_PROGRAM WHERE SUB_EVT_ID = #{subEvtId}
+			)
+			GROUP BY DATE_FORMAT(CREATE_DATE,'%Y%m%d')
+		) AA ORDER BY DT ASC
+	</select>
+	
+	<select id="selectEventDashboardJoinUserList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+        ENTRY.EEU_ID,
+        ENTRY.EVT_ID,
+        ENTRY.SNS_ID,
+        ENTRY.NAME,
+        ENTRY.JOB,
+        ENTRY.TEL,
+        ENTRY.EMAIL,
+        ENTRY.AGE,
+        ENTRY.ETC,
+        ENTRY.REGION,
+        ENTRY.ADDR,
+        ENTRY.ADDR_DETAIL,
+        ENTRY.ZIP_CODE,
+        ENTRY.CREATE_DATE,
+        ENTRY.DEVICE_TYPE, 
+        CASE GENDER WHEN 1 THEN '남자' WHEN 2 THEN '여자' END AS GENDER,
+        DATE_FORMAT(ENTRY.CREATE_DATE,'%Y.%m.%d') DT,
+        WIN.GFT_ID,
+		(SELECT TITLE FROM EVENT_GIFT_INFO WHERE GFT_ID =  WIN.GFT_ID AND SUB_EVT_ID = WIN.SUB_EVT_ID) AS GFT_NM
+        FROM EVENT_USER_ENTRY ENTRY
+        LEFT JOIN EVENT_USER_WIN WIN ON WIN.EEU_ID = ENTRY.EEU_ID
+		WHERE ENTRY.EEU_ID IN (
+			SELECT EEU_ID FROM EVENT_USER_ENTRY_PROGRAM WHERE SUB_EVT_ID = #{subEvtId}
+		)
+		ORDER BY CREATE_DATE DESC
+       <if test="limit != null">
+        LIMIT #{offset}, #{limit}
+        </if>
+	</select>
+	
+	<select id="selectEventDashboardJoinUserListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+        COUNT(*) CNT
+        FROM EVENT_USER_ENTRY ENTRY
+        LEFT JOIN EVENT_USER_WIN WIN ON WIN.EEU_ID = ENTRY.EEU_ID
+		WHERE ENTRY.EEU_ID IN (
+			SELECT EEU_ID FROM EVENT_USER_ENTRY_PROGRAM WHERE SUB_EVT_ID = #{subEvtId}
+		)
+	</select>
+	<select id="SelectUserInfoCollect" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+        *
+        FROM EVENT_USER_INFO_COLLECT
+        WHERE EVT_ID = #{evtId}
+	</select>
+	
+	<select id="selectEventDashboardList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			CM.COT_ID
+			, CM.CREATE_DATE
+			, CM.CREATE_USR_ID
+			, S.STF_ID
+			, EM.*
+			, (SELECT COUNT(*) FROM EVENT_SUB_INFO WHERE EVT_ID = EM.EVT_ID ) AS EVENT_CNT
+			, (SELECT GROUP_CONCAT(ETC.EVT_TYPE_NM SEPARATOR ',') AS TITLE  FROM EVENT_SUB_INFO ESI,  EVENT_TYPE_CODE ETC  WHERE ESI.EVT_TYPE_CD = ETC.EVT_TYPE_CD AND ESI.EVT_ID = EM.EVT_ID ) AS GAMES_NM		 
+
+		FROM CONTENT_MASTER CM
+			INNER JOIN EVENT_MASTER EM ON CM.COT_ID = EM.COT_ID
+			INNER JOIN STAFF S ON CM.CREATE_USR_ID = S.USR_ID
+		WHERE EM.STATUS IN (4,5,6)
+		
+		AND IF(
+			(
+				SELECT 
+					COUNT(*)
+				FROM PERMISSION 
+				WHERE 1 = 1
+					AND PERMISSION_ID = #{adminPermission}
+					AND CREATE_USR_ID = #{usrId}
+			) > 0
+			, EM.STATUS IN (4,5,6)
+			, CREATE_USR_ID = #{usrId}
+		)
+
+		<if test="startDate != null">
+			<![CDATA[
+				AND DATE(EM.START_DATE) >= DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND DATE(EM.END_DATE) <= DATE(#{endDate})
+			]]>
+		</if>
+		<if test="status != -1">
+			AND EM.STATUS = #{status}
+		</if>
+		ORDER BY EM.END_DATE desc
+		LIMIT #{offset}, #{limit}
+	</select>
+	
+	<select id="selectEventDashboardListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			COUNT(EVT_ID) CNT
+		FROM CONTENT_MASTER CM
+			INNER JOIN EVENT_MASTER EM ON CM.COT_ID = EM.COT_ID
+		WHERE EM.STATUS IN (4,5,6)
+		
+		AND IF(
+			(
+				SELECT 
+					COUNT(*)
+				FROM PERMISSION 
+				WHERE 1 = 1
+					AND PERMISSION_ID = #{adminPermission}
+					AND CREATE_USR_ID = #{usrId}
+			) > 0
+			, EM.STATUS IN (4,5,6)
+			, CREATE_USR_ID = #{usrId}
+		)
+		
+		<if test="startDate != null">
+			<![CDATA[
+				AND DATE(EM.START_DATE) >= DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND DATE(EM.END_DATE) <= DATE(#{endDate})
+			]]>
+		</if>
+		<if test="status != -1">
+			AND EM.STATUS = #{status}
+		</if>
+	</select>
+	
+	
+	<select id="selectEventDashboardUserList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+		MAX(EM.START_DATE) AS START_DATE
+		,MAX(EM.END_DATE) AS END_DATE
+		,MAX(EM.TITLE) AS TITLE
+		,EUE.NAME
+		,EUE.TEL
+		,SNS.SNS_USR_NAME
+		,MAX(SNS.SNS_IDENTIFY)  AS SNS_IDENTIFY
+		,(SELECT COUNT(*) FROM EVENT_USER_ENTRY WHERE EVT_ID=EUE.EVT_ID AND EUE.EEU_ID = EEU_ID ) AS JOIN_CNT
+		,(SELECT COUNT(*) FROM EVENT_USER_WIN WHERE EVT_ID=EUE.EVT_ID AND EUE.EEU_ID = EEU_ID ) AS WIN_CNT
+		FROM 
+		EVENT_MASTER EM
+		INNER JOIN CONTENT_MASTER CM ON CM.COT_ID = EM.COT_ID
+		INNER JOIN EVENT_USER_ENTRY EUE ON EM.EVT_ID=EUE.EVT_ID
+		LEFT JOIN SNS ON EUE.SNS_ID = SNS.SNS_ID
+		WHERE EM.STATUS IN (4,5,6)
+		AND IF(
+			(
+				SELECT 
+					COUNT(*)
+				FROM PERMISSION 
+				WHERE 1 = 1
+					AND PERMISSION_ID = #{adminPermission}
+					AND CREATE_USR_ID = #{usrId}
+			) > 0
+			, EM.STATUS IN (4,5,6)
+			, CREATE_USR_ID = #{usrId}
+		)
+		
+		<if test="startDate != null">
+			<![CDATA[
+				AND DATE(EM.START_DATE) >= DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND DATE(EM.END_DATE) <= DATE(#{endDate})
+			]]>
+		</if>
+		<if test="searchWhere != null and searchWord != null">
+			<choose>
+				<when test="searchWhere == 0">
+					AND EM.TITLE LIKE CONCAT('%',#{searchWord},'%')
+				</when>
+				<when test="searchWhere == 1">
+					AND SNS.SNS_USR_NAME LIKE CONCAT('%',#{searchWord},'%')
+				</when>
+				<when test="searchWhere == 2">
+					AND RIGHT(EUE.TEL,4) = #{searchWord}
+				</when>
+				<when test="searchWhere == 3">
+					AND NAME LIKE CONCAT('%',#{searchWord},'%')
+				</when>
+			</choose>
+		</if>
+		GROUP BY SNS.SNS_USR_NAME, EUE.TEL, EUE.NAME
+		ORDER BY END_DATE desc
+		LIMIT #{offset}, #{limit}
+	</select>
+	
+	<select id="selectEventDashboardUserListCnt" parameterType="hashMap" resultType="hashMap">
+	 SELECT COUNT(*) AS CNT FROM (
+			SELECT 
+			COUNT(*)
+			FROM 
+			EVENT_MASTER EM
+			INNER JOIN CONTENT_MASTER CM ON CM.COT_ID = EM.COT_ID
+			INNER JOIN EVENT_USER_ENTRY EUE ON EM.EVT_ID=EUE.EVT_ID
+			LEFT JOIN SNS ON EUE.SNS_ID = SNS.SNS_ID
+			WHERE EM.STATUS IN (4,5,6)
+			AND IF(
+				(
+					SELECT 
+						COUNT(*)
+					FROM PERMISSION 
+					WHERE 1 = 1
+						AND PERMISSION_ID = #{adminPermission}
+						AND CREATE_USR_ID = #{usrId}
+				) > 0
+				, EM.STATUS IN (4,5,6)
+				, CREATE_USR_ID = #{usrId}
+			)
+			<if test="startDate != null">
+				<![CDATA[
+					AND DATE(EM.START_DATE) >= DATE(#{startDate})
+				]]>
+			</if>
+			<if test="endDate != null">
+				<![CDATA[
+					AND DATE(EM.END_DATE) <= DATE(#{endDate})
+				]]>
+			</if>
+			<if test="searchWhere != null and searchWord != null">
+				<choose>
+					<when test="searchWhere == 0">
+						AND EM.TITLE LIKE CONCAT('%',#{searchWord},'%')
+					</when>
+					<when test="searchWhere == 1">
+						AND SNS.SNS_USR_NAME LIKE CONCAT('%',#{searchWord},'%')
+					</when>
+					<when test="searchWhere == 2">
+						AND RIGHT(EUE.TEL,4) = #{searchWord}
+					</when>
+					<when test="searchWhere == 3">
+						AND NAME LIKE CONCAT('%',#{searchWord},'%')
+					</when>
+				</choose>
+			</if>
+			GROUP BY SNS.SNS_USR_NAME, EUE.TEL, EUE.NAME
+		) AA
+	</select>
+	
+	
+	<select id="selectEventDashboardAccessList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+		 EM.EVT_ID
+		,DATE(EM.START_DATE) AS START_DATE
+		,DATE(EM.END_DATE) AS END_DATE
+		,EM.TITLE
+		,(SELECT COUNT(*) FROM EVENT_USER_ENTRY WHERE EVT_ID = EM.EVT_ID) TOT_CNT
+		,(SELECT COUNT(DISTINCT(TEL)) FROM EVENT_USER_ENTRY WHERE EVT_ID =EM.EVT_ID) REMOVE_CNT
+		,IFNULL((SELECT SUM(READ_COUNT) FROM CONTENT_VIEW WHERE COT_ID =EM.COT_ID),0) CONTENT_CNT
+		,(SELECT COUNT(*) FROM SHARE_CONTENT WHERE COT_ID =EM.COT_ID) SHARE_CNT
+		,(SELECT COUNT(*) FROM SNS_FAVORITES WHERE COT_ID =EM.COT_ID) FAVORITES_CNT
+		,(SELECT COUNT(*) FROM EVENT_USER_ENTRY WHERE EVT_ID = EM.EVT_ID AND DEVICE_TYPE = 'P') PC_CNT
+		,(SELECT COUNT(*) FROM EVENT_USER_ENTRY WHERE EVT_ID = EM.EVT_ID AND DEVICE_TYPE = 'M') MOBILE_CNT
+		FROM 
+		EVENT_MASTER EM
+		INNER JOIN CONTENT_MASTER CM ON CM.COT_ID = EM.COT_ID
+		WHERE EM.STATUS IN (4,5,6)
+		AND IF(
+			(
+				SELECT 
+					COUNT(*)
+				FROM PERMISSION 
+				WHERE 1 = 1
+					AND PERMISSION_ID = #{adminPermission}
+					AND CREATE_USR_ID = #{usrId}
+			) > 0
+			, EM.STATUS IN (4,5,6)
+			, CREATE_USR_ID = #{usrId}
+		)
+		<if test="startDate != null">
+			<![CDATA[
+				AND DATE(EM.START_DATE) >= DATE(#{startDate})
+			]]>
+		</if>
+		<if test="endDate != null">
+			<![CDATA[
+				AND DATE(EM.END_DATE) <= DATE(#{endDate})
+			]]>
+		</if>
+		<if test="searchWord != null">
+			AND EM.TITLE LIKE CONCAT('%',#{searchWord},'%')
+		</if>	
+		ORDER BY EM.END_DATE desc
+		LIMIT #{offset}, #{limit}
+	</select>
+
+	<select id="selectEventDashboardAccessListCnt" parameterType="hashMap" resultType="hashMap">
+		 SELECT 
+			 COUNT(*) CNT
+			FROM 
+			EVENT_MASTER EM
+			INNER JOIN CONTENT_MASTER CM ON CM.COT_ID = EM.COT_ID
+			WHERE EM.STATUS IN (4,5,6)
+			AND IF(
+				(
+					SELECT 
+						COUNT(*)
+					FROM PERMISSION 
+					WHERE 1 = 1
+						AND PERMISSION_ID = #{adminPermission}
+						AND CREATE_USR_ID = #{usrId}
+				) > 0
+				, EM.STATUS IN (4,5,6)
+				, CREATE_USR_ID = #{usrId}
+			)
+			<if test="startDate != null">
+				<![CDATA[
+					AND DATE(EM.START_DATE) >= DATE(#{startDate})
+				]]>
+			</if>
+			<if test="endDate != null">
+				<![CDATA[
+					AND DATE(EM.END_DATE) <= DATE(#{endDate})
+				]]>
+			</if>
+			<if test="searchWord != null">
+				AND EM.TITLE LIKE CONCAT('%',#{searchWord},'%')
+			</if>	
+	</select>
+	
+	
+	<select id="selectEventMaster" parameterType="hashMap" resultType="hashMap">
+		SELECT * 
+		FROM EVENT_MASTER
+		WHERE EVT_ID = #{evtId}
+	</select>
+	
+	<select id="selectSubEvent" parameterType="hashMap" resultType="hashMap">
+		SELECT * 
+		FROM EVENT_SUB_INFO
+		WHERE EVT_ID = #{evtId}
+		AND SUB_EVT_ID = #{subEvtId}
+	</select>
+	
+</mapper>
+

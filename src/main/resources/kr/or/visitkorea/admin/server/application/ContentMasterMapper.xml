@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.ContentMasterMapper">
+	<select id="contentMasterList" parameterType="hashMap" resultType="hashMap">
+		<!-- SELECT
+			  CM.COT_ID
+			, CM.CONTENT_ID
+			, CM.TITLE
+			, CM.CONTENT_TYPE
+			, CM.CONTENT_STATUS
+			, CM.DISPLAY_TITLE
+			, CM.READ_COUNT
+			, CM.SHOW_FLAG
+			, CM.CREATE_USR_ID
+			, CM.CREATE_DATE
+			, CM.MODIFIED_DATE
+			, CM.DEPT
+			, CM.DEPT_VIEW
+			, CM.TEL
+			, CM.CONTENTS_TYPE_OLD
+		FROM CONTENT_MASTER CM
+			<if test="table != null">
+				INNER JOIN #{table} T ON CM.COT_ID = T.COT_ID
+			</if>
+		WHERE 1 = 1
+		<choose>
+			<when test="searchType == 0">
+				AND CM.TITLE REGEXP #{keyword}
+			</when>
+			<when test="searchType == 1">
+				AND CM.CID REGEXP #{keyword}
+			</when>
+			<when test="searchType == 2">
+			 	AND CM.COT_ID IN (
+			 		SELECT 
+			 			DISTINCT COT_ID
+			 		FROM TAGS TA 
+			 			INNER JOIN CONTENT_TAGS CT ON TA.TAG_ID = CT.TAG_ID
+			 		WHERE
+			 			TA.TAG_NAME REGEXP #{keyword}
+			 	)				
+			</when>
+		</choose>
+		<choose>
+			<when test="startDate != null">
+				<![CDATA[
+					AND DATE(CM.CREATE_DATE) >= DATE(#{startDate})
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="endDate != null">
+				<![CDATA[
+					AND DATE(CM.CREATE_DATE) <= DATE(#{endDate})
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="order == 'DESC'">
+				ORDER BY CREATE_DATE DESC
+			</when>
+			<when test="order == 'ASC'">
+				ORDER BY CREATE_DATE ASC
+			</when>
+		</choose>
+		<choose>
+			<when test="offset != null">
+				<choose>
+					<when test="limit != null">
+						LIMIT #{offset}, #{limit}
+					</when>
+					<otherwise>
+						LIMIT #{offset}, 20
+					</otherwise>
+				</choose>
+			</when>
+		</choose>  -->
+		
+		 SELECT * FROM (
+		  select
+		     A.COT_ID
+			, A.CONTENT_ID
+			, A.TITLE 
+		  , (SELECT CREATE_DATE FROM SNS_COMMENT B WHERE A.COT_ID = B.COT_ID ORDER BY CREATE_DATE DESC LIMIT 1) AS CREATE_DATE 
+		  , (SELECT COUNT(*) FROM SNS_COMMENT B WHERE A.COT_ID = B.COT_ID AND B.PARENT_CMT_ID IS NULL ) AS CNT
+		  FROM CONTENT_MASTER A) CD
+		  <choose> 
+		 <when test="searchType == 0">
+		 	WHERE CD.TITLE REGEXP #{keyword}
+			</when>
+			<when test="searchType == 1">
+			 WHERE CD.COT_ID IN 
+			 (SELECT C.COT_ID FROM SNS_COMMENT C LEFT JOIN SNS D ON C.SNS_ID = D.SNS_ID
+			  WHERE D.SNS_IDENTIFY REGEXP #{keyword})
+			</when>
+			<when test="searchType == 2">
+			 WHERE CD.COT_ID IN 
+			 (SELECT C.COT_ID FROM SNS_COMMENT C LEFT JOIN SNS D ON C.SNS_ID = D.SNS_ID
+			  WHERE D.SNS_USR_NAME REGEXP #{keyword})
+			</when>
+		  </choose>
+		  <choose>
+			<when test="startDate != null and endDate == null">
+				<![CDATA[
+					AND CD.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) >= DATE(#{startDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="endDate != null and startDate == null">
+				<![CDATA[
+					AND CD.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) <= DATE(#{endDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="endDate != null and startDate != null">
+				<![CDATA[
+					AND CD.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) >= DATE(#{startDate}) 
+					 AND DATE(C.CREATE_DATE) <= DATE(#{endDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="order == 'DESC'">
+				ORDER BY CD.CREATE_DATE DESC
+			</when>
+			<when test="order == 'ASC'">
+				ORDER BY CD.CREATE_DATE ASC
+			</when>
+		</choose>
+		<choose>
+			<when test="offset != null">
+				<choose>
+					<when test="limit != null">
+						LIMIT #{offset}, #{limit}
+					</when>
+					<otherwise>
+						LIMIT #{offset}, 20
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+	</select>
+	
+	<select id="contentMasterListCnt" parameterType="hashMap" resultType="hashMap">
+	<!-- 
+		SELECT
+			COUNT(CM.COT_ID) CNT
+		FROM CONTENT_MASTER CM
+			<if test="table != null">
+				INNER JOIN #{table} T ON CM.COT_ID = T.COT_ID
+			</if>
+		WHERE 1 = 1
+		<choose>
+			<when test="searchType == 0">
+				AND CM.TITLE REGEXP #{keyword}
+			</when>
+			<when test="searchType == 1">
+				AND CM.CID REGEXP #{keyword}
+			</when>
+			<when test="searchType == 2">
+			 	AND CM.COT_ID IN (
+			 		SELECT 
+			 			DISTINCT COT_ID
+			 		FROM TAGS TA 
+			 			INNER JOIN CONTENT_TAGS CT ON TA.TAG_ID = CT.TAG_ID
+			 		WHERE
+			 			TA.TAG_NAME REGEXP #{keyword}
+			 	)				
+			</when>
+		</choose>
+		<choose>
+			<when test="startDate != null">
+				<![CDATA[
+					AND DATE(CM.CREATE_DATE) >= DATE(#{startDate})
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="endDate != null">
+				<![CDATA[
+					AND DATE(CM.CREATE_DATE) >= DATE(#{endDate})
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="order == 'DESC'">
+				ORDER BY CREATE_DATE DESC
+			</when>
+			<when test="order == 'ASC'">
+				ORDER BY CREATE_DATE ASC
+			</when>
+		</choose>
+		 -->
+		 SELECT COUNT(*) CNT FROM (
+		  select
+		     A.COT_ID
+			, A.CONTENT_ID
+			, A.TITLE 
+		  , (SELECT CREATE_DATE FROM SNS_COMMENT B WHERE A.COT_ID = B.COT_ID ORDER BY CREATE_DATE DESC LIMIT 1) AS CREATE_DATE 
+		  , (SELECT COUNT(*) FROM SNS_COMMENT B WHERE A.COT_ID = B.COT_ID ) AS CNT
+		  FROM CONTENT_MASTER A) CD
+		  <choose> 
+		 <when test="searchType == 0">
+		 	WHERE CD.TITLE REGEXP #{keyword}
+			</when>
+			<when test="searchType == 1">
+			 WHERE CD.COT_ID IN 
+			 (SELECT C.COT_ID FROM SNS_COMMENT C LEFT JOIN SNS D ON C.SNS_ID = D.SNS_ID
+			  WHERE D.SNS_IDENTIFY REGEXP #{keyword})
+			</when>
+			<when test="searchType == 2">
+			 WHERE CD.COT_ID IN 
+			 (SELECT C.COT_ID FROM SNS_COMMENT C LEFT JOIN SNS D ON C.SNS_ID = D.SNS_ID
+			  WHERE D.SNS_USR_NAME REGEXP #{keyword})
+			</when>
+		  </choose>
+		  <choose>
+			<when test="startDate != null and endDate == null">
+				<![CDATA[
+					AND CD.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) >= DATE(#{startDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="endDate != null and startDate == null">
+				<![CDATA[
+					AND CD.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) <= DATE(#{endDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="endDate != null and startDate != null">
+				<![CDATA[
+					AND CD.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) >= DATE(#{startDate}) 
+					 AND DATE(C.CREATE_DATE) <= DATE(#{endDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+	</select>
+	
+	<select id="getContentMaster" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			  CM.COT_ID
+			, CM.CONTENT_ID
+			, CM.CONTENT_TYPE
+			, CM.CONTENT_STATUS
+			, CM.TITLE
+			, CM.DISPLAY_TITLE
+			, CM.READ_COUNT
+			, CM.SHOW_FLAG
+			, CM.CREATE_USR_ID
+			, CM.CREATE_DATE
+			, CM.MODIFIED_DATE
+			, CM.DEPT
+			, CM.DEPT_VIEW
+			, CM.TEL
+			, CM.CONTENTS_TYPE_OLD
+		FROM CONTENT_MASTER CM
+		WHERE 1 = 1
+			AND CM.COT_ID = #{cotId}
+			
+	</select>
+	 <update id="updateContentFinalSave" parameterType="hashMap">
+  		UPDATE CONTENT_MASTER
+	    SET FINAL_MODIFIED_DATE = NOW()
+	    WHERE COT_ID = #{cotId}
+  </update>
+  <select id="XLSDownload" parameterType="hashMap" resultType="hashMap">
+ 			 select
+		     A.COT_ID
+			, A.CONTENT_ID
+			, A.TITLE
+			, (SELECT D.SNS_USR_NAME FROM SNS D WHERE B.SNS_ID = D.SNS_ID ) SNSNAME
+			,B.COMMENT
+			, B.CREATE_DATE
+			, B.IS_DELETE
+			, B.IS_VIEW
+		  , (SELECT COUNT(D.CMT_ID)FROM SNS_COMMENT D WHERE D.PARENT_CMT_ID = B.CMT_ID) REPLY_CNT
+		  FROM CONTENT_MASTER A , SNS_COMMENT B
+		  where A.COT_ID = B.COT_ID 
+		  <choose> 
+		 <when test="searchType == 0">
+		 	AND A.TITLE REGEXP #{keyword}
+			</when>
+			<when test="searchType == 1">
+			  AND  B.CMT_ID IN 
+			 (SELECT C.CMT_ID FROM SNS_COMMENT C LEFT JOIN SNS D ON C.SNS_ID = D.SNS_ID
+			  WHERE D.SNS_IDENTIFY REGEXP #{keyword})
+			</when>
+			<when test="searchType == 2">
+			 AND  B.CMT_ID IN 
+			 (SELECT C.CMT_ID FROM SNS_COMMENT C LEFT JOIN SNS D ON C.SNS_ID = D.SNS_ID
+			  WHERE D.SNS_USR_NAME REGEXP #{keyword})
+			</when>
+		  </choose>
+		  <choose>
+			<when test="startDate != null and endDate == null">
+				<![CDATA[
+					AND B.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) >= DATE(#{startDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="endDate != null and startDate == null">
+				<![CDATA[
+					AND B.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) <= DATE(#{endDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="endDate != null and startDate != null">
+				<![CDATA[
+					AND B.COT_ID IN 
+					(SELECT C.COT_ID FROM SNS_COMMENT C left join SNS D on C.SNS_ID = D.SNS_ID
+					 WHERE DATE(C.CREATE_DATE) >= DATE(#{startDate}) 
+					 AND DATE(C.CREATE_DATE) <= DATE(#{endDate}) 
+					 AND COT_ID IS NOT NULL)
+				]]>
+			</when>
+		</choose>
+		<choose>
+			<when test="order == 'DESC'">
+				ORDER BY B.CREATE_DATE DESC
+			</when>
+			<when test="order == 'ASC'">
+				ORDER BY B.CREATE_DATE ASC
+			</when>
+		</choose>
+  </select>
+</mapper>

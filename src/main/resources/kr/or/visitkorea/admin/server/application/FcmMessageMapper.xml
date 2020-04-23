@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.visitkorea.system.FcmMessageMapper">
+	<select id="totalCount" resultType="int">
+		SELECT 
+			COUNT(*) 
+		FROM PUSH_MESSAGES
+		WHERE 1 = 1
+		<if test="keyword != null">
+			AND TITLE REGEXP #{keyword}
+		</if>
+		<if test="osType != null">
+			AND TARGET = #{osType}
+		</if>
+	</select>
+
+	<select id="select" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			  PM_ID
+			, TARGET
+			, TITLE
+			, MESSAGE
+			, URL
+			, SEND_DATE
+		FROM PUSH_MESSAGES
+		WHERE 1 = 1
+		<if test="keyword != null">
+			AND TITLE REGEXP #{keyword}
+		</if>
+		<if test="osType != null">
+			AND TARGET = #{osType}
+		</if>
+		ORDER BY PM_ID DESC
+		LIMIT #{limit}
+		OFFSET #{offset}
+	</select>
+
+	<insert id="insert" parameterType="hashMap">
+		INSERT INTO PUSH_MESSAGES (
+			  TARGET
+			, TITLE
+			, MESSAGE
+			, URL
+			, SEND_DATE
+		) VALUES (
+			  #{target}
+			, #{title}
+			, #{message}
+			, #{url}
+			, NOW()
+		)
+	</insert>
+</mapper>

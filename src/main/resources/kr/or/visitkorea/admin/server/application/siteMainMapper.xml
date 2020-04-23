@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.SiteMainMapper">
+ 
+ <!-- related other site main table -->
+   <insert id="insertShowcase" parameterType="hashMap" >
+   		insert into SHOWCASE ( 
+   			MAN_ID, CONTENT_TITLE, 
+   			CONTENT_DESCRIPTION, COURSE_DESCRIPTION,  CONTENT_ORDER, IMG_ID, 
+   			DISPAY_START_DATE, 
+   			DISPLAY_END_DATE
+   			<if test="COT_ID!= null"> , COT_ID</if>
+   			<if test="LINK_URL != null"> , LINK_URL</if>
+   		)
+   		values
+   		( #{MAN_ID}, #{CONTENT_TITLE}, 
+   		#{CONTENT_DESCRIPTION}, #{COURSE_DESCRIPTION}, #{CONTENT_ORDER}, #{IMG_ID}, 
+   		str_to_date(#{DISPAY_START_DATE},'%Y-%m-%d'), 
+  		str_to_date(#{DISPLAY_END_DATE},'%Y-%m-%d')
+  			<if test="COT_ID != null"> , #{COT_ID}</if>
+   			<if test="LINK_URL != null"> , #{LINK_URL}</if>
+   		)
+   </insert>
+ 
+ <!-- related other site main table -->
+   <insert id="insertCuration" parameterType="hashMap" >
+   		insert into CURATION ( 
+			MAN_ID,
+			<if test="COT_ID != null">COT_ID,</if>
+			CREATE_DATE,
+			CREATE_USR_ID,
+			CONTENT_ORDER,
+			DISPLAY_TITLE,
+			DISPLAY_HEADER_YN,
+			DISPLAY_HEADER_COLOR,
+			DISPLAY_HEADER_TITLE,
+			LINK_URL   		
+   		)
+   		values
+   		(
+			#{MAN_ID},
+			<if test="COT_ID != null">#{COT_ID},</if>
+			now(),
+			#{CREATE_USR_ID},
+			#{CONTENT_ORDER},
+			#{DISPLAY_TITLE},
+			#{DISPLAY_HEADER_YN},
+			#{DISPLAY_HEADER_COLOR},
+			#{DISPLAY_HEADER_TITLE},
+			#{LINK_URL}   		
+   		)
+   </insert>
+ 
+	<!-- related other site main table -->
+	<insert id="insertMarketing" parameterType="hashMap" >
+   		insert into MARKETING ( 
+			MAN_ID,
+			<if test="COT_ID != null">COT_ID,</if>
+			TITLE,
+			LINK_URL,
+			IMG_ID,
+			CONTENT_ORDER,
+			CREATE_DATE,
+			CREATE_USR_ID,
+			CGP_ID
+   		)
+   		values
+   		(
+			#{MAN_ID},
+			<if test="COT_ID != null">#{COT_ID},</if>
+			#{TITLE},
+			#{LINK_URL},   		
+			#{IMG_ID},
+			#{CONTENT_ORDER},
+			now(),
+			#{CREATE_USR_ID},
+			#{CGP_ID}
+   		)
+</insert>
+ 
+ <!--  delete all record from showcase -->
+  	<delete id="deleteAllShowcase" parameterType="hashMap" >
+  		delete from SHOWCASE
+  		where MAN_ID=#{MAN_ID}
+  	</delete>
+   
+ <!--  delete all record from showcase -->
+  	<delete id="deleteAllCuration" parameterType="hashMap" >
+  		delete from CURATION
+  		where MAN_ID=#{MAN_ID}
+  	</delete>
+  
+<!--  delete all record from showcase -->
+  	<delete id="deleteAllMarketing" parameterType="hashMap" >
+  		delete from MARKETING
+  		where MAN_ID=#{MAN_ID}
+  	</delete>
+  
+<!--  delete all record from local government -->
+  	<delete id="deleteAllLogcalGov" parameterType="hashMap" >
+  		delete from LOCAL_GOVERNMENT
+  		where OTD_ID=#{OTD_ID}
+  	</delete>
+  
+<!--  delete all record from local government banner-->
+  	<delete id="deleteAllLogcalGovBanner" parameterType="hashMap" >
+  		delete from LOCAL_GOVERNMENT_BANNER
+  		where OTD_ID=#{OTD_ID}
+	</delete>
+
+<!-- get all main showcase -->
+  	<select id="getMainShowcase" parameterType="hashMap" resultType="hashMap">
+  		select * from SHOWCASE where MAN_ID=#{MAN_ID} order by CONTENT_ORDER asc
+  	</select>
+ 
+<!-- get all main curation -->
+  	<select id="getMainCuration" parameterType="hashMap" resultType="hashMap">
+  		select * from CURATION where MAN_ID=#{MAN_ID}  order by CONTENT_ORDER asc
+  	</select>
+ 
+<!-- get all main marketing -->
+  	<select id="getMainMarketing" parameterType="hashMap" resultType="hashMap">
+  		select * from MARKETING where MAN_ID=#{MAN_ID} order by CGP_ID asc, CONTENT_ORDER asc
+  	</select>
+ 
+<!-- get all main local government -->
+  	<select id="getMainLocalGov" parameterType="hashMap" resultType="hashMap">
+  		select * from LOCAL_GOVERNMENT where AREA_CODE = #{AREA_CODE} and OTD_ID = #{OTD_ID}
+  	</select>
+  	<select id="getMainLocalGovBanner" parameterType="hashMap" resultType="hashMap">
+  		select * from LOCAL_GOVERNMENT_BANNER where LOG_ID = #{LOG_ID} and OTD_ID = #{OTD_ID} order by `ORDER`
+  	</select>
+ 
+<!-- get all main local government -->
+  	<select id="selectCountSigungu" parameterType="hashMap" resultType="hashMap">
+	select count(*) CNT from CITY_CAPITAL_INFOR 
+	where COD_ID in 
+		(
+			select
+			COD_ID from KTO.CODE WHERE BIG_CATEGORY=#{AREA_CODE} 
+			AND MID_CATEGORY=#{SIGUNGU_CODE} AND SML_CATEGORY = '0'
+		) 
+		AND OTD_ID = #{OTD_ID}
+  	</select>
+ 
+	<insert id="insertSigungu" parameterType="hashMap" >
+	insert
+	into
+		CITY_CAPITAL_INFOR (COD_ID,
+		HOMEPAGE, OTD_ID)
+	values 
+	((
+		select COD_ID
+	from
+		KTO.CODE
+	WHERE
+		BIG_CATEGORY =
+		#{AREA_CODE} 
+		AND MID_CATEGORY=#{SIGUNGU_CODE} 
+		AND SML_CATEGORY = '0'), 
+		#{SIGUNGU_CODE}
+		)
+		, #{HOMEPAGE}
+		, #{OTD_ID}
+		)
+	</insert>
+ 
+	<update id="updateSigungu" parameterType="hashMap" >
+		update CITY_CAPITAL_INFOR set HOMEPAGE=#{HOMEPAGE} where COD_ID = (select COD_ID from KTO.CODE WHERE BIG_CATEGORY=#{AREA_CODE} AND MID_CATEGORY=#{SIGUNGU_CODE} AND SML_CATEGORY = '0') AND OTD_ID = #{OTD_ID}
+	</update>
+	
+  	<select id="getCityCapital" parameterType="hashMap" resultType="hashMap">
+  		select * from CITY_CAPITAL_INFOR A, CODE B where A.COD_ID = B.COD_ID and BIG_CATEGORY=#{AREA_CODE} AND MID_CATEGORY=#{SIGUNGU_CODE} AND SML_CATEGORY = '0' AND A.OTD_ID = #{OTD_ID}
+  	</select>
+	
+ 
+<!-- get citi capital homepage url -->
+  	<select id="getCountLocalGovernment" parameterType="hashMap" resultType="hashMap">
+  		select count(*) CNT from LOCAL_GOVERNMENT where LOG_ID = #{LOG_ID} AND OTD_ID = #{OTD_ID}
+  	</select>
+	 
+<!-- related other site main table -->
+	<insert id="insertLocalGovernment" parameterType="hashMap" >
+   		insert into LOCAL_GOVERNMENT ( 
+			LOG_ID,
+			AREA_CODE,
+			<if test="IMG_ID != ''">IMG_ID,</if>
+			<if test="LOG_IMG_ID != ''">LOG_IMG_ID,</if>
+			TITLE,
+			SUB_TITLE,
+			INFORMATION,
+			CONNECT_URL,
+			BANNER_STYLE,
+<!-- 
+			<if test="COT_ID != null">COT_ID,</if>
+ -->			
+			LINK_URL,
+			CREATE_DATE,
+			OTD_ID
+   		)
+   		values
+   		(
+   			#{LOG_ID}, 
+			#{AREA_CODE},
+			<if test="IMG_ID != ''">#{IMG_ID},</if>
+			<if test="LOG_IMG_ID != ''">#{LOG_IMG_ID},</if>
+			#{TITLE},
+			#{SUB_TITLE},
+			#{INFORMATION},
+			#{CONNECT_URL},
+			#{BANNER_STYLE},
+<!-- 
+			<if test="COT_ID != null">#{COT_ID},</if>
+ -->			
+			#{LINK_URL},
+			now(),
+			#{OTD_ID}
+   		)
+	</insert>
+	
+<!-- related other site main table -->
+	<insert id="insertLocalGovernmentBanner" parameterType="hashMap" >
+   		insert into LOCAL_GOVERNMENT_BANNER ( 
+ 			LOG_ID,
+			HEADER,
+			HEADER_COLOR,
+			CONTENT_TYPE_NAME,
+			TITLE,
+			LINK_URL,
+			LINK_TYPE,
+			<if test="IMG_ID != ''">IMG_ID,</if>
+			CREATE_DATE,
+			OTD_ID,
+			`ORDER`
+   		)
+   		values
+   		(
+   			#{LOG_ID},
+			#{HEADER},
+			#{HEADER_COLOR},
+			#{CONTENT_TYPE_NAME},
+			#{TITLE},
+			#{LINK_URL},
+			0,
+			<if test="IMG_ID != ''">#{IMG_ID},</if>
+			now(),
+			#{OTD_ID},
+			#{ORDER}
+   		)
+	</insert>
+	
+<!-- related other site main table -->
+	<update id="updateLocalGovernment" parameterType="hashMap" >
+   		update LOCAL_GOVERNMENT 
+   		set 
+			AREA_CODE=#{AREA_CODE},
+			<if test="IMG_ID != null">IMG_ID=#{IMG_ID},</if>
+			<if test="LOG_IMG_ID != null">LOG_IMG_ID=#{LOG_IMG_ID},</if>
+			TITLE=#{TITLE},
+			SUB_TITLE=#{SUB_TITLE},
+			INFORMATION=#{INFORMATION},
+			CONNECT_URL=#{CONNECT_URL},
+<!-- 
+			<if test="COT_ID != null">COT_ID=#{COT_ID},</if>
+ -->			
+			LINK_URL=#{LINK_URL}
+		where
+   			LOG_ID=#{LOG_ID}
+   			AND OTD_ID=#{OTD_ID}
+   		
+	</update>
+	
+<!-- related other site main table -->
+	<update id="updateLocalGovernmentBanner" parameterType="hashMap" >
+   		update LOCAL_GOVERNMENT_BANNER
+   		set 
+			AREA_CODE=#{AREA_CODE},
+			CONTENT_TYPE_NAME=#{CONTENT_TYPE_NAME},
+			TITLE=#{TITLE},
+			LINK_URL=#{LINK_URL},
+			<if test="IMG_ID != null">IMG_ID=#{IMG_ID},</if>
+<!-- 
+			<if test="COT_ID != null">COT_ID=#{COT_ID},</if>
+ -->			
+		where
+   			LOG_ID=#{LOG_ID}
+   			AND OTD_ID = #{OTD_ID}
+	</update>
+	<delete id="deleteMemberTag" parameterType="hashMap" >
+		delete from SITE_MAIN_TAGS where TAG_ID=#{tagId} and MAN_ID=#{manId}
+	</delete>
+  	<select id="searchContentTags" parameterType="hashMap" resultType="hashMap">
+  		select * from TAGS where TAG_ID in (select TAG_ID from SITE_MAIN_TAGS WHERE MAN_ID=#{manId})
+  	</select>
+	<insert id="insertMemberTag" parameterType="hashMap" >
+		insert into SITE_MAIN_TAGS (TAG_ID, MAN_ID ) values (#{tagId}, #{manId})
+	</insert>
+  	<select id="getAllRecommandMain" parameterType="hashMap" resultType="hashMap">
+  		select * from RECOMMAND_MAIN where COMP_ID=#{COMP_ID} order by CONTENT_ORDER asc
+  	</select>
+  	<select id="getAllEventMain" parameterType="hashMap" resultType="hashMap">
+  		select * from EVENT_MAIN where COMP_ID=#{COMP_ID} order by CONTENT_ORDER asc
+  	</select>
+  	<select id="getAllCourseMain" parameterType="hashMap" resultType="hashMap">
+		select *
+		from 
+		(select A.COT_ID, B.FIRST_IMAGE, areacode(B.AREA_CODE) AREA_NAME, A.TITLE
+		from CONTENT_MASTER A, DATABASE_MASTER B
+		where A.COT_ID = B.COT_ID) T, COURSE_MAIN K
+		where T.COT_ID = K.COT_ID and K.COMP_ID = #{COMP_ID}
+		order by K.CONTENT_ORDER asc
+  	</select>
+	<select id="getAllCompIdList" parameterType="hashMap" resultType="hashMap">
+		SELECT * FROM KTO.COURSE_MAIN WHERE COMP_ID = #{COMP_ID} ORDER BY CONTENT_ORDER
+	</select>
+	<select id="getDataBasedOnCotData" parameterType="hashMap" resultType="hashMap">
+	select
+		A.COT_ID,
+		B.FIRST_IMAGE,
+		areacode(B.AREA_CODE) AREA_NAME,
+		A.TITLE
+	from
+		CONTENT_MASTER A,
+		DATABASE_MASTER B
+	where
+		A.COT_ID = B.COT_ID
+		and A.COT_ID in (${IN_CONDITION})
+	</select>
+	<select id="getDataBasedOnCrsData" parameterType="hashMap" resultType="hashMap">
+	select
+		A.CRS_ID,
+		A.TITLE,
+		C.FIRST_IMAGE,
+		areacode(C.AREA_CODE) AREA_NAME
+	from
+		KTO.SNS_COURSE A,
+		(select * from KTO.SNS_COURSE_DETAILS where CRS_ID = #{CRS_ID} order by CREATE_DATE desc limit 1 ) B,
+		KTO.DATABASE_MASTER C
+	WHERE
+		A.CRS_ID = B.CRS_ID 
+		and B.COT_ID = C.COT_ID
+	</select>
+  	<select id="getAllSightMain" parameterType="hashMap" resultType="hashMap">
+  		select * from SIGHT_MAIN where COMP_ID=#{COMP_ID} order by CONTENT_ORDER asc
+  	</select>
+  	<select id="getAllSightMainCuration" parameterType="hashMap" resultType="hashMap">
+  		select * from CURATION where COMP_ID=#{COMP_ID} order by CONTENT_ORDER asc
+  	</select>
+  	<select id="getAllFestivalMainMonthly" parameterType="hashMap" resultType="hashMap">
+  		select * from FESTIVAL_MAIN where COMP_ID=#{COMP_ID} order by CONTENT_ORDER asc
+  	</select>
+  	<select id="getAllFestivalMainMonthlyCount" parameterType="hashMap" resultType="hashMap">
+  		select MAIN_TYPE, count(1) as CNT from KTO.SUB_MAIN where MAIN_TYPE BETWEEN 3 and 14 group by MAIN_TYPE order by MAIN_TYPE
+  	</select>
+  	<select id="getAllFestivalMainSeasonCount" parameterType="hashMap" resultType="hashMap">
+  		select FS.NAME, count(1) as CNT from KTO.FESTIVAL_SEASON FS inner join KTO.FESTIVAL_SEASON_TAGS FST on FS.SEASON_ID = FST.SEASON_ID group by FS.NAME
+  	</select>
+  	<select id="getAllFestivalMainSeason" parameterType="hashMap" resultType="hashMap">
+  		select * from FESTIVAL_SEASON
+  	</select>
+  	<select id="getSubMain" parameterType="hashMap" resultType="hashMap">
+  		select * from SUB_MAIN WHERE MAIN_TYPE = #{MAIN_TYPE} order by COMP_ORDER asc
+  	</select>
+  	<select id="getSubMainForFestival" parameterType="hashMap" resultType="hashMap">
+  		select * from SUB_MAIN WHERE MAIN_TYPE <![CDATA[ >= ]]> 3 and MAIN_TYPE <![CDATA[ <= ]]> 14 order by MAIN_TYPE asc, COMP_ORDER asc
+  	</select>
+	<select id="getCountWithSubMain" parameterType="hashMap"  resultType="hashMap">
+   		select count(*) cnt from SUB_MAIN where COMP_ID=#{COMP_ID}
+	</select>
+	<insert id="insertSubMain" parameterType="hashMap" >
+   		insert SUB_MAIN ( 
+   			COMP_ID, 
+   			COMP_TYPE, 
+   			COMP_ORDER, 
+   			MAIN_TYPE, 
+   			TITLE, 
+   			SUB_TITLE )
+   		values( 
+   			#{COMP_ID}, 
+   			#{COMP_TYPE}, 
+   			#{COMP_ORDER}, 
+   			#{MAIN_TYPE}, 
+   			#{TITLE}, 
+   			#{SUB_TITLE} ) 
+	</insert>
+	<update id="updateSubMain" parameterType="hashMap" >
+   		update SUB_MAIN 
+   		set 
+			COMP_ORDER=#{COMP_ORDER},
+			MAIN_TYPE=#{MAIN_TYPE},
+			TITLE=#{TITLE},
+			SUB_TITLE=#{SUB_TITLE}
+		where
+   			COMP_ID=#{COMP_ID}
+	</update>
+	
+ <!--  delete all record from showcase -->
+  	<delete id="deleteSightMain" parameterType="hashMap" >delete from SIGHT_MAIN</delete>
+  	<delete id="deleteRecommandMain" parameterType="hashMap" >delete from RECOMMAND_MAIN</delete>
+  	<delete id="deleteEventMain" parameterType="hashMap" >delete from EVENT_MAIN</delete>
+  	<delete id="deleteFestivalMain" parameterType="hashMap" >
+  		delete from FESTIVAL_MAIN where COMP_ID in (select COMP_ID from SUB_MAIN where MAIN_TYPE = #{MAIN_TYPE})
+  	</delete>
+ 	<delete id="deleteSubMain" parameterType="hashMap" >delete from SUB_MAIN where MAIN_TYPE=#{MAIN_TYPE}</delete>
+	<insert id="insertFestivalMain" parameterType="hashMap" >
+   		insert into FESTIVAL_MAIN ( 
+ 			MAN_ID,
+			<if test="COT_ID != null">COT_ID,</if>
+			CONTENT_ORDER,
+			TITLE,
+			LINK_URL,
+			COMP_ID,
+			IMG_ID
+   		)
+   		values
+   		(
+   			#{MAN_ID},
+			<if test="COT_ID != null">#{COT_ID},</if>
+			#{CONTENT_ORDER},
+			#{CTITLE},
+			#{LINK_URL},
+			#{COMP_ID},
+			#{IMG_ID}
+   		)
+	</insert>
+	<insert id="insertRecommandMain" parameterType="hashMap" >
+   		insert into RECOMMAND_MAIN ( 
+ 			MAN_ID,
+			<if test="COT_ID != null">COT_ID,</if>
+			CONTENT_ORDER,
+			TITLE,
+			LINK_URL,
+			COMP_ID,
+			IMG_ID
+   		)
+   		values
+   		(
+   			#{MAN_ID},
+			<if test="COT_ID != null">#{COT_ID},</if>
+			#{CONTENT_ORDER},
+			#{CTITLE},
+			#{LINK_URL},
+			#{COMP_ID},
+			#{IMG_ID}
+   		)
+	</insert>
+	<insert id="insertEventMain" parameterType="hashMap" >
+   		insert into EVENT_MAIN ( 
+ 			MAN_ID,
+			<if test="COT_ID != null">COT_ID,</if>
+			CONTENT_ORDER,
+			TITLE,
+			LINK_URL,
+			COMP_ID,
+			IMG_ID
+   		)
+   		values
+   		(
+   			#{MAN_ID},
+			<if test="COT_ID != null">#{COT_ID},</if>
+			#{CONTENT_ORDER},
+			#{CTITLE},
+			#{LINK_URL},
+			#{COMP_ID},
+			#{IMG_ID}
+   		)
+	</insert>
+	<insert id="insertSightMain" parameterType="hashMap" >
+   		insert into SIGHT_MAIN ( 
+ 			MAN_ID,
+			<if test="COT_ID != null">COT_ID,</if>
+			CONTENT_ORDER,
+			TITLE,
+			LINK_URL,
+			COMP_ID,
+			IMG_ID
+   		)
+   		values
+   		(
+   			#{MAN_ID},
+			<if test="COT_ID != null">#{COT_ID},</if>
+			#{CONTENT_ORDER},
+			#{CTITLE},
+			#{LINK_URL},
+			#{COMP_ID},
+			#{IMG_ID}
+   		)
+	</insert>
+	<insert id="insertSightMainCuration" parameterType="hashMap" >
+   		insert into CURATION ( 
+ 			MAN_ID,
+			<if test="COT_ID != null">COT_ID,</if>
+			CONTENT_ORDER,
+			DISPLAY_TITLE,
+			DISPLAY_HEADER_YN,
+			DISPLAY_HEADER_COLOR,
+			DISPLAY_HEADER_TITLE,
+			LINK_URL,
+			COMP_ID
+   		)
+   		values
+   		(
+   			#{MAN_ID},
+			<if test="COT_ID != null">#{COT_ID},</if>
+			#{CONTENT_ORDER},
+			#{CTITLE},
+			1,
+			#{HEAD_COLOR},
+			#{HEAD},
+			#{LINK_URL},
+			#{COMP_ID}
+   		)
+	</insert>
+   	<delete id="deleteSightMainCuration" parameterType="hashMap" >delete from CURATION where MAN_ID='0fa1c1f0-a30a-11e8-8165-020027310001'</delete>
+   	<delete id="deleteCourseMain" parameterType="hashMap" >delete from COURSE_MAIN</delete>
+	<insert id="insertCourseMain" parameterType="hashMap" >
+   		insert into COURSE_MAIN ( 
+ 			MAN_ID,
+			COT_ID,
+			CONTENT_ORDER,
+			LINK_URL,
+			COMP_ID,
+			CRS_ID
+   		)
+   		values
+   		(
+   			#{MAN_ID},
+			#{COT_ID},
+			#{CONTENT_ORDER},
+			#{LINK_URL},
+			#{COMP_ID},
+			#{CRS_ID}
+   		)
+	</insert>
+	<update id="UpdateImageBanner" parameterType="hashMap">
+		UPDATE CURATION
+		SET DISPLAY_TITLE = #{img_title}
+		   ,LINK_URL = #{img_link}
+		   ,DISPLAY_HEADER_TITLE = #{imgId}
+		WHERE MAN_ID = 'c37c2690-8716-4528-8325-19451c7700c1'
+		  AND CONTENT_ORDER = #{order}
+	</update>
+	<select id="GetImageBanner" parameterType="hashMap" resultType="hashMap">
+	select A.LINK_URL img_link
+	, B.IMG_ID imgId
+	, B.IMAGE_DESCRIPTION img_desc
+	, A.DISPLAY_TITLE img_title
+	from CURATION A, IMAGE B 
+	where A.DISPLAY_HEADER_TITLE = B.IMG_ID 
+	and A.CONTENT_ORDER = #{order}
+	</select>
+</mapper>

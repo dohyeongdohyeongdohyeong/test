@@ -1,0 +1,1122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.ArticleMapper">
+ <!-- related  ARTICLE table -->
+  <select id="list" parameterType="hashMap" resultType="hashMap">
+	select *
+	, areacode(AA.AREA_CODE) AREA_NAME
+	, mastertag(AA.COT_ID) MASTER_TAG 
+	, username(AA.CREATE_USR_ID) USER_NAME
+	, (SELECT VALUE FROM CODE E WHERE E.BIG_CATEGORY = AA.CONTENT_CATEGORY AND E.CODE_TYPE = 3) CONTENT_CATEGORYK
+	, (SELECT VALUE FROM CODE E WHERE E.BIG_CATEGORY = AA.CONTENT_CATEGORY_TWO AND E.CODE_TYPE = 3) CONTENT_CATEGORYK_TWO
+	from (
+		select 
+			A.COT_ID COT_ID
+			,A.CONTENT_ID CONTENT_ID
+			,A.TITLE TITLE
+			,D.AREA_CODE
+			,(case when A.CONTENT_STATUS=0 then '작업 미완료'
+				 when A.CONTENT_STATUS=1 then '상태 미등록'
+				       when A.CONTENT_STATUS=2 then '작업 완료'
+				 when A.CONTENT_STATUS=3 then '작업 완료'
+				 when A.CONTENT_STATUS=4 then '상태 미등록'
+				 when A.CONTENT_STATUS=5 then '작업 완료'
+				 when A.CONTENT_STATUS=6 then '상태 미등록'
+				 when A.CONTENT_STATUS=7 then '비노출'
+				 when A.CONTENT_STATUS=8 then '삭제'
+				 when A.CONTENT_STATUS=9 then '작업보류'
+				ELSE '상태 미등록'
+				END
+			) AS CONTENT_STATUS
+			,D.CONTENT_CATEGORY
+			,D.CONTENT_CATEGORY_TWO
+			,A.FINAL_MODIFIED_DATE FINAL_MODIFIED_DATE
+			,A.CREATE_DATE CREATE_DATE
+			,A.CREATE_USR_ID
+			,A.CONTENT_DIV
+			from CONTENT_MASTER A, ARTICLE_MASTER D
+			where A.COT_ID = D.COT_ID
+			<choose>
+				<when test="mode == -1">
+				 and A.TITLE REGEXP ''
+				</when>
+				<when test="mode == 0">
+				 and A.TITLE REGEXP #{keyword}
+				</when>
+				<when test="mode == 1">
+				 and A.CONTENT_ID=#{keyword}
+				</when>
+				<when test="mode == 2">
+				 	and A.COT_ID in (select DISTINCT COT_ID from TAGS A, CONTENT_TAGS B where A.TAG_ID = B.TAG_ID and A.TAG_NAME REGEXP #{keyword})
+				</when>
+				<when test="mode == 3">
+				 	and username(A.CREATE_USR_ID)=#{keyword}
+				</when>
+			</choose>
+			<choose>
+				<when test="dateType == 0">
+					<choose>
+						<when test="startInput != null">
+						 and A.CREATE_DATE >= #{startInput}
+						</when>
+					</choose>
+					<choose>
+						<when test="endInput != null">
+						 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+						</when>
+					</choose>
+				</when>
+				<when test="dateType == 1">
+					<choose>
+						<when test="startInput != null">
+						 and A.FINAL_MODIFIED_DATE >= #{startInput}
+						</when>
+					</choose>
+					<choose>
+						<when test="endInput != null">
+						 and A.FINAL_MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+						</when>
+					</choose>
+				</when>
+			</choose>
+			<choose>
+				<when test="areaCode != null">
+				 and D.AREA_CODE = #{areaCode}
+				</when>
+			</choose>
+			<if test="CategoryCode != null">
+			 and D.CONTENT_CATEGORY = #{CategoryCode}
+			</if>
+			<if test="Division != null">
+			 and A.CONTENT_DIV = #{Division}
+			</if>
+			<if test="OTD_ID != null">
+			 and A.COT_ID in (select COT_ID from OTHER_DEPARTMENT_CONTENT where OTD_ID = #{OTD_ID})
+			</if>
+			<if test="IS_OPEN != null">
+			 	<if test="IS_OPEN == 1">
+				 AND(A.CONTENT_STATUS = 2 OR A.CONTENT_STATUS = 3 OR A.CONTENT_STATUS = 5)
+				</if>
+			</if>
+			<if test="IS_RANK != null">
+			 	<if test="IS_RANK == 1">
+			 		<if test="CODE != null">
+						 and D.CONTENT_CATEGORY_TWO = #{CODE}
+					</if>
+				</if>
+				<if test="IS_RANK == 0">
+					<if test="CODE != null">
+						 and D.CONTENT_CATEGORY = #{CODE}
+					</if>
+				</if>
+			</if>
+			ORDER BY A.CREATE_DATE DESC
+			<if test="offset != null">
+	        	limit #{offset}, 20
+			</if>
+			) AA
+	
+  </select>
+  
+  <select id="listCnt" parameterType="hashMap" resultType="hashMap">
+  SELECT count(*) CNT FROM (
+		select 
+			A.COT_ID COT_ID,
+			A.CONTENT_ID CONTENT_ID, 
+			areacode(D.AREA_CODE) AREA_NAME, 
+			A.TITLE TITLE,
+			mastertag(A.COT_ID) MASTER_TAG
+			,    if(A.CONTENT_STATUS=0,'작업 미완료', if(A.CONTENT_STATUS=1, '상태 미등록', if(A.CONTENT_STATUS=2, '작업 완료', if(A.CONTENT_STATUS=3, '작업 완료'
+		,if(A.CONTENT_STATUS=4, '상태 미등록', if(A.CONTENT_STATUS=5, '작업 완료', if(A.CONTENT_STATUS=6, '상태 미등록', if(A.CONTENT_STATUS=7, '비노출'
+		,if(A.CONTENT_STATUS=8, '삭제', if(A.CONTENT_STATUS=9, '작업보류', '상태 미등록')))))))))) 
+		CONTENT_STATUS
+<!-- 			cstatus(A.CONTENT_STATUS) CONTENT_STATUS -->
+			,A.FINAL_MODIFIED_DATE FINAL_MODIFIED_DATE
+			,A.CREATE_DATE CREATE_DATE
+			,username(A.CREATE_USR_ID) USER_NAME
+			,A.CONTENT_DIV
+		from CONTENT_MASTER A, ARTICLE_MASTER D
+		where A.COT_ID = D.COT_ID
+		<choose>
+			<when test="mode == -1">
+			 and A.TITLE REGEXP ''
+			</when>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+			<when test="mode == 1">
+			 and A.CONTENT_ID=#{keyword}
+			</when>
+			<when test="mode == 2">
+			 	and A.COT_ID in (select DISTINCT COT_ID from TAGS A, CONTENT_TAGS B where A.TAG_ID = B.TAG_ID and A.TAG_NAME REGEXP #{keyword})
+			</when>
+			<when test="mode == 3">
+			 	and username(A.CREATE_USR_ID)=#{keyword}
+			</when>
+		</choose>
+		<choose>
+			<when test="dateType == 0">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.FINAL_MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.FINAL_MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="areaCode != null">
+			 and D.AREA_CODE = #{areaCode}
+			</when>
+		</choose>
+		<if test="CategoryCode != null">
+		 and D.CONTENT_CATEGORY = #{CategoryCode}
+		</if>
+		<if test="Division != null">
+		 and A.CONTENT_DIV = #{Division}
+		</if>
+		<if test="OTD_ID != null">
+		 and A.COT_ID in (select COT_ID from OTHER_DEPARTMENT_CONTENT where OTD_ID = #{OTD_ID})
+		</if>
+		<if test="IS_OPEN != null">
+		 	<if test="IS_OPEN == 1">
+			 AND(A.CONTENT_STATUS = 2 OR A.CONTENT_STATUS = 3 OR A.CONTENT_STATUS = 5)
+			</if>
+		</if>
+		<if test="IS_RANK != null">
+		 	<if test="IS_RANK == 1">
+		 		<if test="CODE != null">
+					 and D.CONTENT_CATEGORY_TWO = #{CODE}
+				</if>
+			</if>
+			<if test="IS_RANK == 0">
+				<if test="CODE != null">
+					 and D.CONTENT_CATEGORY = #{CODE}
+				</if>
+			</if>
+		</if>
+        ) AAA
+  </select>
+  
+  <select id="selectCotId" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			A.COT_ID,
+			B.ATM_ID,
+			A.CONTENT_ID,
+			A.TITLE, 
+			B.DISPLAY_TITLE, 
+			areacode(B.AREA_CODE) AREA_NAME, 
+			siguguncode(B.AREA_CODE, B.SIGUGUN_CODE) SIGUGUN_NAME,    if(A.CONTENT_STATUS=0,'작업 미완료', if(A.CONTENT_STATUS=1, '상태 미등록', if(A.CONTENT_STATUS=2, '작업 완료', if(A.CONTENT_STATUS=3, '작업 완료'
+		,if(A.CONTENT_STATUS=4, '상태 미등록', if(A.CONTENT_STATUS=5, '작업 완료', if(A.CONTENT_STATUS=6, '상태 미등록', if(A.CONTENT_STATUS=7, '비노출'
+		,if(A.CONTENT_STATUS=8, '삭제', if(A.CONTENT_STATUS=9, '작업보류', '상태 미등록')))))))))) 
+	CONTENT_STATUS
+	,B.SEASON,
+			A.CREATE_DATE,
+			A.MODIFIED_DATE,
+			A.FINAL_MODIFIED_DATE,
+			B.IMG_ID,
+			B.CONTENT_CATEGORY,
+			B.CONTENT_CATEGORY_TWO,
+			username(A.CREATE_USR_ID) USER_NAME
+			, A.CONTENT_DIV
+		FROM 
+			CONTENT_MASTER A, ARTICLE_MASTER B 
+		WHERE 
+			A.COT_ID = B.COT_ID and A.COT_ID = #{cotId}
+  </select>
+  <select id="selectMonth" parameterType="hashMap" resultType="hashMap">
+  		SELECT `MONTH` A_MONTH 
+  		FROM ARTICLE_MONTH 
+  		WHERE ATM_ID = #{atmId}
+  </select>
+  <update id="updateOrder" parameterType="hashMap">
+  		UPDATE ARTICLE_CONTENT SET CONTENT_ORDER=#{cOrder}, ARTICLE_ORDER=#{aOrder} WHERE ACI_ID = #{aciId}
+  </update>
+  <update id="updateOrderImage" parameterType="hashMap">
+  		UPDATE ARTICLE_CONTENT SET CONTENT_ORDER=#{cOrder}, ARTICLE_ORDER=#{aOrder}, ARTICLE_SUB_ORDER=#{asOrder}  WHERE IMG_ID = #{imgId}
+  </update>
+  <update id="updateCaption" parameterType="hashMap">
+  		UPDATE ARTICLE_CONTENT SET IMG_CAPTION=#{caption} WHERE IMG_ID = #{imgId}
+  </update>
+  <update id="updateisCaption" parameterType="hashMap">
+  		UPDATE ARTICLE_CONTENT SET IS_CAPTION =#{iscaption} WHERE IMG_ID = #{imgId}
+  </update>
+  <update id="updateForStatus" parameterType="hashMap">
+  		UPDATE CONTENT_MASTER SET CONTENT_STATUS=8, MODIFIED_DATE=now()
+  		WHERE COT_ID = #{cotId}
+  </update>
+  <update id="updateForModifiedDate" parameterType="hashMap">
+  		UPDATE CONTENT_MASTER SET MODIFIED_DATE=now() WHERE COT_ID = #{cotId}
+  </update>
+  <update id="updateForModifiedDateImg" parameterType="hashMap">
+      UPDATE CONTENT_MASTER A, IMAGE B SET MODIFIED_DATE=now() WHERE  B.IMG_ID = #{imgId} and A.COT_ID = B.COT_ID
+  </update>
+  <delete id="deleteWithCotId" parameterType="hashMap">
+  		delete from ARTICLE_MONTH where ATM_ID = (select ATM_ID from ARTICLE_MASTER where COT_ID=#{cotId})
+  </delete>
+
+  <select id="selcetAtmIdFromCotId" parameterType="hashMap" resultType="java.lang.String">
+  		select ATM_ID from ARTICLE_MASTER where COT_ID=#{cotId}
+  </select>
+  
+  <insert id="insertWithCotId" parameterType="hashMap">
+  		insert into ARTICLE_MONTH (ATM_ID, MONTH) values
+  		<foreach collection="list" item="item" separator=" , ">
+            (#{item.atmId}, #{item.month})
+        </foreach>
+  </insert>
+  
+  <select id="selectEtcCotId" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			AUTHOR,
+			BIGO,
+			IS_KOGL,
+			IMG_ID,
+			IS_RELATED,
+			AUTHOR_VIEW
+		FROM
+			ARTICLE_MASTER
+		WHERE
+			COT_ID = #{cotId}
+  </select>
+  
+  <select id="selectEtcRelatedView" parameterType="hashMap" resultType="hashMap">
+		SELECT
+			A.COT_ID,
+			A.ATH_ID,
+			C.NAME,
+			C.CREATE_DATE,
+			C.TYPE_ID,
+			D.KEYWORD,
+			D.TYPE_NAME
+		FROM AUTHOR_CONTENT A 
+			INNER JOIN ARTICLE_MASTER B ON A.COT_ID = B.COT_ID
+			LEFT OUTER JOIN AUTHOR_INFO C ON C.ATH_ID = A.ATH_ID
+			INNER JOIN AUTHOR_TYPE D ON C.TYPE_ID = D.TYPE_ID
+		WHERE A.COT_ID = #{cotId}
+  </select>
+  
+  <select id="selectContent" parameterType="hashMap" resultType="hashMap">
+		SELECT COT_ID, CONTENT_ID,
+			TITLE,
+			mastertag(COT_ID) MASTER_TAG
+		FROM
+			CONTENT_MASTER
+		WHERE COT_ID in (
+			select COT_ID from KTO.ARTICLE_MASTER
+			union
+			select COT_ID from KTO.DATABASE_MASTER
+		)
+		<choose>
+			<when test="mode == 0"> 
+				and TITLE regexp #{keyword}
+			</when>
+			<when test="mode == 1"> 
+				and cid(COT_ID) = ${keyword}
+			</when>
+		</choose>
+		<choose>
+			<when test="sMode == 0"> 
+				and CONTENT_TYPE in ${condition}
+			</when>
+			<when test="sMode == 1"> 
+				and CONTENT_TYPE = #{condition}
+			</when>
+		</choose>		
+  </select>
+  
+  <insert id="insertRelatedContent" parameterType="hashMap">
+  		INSERT INTO RELATED_${tbl} ( 
+  			COT_ID, SUB_COT_ID, CREATE_DATE 
+  		) VALUES (
+  			#{cotId}, #{subCotId}, now()
+  		) ON DUPLICATE KEY UPDATE 
+  			SUB_COT_ID = #{subCotId}
+  			, CREATE_DATE = now()
+  </insert>
+  
+  <select id="articleRelatedContentList" parameterType="hashMap" resultType="hashMap">
+		select DISTINCTROW 
+			A.SUB_COT_ID COT_ID,
+			areacode(B.AREA_CODE) AREA_NAME, 
+			siguguncode(B.AREA_CODE, B.SIGUGUN_CODE) SIGUGUN_CODE, 
+			mastertag(B.COT_ID) MASTER_TAG, 
+			B.DISPLAY_TITLE TITLE, 
+			B.AUTHOR 
+		from RELATED_RECOMMAND A, ARTICLE_MASTER B 
+		where A.SUB_COT_ID = B.COT_ID
+			and A.COT_ID = #{cotId}
+		order by A.CREATE_DATE DESC
+  </select>
+  
+  <select id="dbRelatedContentList" parameterType="hashMap" resultType="hashMap">
+		select DISTINCTROW
+			A.SUB_COT_ID COT_ID,
+			areacode(B.AREA_CODE) AREA_NAME, 
+			siguguncode(B.AREA_CODE, B.SIGUGUN_CODE) SIGUGUN_CODE, 
+			mastertag(B.COT_ID) MASTER_TAG, 
+			C.TITLE TITLE, 
+			'SYSTEM' AUTHOR
+		from ${tbl} A, DATABASE_MASTER B, CONTENT_MASTER C 
+		where A.SUB_COT_ID = B.COT_ID and B.COT_ID = C.COT_ID
+			and A.COT_ID = #{cotId}
+		order by A.CREATE_DATE DESC
+  </select>
+  
+  <delete id="deleteRelatedContent" parameterType="hashMap" >
+  		delete from ${tbl} where COT_ID = #{cotId} and SUB_COT_ID = #{subCotId}
+  </delete>
+
+  <select id="articleContentCount" parameterType="hashMap" resultType="hashMap">
+		select count(*) cnt
+		from ARTICLE_CONTENT
+		where ACI_ID = #{ACI_ID}
+  </select>
+  <!-- 
+  ATM_ID, IMG_ID, CONTENT_ORDER, ARTICLE_ORDER, ARTICLE_SUB_ORDER, ARTICLE_TYPE, ARTICLE_TITLE, ARTICLE_BODY
+   -->
+  <insert id="articleContentRowInsert" parameterType="hashMap">
+		insert into 
+		ARTICLE_CONTENT 
+		(ACI_ID, ATM_ID, 
+  		<choose>
+			<when test="ARTICLE_TYPE == 1 or ARTICLE_TYPE == 0" > 
+					ARTICLE_TITLE, ARTICLE_BODY, 
+			</when>
+			<when test="ARTICLE_TYPE == 2"> 
+					IMG_ID,IS_CAPTION,IMG_CAPTION,
+			</when>
+			<when test="ARTICLE_TYPE == 3"> 
+					ARTICLE_BODY, 
+			</when>
+			<when test="ARTICLE_TYPE == 6"> 
+					ARTICLE_BODY, 
+			</when>
+			<when test="ARTICLE_TYPE == 7"> 
+					ARTICLE_TITLE,  ARTICLE_BODY, 
+			</when>
+		</choose>
+		CONTENT_ORDER, ARTICLE_ORDER, ARTICLE_SUB_ORDER, ARTICLE_TYPE, IS_BOX, IS_VERTICAL ) 
+		values 
+		( #{ACI_ID}, #{ATM_ID},
+   		<choose>
+			<when test="ARTICLE_TYPE == 1 or ARTICLE_TYPE == 0"> 
+					#{ARTICLE_TITLE}, #{ARTICLE_BODY}, 
+			</when>
+			<when test="ARTICLE_TYPE == 2"> 	
+					#{IMG_ID},#{IS_CAPTION},#{IMAGE_CAPTION},
+			</when>
+			<when test="ARTICLE_TYPE == 3"> 
+					#{ARTICLE_BODY}, 
+			</when>
+			<when test="ARTICLE_TYPE == 6"> 
+					#{ARTICLE_BODY},
+			</when>
+			<when test="ARTICLE_TYPE == 7"> 
+					#{ARTICLE_TITLE},#{ARTICLE_BODY},
+			</when>
+		</choose>
+		#{CONTENT_ORDER}, #{ARTICLE_ORDER}, #{ARTICLE_SUB_ORDER}, #{ARTICLE_TYPE}
+		<choose>
+			<when test="IS_BOX != null">
+				, #{IS_BOX}
+			</when>
+			<otherwise>
+				, 0
+			</otherwise>
+		</choose>
+		<choose>
+			<when test="IS_VERTICAL != null">
+				, #{IS_VERTICAL}
+			</when>
+			<otherwise>
+				, 0
+			</otherwise>
+		</choose>
+		);
+  </insert>
+  
+  <update id="articleContentRowUpdate" parameterType="hashMap">
+		update ARTICLE_CONTENT 
+		set 
+  		<choose>
+			<when test="ARTICLE_TYPE == 0 and ARTICLE_TITLE != null  and ARTICLE_TITLE != '' "> 
+					ARTICLE_TITLE = #{ARTICLE_TITLE}
+			</when>
+			<when test="ARTICLE_TYPE == 0 and ARTICLE_BODY != null  and ARTICLE_BODY != '' "> 
+					ARTICLE_BODY = #{ARTICLE_BODY}
+			</when>
+			<when test="ARTICLE_TYPE == 1 and ARTICLE_TITLE != null  and ARTICLE_TITLE != '' "> 
+					ARTICLE_TITLE = #{ARTICLE_TITLE}
+			</when>
+			<when test="ARTICLE_TYPE == 1 and ARTICLE_BODY != null  and ARTICLE_BODY != '' "> 
+					ARTICLE_BODY = #{ARTICLE_BODY}
+			</when>
+			<when test="ARTICLE_TYPE == 2"> 
+					IMG_ID = #{IMG_ID}
+			</when>
+			<when test="ARTICLE_TYPE == 3"> 
+					ARTICLE_BODY = #{ARTICLE_BODY}
+			</when>
+			<when test="ARTICLE_TYPE == 7 and ARTICLE_TITLE != null  and ARTICLE_TITLE != '' "> 
+					ARTICLE_TITLE = #{ARTICLE_TITLE}
+			</when>
+		</choose>
+		where ACI_ID = #{ACI_ID} 
+  </update>
+  
+  <select id="selectContentDetail" parameterType="hashMap" resultType="hashMap">
+		select 
+			B.ATM_ID, B.CONTENT_ORDER, B.ARTICLE_ORDER, B.ARTICLE_SUB_ORDER, B.ARTICLE_TYPE, 
+			B.ARTICLE_TITLE, B.ARTICLE_BODY, B.IMG_ID, imgdesc(B.IMG_ID) IMAGE_DESCRIPTION, B.ACI_ID,
+			B.IS_BOX, B.IS_VERTICAL,B.IMG_CAPTION,B.IS_CAPTION
+		from 
+			ARTICLE_MASTER A, ARTICLE_CONTENT B
+		where
+			A.ATM_ID = B.ATM_ID 
+			and A.COT_ID = #{cotId}
+			order by B.CONTENT_ORDER ASC, B.ARTICLE_ORDER ASC, B.ARTICLE_SUB_ORDER ASC
+  </select>
+  
+  <select id="getAtmId" parameterType="hashMap" resultType="hashMap">
+		select 
+			ATM_ID
+		from 
+			ARTICLE_MASTER
+		where
+			COT_ID = #{cotId}
+  </select>
+
+  <insert id="insertArticleContent" parameterType="hashMap">
+  		insert into 
+  			ARTICLE_CONTENT
+  			( ATM_ID, IMG_ID, CONTENT_ORDER, ARTICLE_ORDER, ARTICLE_SUB_ORDER, ARTICLE_TYPE, ACI_ID )
+  		values
+	  		( atmcotid(#{cotId}), #{imgId}, #{contentOrder}, #{articleOrder}, #{articleSubOrder}, #{articleType}, #{aciId})
+  </insert>
+
+  <insert id="insertContentMaster" parameterType="hashMap">
+  		insert into CONTENT_MASTER
+  			( COT_ID, CREATE_DATE, MODIFIED_DATE,FINAL_MODIFIED_DATE,CREATE_USR_ID)
+  		values
+	  		( #{cotId}, now(), now(),now(), #{usrId} )
+  </insert>
+
+  <insert id="insertArticleMaster" parameterType="hashMap">
+  		insert into ARTICLE_MASTER
+  			( ATM_ID, COT_ID )
+  		values
+	  		( #{atmId}, #{cotId} )
+  </insert>
+ 
+  <insert id="insertOtherContent" parameterType="hashMap">
+  		insert into OTHER_DEPARTMENT_CONTENT
+  			( COT_ID, OTD_ID )
+  		values
+	  		( #{cotId}, #{otdId} )
+  </insert>
+ 
+  <delete id="deleteWithAciId" parameterType="hashMap">
+  		delete from ARTICLE_CONTENT WHERE ACI_ID = #{aciId}
+  </delete>
+ 
+  <delete id="deleteArticleContentWithAtmId" parameterType="hashMap">
+  		delete from ARTICLE_CONTENT WHERE ATM_ID = #{atmId}
+  </delete>
+ 
+  <delete id="deleteWithImages" parameterType="hashMap">
+  		delete from ARTICLE_CONTENT WHERE IMG_ID in (${targets});
+  </delete>
+
+ <!-- related Image table -->
+  <delete id="deleteWithImgId" parameterType="hashMap">
+  		delete from ARTICLE_CONTENT WHERE IMG_ID = #{imgId}
+  </delete>
+   
+  <select id="selectArticleTravelInfo" parameterType="hashMap" resultType="hashMap">
+  		select * from ARTICLE_CONTENT_TRAVEL_INFO where ACI_ID = #{aciId} order by IDX
+  </select>
+  <select id="selectArticleCouponInfo" parameterType="hashMap" resultType="hashMap">
+  		select A.CP_ID
+		,A.CP_GB
+		, A.CP_USE_FL
+		, A.CP_TITLE
+		, A.CP_DESC
+		, A.AREA_CODE
+		, A.SIGUGUN_CODE
+		,A.CP_START_DATE
+		,A.CP_END_DATE
+		,A.CP_IMG_ID
+		,A.CP_CONTENT
+		,A.CP_DEL_FL
+		,A.CP_CREATE_DT
+		,A.CP_IDX
+		,A.CP_COT_CATEGORY
+		,(SELECT VALUE FROM CODE AA WHERE AA.BIG_CATEGORY = A.CP_COT_CATEGORY AND AA.CODE_TYPE =5) CP_COT_CATEGORY_NAME
+		,A.CP_RSV_START_DATE
+		,A.CP_RSV_END_DATE
+		,B.CA_IDX
+  		, areacode(A.AREA_CODE) AREA_NAME 
+		, siguguncode(A.AREA_CODE, A.SIGUGUN_CODE) SIGUGUN_NAME
+		, (select IMAGE_PATH from IMAGE C where A.CP_IMG_ID = C.IMG_ID) IMAGE_PATH
+  		 from COUPON_INFO A , COUPON_ACI B where A.CP_ID = B.CP_ID and B.ACI_ID = #{aciId} order by CP_IDX
+  </select>
+  <select id="selectArticleCouponImage" parameterType="hashMap" resultType="hashMap">
+  		select CP_IMG_ID
+  		 from COUPON_INFO A where CP_ID = #{CP_ID} order by CP_IDX
+  </select>
+  <select id="selectPutCoupon" parameterType="hashMap" resultType="int">
+  	select count(CP_ID) cnt from COUPON_LOG where CP_ID = #{CP_ID}
+  </select>
+  <insert id="insertArticleTravelInfo" parameterType="hashMap">
+  		insert into ARTICLE_CONTENT_TRAVEL_INFO
+  		( TRI_ID, ACI_ID, IDX
+  			<if test="COT_ID != null">
+  				, COT_ID
+  			</if>
+  			<if test="TITLE != null">
+  				, TITLE
+  			</if>
+  			<if test="ADDRESS != null">
+  				, ADDRESS
+  			</if>
+  			<if test="TEL != null">
+  				, TEL
+  			</if>
+  			<if test="HOMEPAGE != null">
+  				, HOMEPAGE
+  			</if>
+  			<if test="ETC != null">
+				, ETC
+			</if>
+  		) VALUES ( #{TRI_ID}, #{ACI_ID}, #{IDX}
+  			<if test="COT_ID != null">
+  				, #{COT_ID}
+  			</if>
+  			<if test="TITLE != null">
+  				, #{TITLE}
+  			</if>
+  			<if test="ADDRESS != null">
+  				, #{ADDRESS}
+  			</if>
+  			<if test="TEL != null">
+  				, #{TEL}
+  			</if>
+  			<if test="HOMEPAGE != null">
+  				, #{HOMEPAGE}
+  			</if>
+  			<if test="ETC != null">
+				, #{ETC}
+			</if>
+  		)
+  		ON DUPLICATE KEY UPDATE	ACI_ID = #{ACI_ID}, IDX = #{IDX}
+		<if test="COT_ID != null">
+			, COT_ID = #{COT_ID}
+		</if>
+		<if test="TITLE != null">
+			, TITLE = #{TITLE}
+		</if>
+		<if test="ADDRESS != null">
+			, ADDRESS = #{ADDRESS}
+		</if>
+		<if test="TEL != null">
+			, TEL = #{TEL}
+		</if>
+		<if test="HOMEPAGE != null">
+			, HOMEPAGE = #{HOMEPAGE}
+		</if>
+		<if test="ETC != null">
+			, ETC = #{ETC}
+		</if>
+  </insert>
+  
+  <update id="updateArticleTravelInfo" parameterType="hashMap">
+  		update ARTICLE_CONTENT_TRAVEL_INFO 
+  		set	IDX = #{IDX}
+		<if test="COT_ID != null">
+			, COT_ID = #{COT_ID}
+		</if>
+		<if test="TITLE != null">
+			, TITLE = #{TITLE}
+		</if>
+		<if test="ADDRESS != null">
+			, ADDRESS = #{ADDRESS}
+		</if>
+		<if test="TEL != null">
+			, ADDRESS = #{ADDRESS}
+		</if>
+		<if test="HOMEPAGE != null">
+			, HOMEPAGE = #{HOMEPAGE}
+		</if>
+		<if test="ETC != null">
+			, ETC = #{ETC}
+		</if>
+  		where TRI_ID = #{TRI_ID}
+  </update>
+  <delete id="deleteArticleTravelInfo" parameterType="hashMap">
+  		delete from ARTICLE_CONTENT_TRAVEL_INFO where TRI_ID = #{TRI_ID}
+  </delete>
+  <insert id="insertArticleCouponInfo" parameterType="hashMap">
+  		insert into COUPON_INFO
+  		( CP_ID, CP_IDX,CP_CREATE_DT,CP_DEL_FL
+  			<if test="CP_GB != null">
+  				, CP_GB
+  			</if>
+  			<if test="CP_USE_FL != null">
+  				, CP_USE_FL
+  			</if>
+  			<if test="CP_TITLE != null">
+  				, CP_TITLE
+  			</if>
+  			<if test="CP_DESC != null">
+  				, CP_DESC
+  			</if>
+  			<if test="AREA_CODE != null">
+  				, AREA_CODE
+  			</if>
+  			<if test="SIGUGUN_CODE != null">
+  				, SIGUGUN_CODE
+  			</if>
+  			<if test="CP_START_DATE != null">
+				, CP_START_DATE
+			</if>
+			<if test="CP_END_DATE != null">
+				, CP_END_DATE
+			</if>
+			<if test="CP_RSV_START_DATE != null">
+				, CP_RSV_START_DATE 
+			</if>
+			<if test="CP_RSV_END_DATE != null">
+				, CP_RSV_END_DATE 
+			</if>
+			<if test="CP_COT_CATEGORY != null">
+				, CP_COT_CATEGORY  
+			</if>
+			<if test="imgId != null">
+				, CP_IMG_ID
+			</if>
+			<if test="CP_CONTENT != null">
+				, CP_CONTENT
+			</if>
+			
+  		) VALUES ( #{CP_ID}, #{CP_IDX}, NOW(),#{CP_DEL_FL}
+  			<if test="CP_GB != null">
+  				, #{CP_GB}
+  			</if>
+  			<if test="CP_USE_FL != null">
+  				, #{CP_USE_FL}
+  			</if>
+  			<if test="CP_TITLE != null">
+  				, #{CP_TITLE}
+  			</if>
+  			<if test="CP_DESC != null">
+  				, #{CP_DESC}
+  			</if>
+  			<if test="AREA_CODE != null">
+  				, #{AREA_CODE}
+  			</if>
+  			<if test="SIGUGUN_CODE != null">
+  				, #{SIGUGUN_CODE}
+  			</if>
+  			<if test="CP_START_DATE != null">
+				, #{CP_START_DATE}
+			</if>
+			<if test="CP_END_DATE != null">
+				, #{CP_END_DATE}
+			</if>
+			<if test="CP_RSV_START_DATE != null">
+				, #{CP_RSV_START_DATE}
+			</if>
+			<if test="CP_RSV_END_DATE != null">
+				, #{CP_RSV_END_DATE}
+			</if>
+			<if test="CP_COT_CATEGORY != null">
+				, ${CP_COT_CATEGORY}
+			</if>
+			<if test="imgId != null">
+				, #{imgId}
+			</if>
+			<if test="CP_CONTENT != null">
+				, #{CP_CONTENT}
+			</if>
+  		)
+  		ON DUPLICATE KEY UPDATE	CP_ID = #{CP_ID}, CP_IDX = #{CP_IDX}
+			<if test="CP_GB != null">
+  				,CP_GB = #{CP_GB}
+  			</if>
+  			<if test="CP_USE_FL != null">
+  				,CP_USE_FL = #{CP_USE_FL}
+  			</if>
+  			<if test="CP_TITLE != null">
+  				,CP_TITLE = #{CP_TITLE}
+  			</if>
+  			<if test="CP_DESC != null">
+  				,CP_DESC = #{CP_DESC}
+  			</if>
+  			<if test="AREA_CODE != null">
+  				,AREA_CODE = #{AREA_CODE}
+  			</if>
+  			<if test="SIGUGUN_CODE != null">
+  				,SIGUGUN_CODE = #{SIGUGUN_CODE}
+  			</if>
+  			<if test="CP_START_DATE != null">
+				,CP_START_DATE = #{CP_START_DATE}
+			</if>
+			<if test="CP_END_DATE != null">
+				,CP_END_DATE = #{CP_END_DATE}
+			</if>
+			<if test="CP_RSV_START_DATE != null">
+				,CP_RSV_START_DATE = #{CP_RSV_START_DATE}
+			</if>
+			<if test="CP_RSV_END_DATE != null">
+				,CP_RSV_END_DATE = #{CP_RSV_END_DATE}
+			</if>
+			<if test="CP_COT_CATEGORY != null">
+				,CP_COT_CATEGORY = ${CP_COT_CATEGORY}
+			</if>
+			<if test="imgId != null">
+				,CP_IMG_ID = #{imgId}
+			</if>
+			<if test="CP_CONTENT != null">
+				,CP_CONTENT = #{CP_CONTENT}
+			</if>
+			<if test="CP_DEL_FL != null">
+				,CP_DEL_FL = #{CP_DEL_FL}
+			</if>
+  </insert>
+  <insert id="importCouponWithACI" parameterType="hashMap">
+  	insert into COUPON_ACI (CP_ID,ACI_ID) VALUES (#{CP_ID},#{ACI_ID})
+  </insert>
+  
+  <update id="updateArticleCouponInfo" parameterType="hashMap">
+  		update COUPON_INFO 
+  		set	CP_IDX = #{CP_IDX}
+  			,CP_IMG_ID = #{imgId}
+			<if test="CP_GB != null">
+  				,CP_GB = #{CP_GB}
+  			</if>
+  			<if test="CP_USE_FL != null">
+  				,CP_USE_FL = #{CP_USE_FL}
+  			</if>
+  			<if test="CP_TITLE != null">
+  				,CP_TITLE = #{CP_TITLE}
+  			</if>
+  			<if test="CP_DESC != null">
+  				,CP_DESC = #{CP_DESC}
+  			</if>
+  			<if test="AREA_CODE != null">
+  				,AREA_CODE = #{AREA_CODE}
+  			</if>
+  			<if test="SIGUGUN_CODE != null">
+  				,SIGUGUN_CODE = #{SIGUGUN_CODE}
+  			</if>
+				,CP_START_DATE = #{CP_START_DATE}
+				,CP_END_DATE = #{CP_END_DATE}
+				,CP_RSV_START_DATE = #{CP_RSV_START_DATE}
+				,CP_RSV_END_DATE = #{CP_RSV_END_DATE}
+			<if test="CP_COT_CATEGORY != null">
+				,CP_COT_CATEGORY = ${CP_COT_CATEGORY}
+			</if>
+			<if test="CP_CONTENT != null">
+				,CP_CONTENT = #{CP_CONTENT}
+			</if>
+			<if test="CP_DEL_FL != null">
+				,CP_DEL_FL = #{CP_DEL_FL}
+			</if>
+  		where CP_ID = #{CP_ID}
+  </update>
+  <delete id="deleteArticleCouponInfo" parameterType="hashMap">
+  		delete from COUPON_INFO where CP_ID = #{CP_ID}
+  </delete>
+  <insert id="insertArticleView" parameterType="hashMap">
+  		insert into ARTICLE_VIEW ( ATM_ID ) values ( #{ATM_ID} )
+  </insert>
+  <update id="updateArticleView" parameterType="hashMap">
+  		update ARTICLE_VIEW	set
+		<if test="RECOMM_VIEW != null">
+  			RECOMM_VIEW = #{RECOMM_VIEW}
+  			, SIGHT_VIEW = #{SIGHT_VIEW}
+  		</if>
+		<if test="COURSE_VIEW != null">
+  			COURSE_VIEW = #{COURSE_VIEW}
+  			, FESTIVAL_VIEW = #{FESTIVAL_VIEW}
+  		</if>
+  		where ATM_ID = #{ATM_ID}
+  </update>
+  <select id="selectArticleView" parameterType="hashMap" resultType="hashMap">
+  		select * from ARTICLE_VIEW where ATM_ID = #{ATM_ID}
+  </select>
+  <update id="updateArticleRelatedView" parameterType="hashMap">
+  		UPDATE ARTICLE_MASTER SET IS_RELATED = #{relatedView} WHERE COT_ID = #{cotId}
+  </update>
+  <update id="updateArticleAuthorView" parameterType="hashMap">
+  		UPDATE ARTICLE_MASTER 
+  		<if test="authorView != null">
+  		SET AUTHOR_VIEW = #{authorView} WHERE COT_ID = #{cotId}
+  		</if>
+  		<if test="Author != null">
+  		SET AUTHOR = #{Author} WHERE COT_ID = #{cotId}
+  		</if>
+  		
+  </update>
+ <select id="ArticleExcelDownload" parameterType="hashMap" resultType="hashMap">
+		select A.COT_ID cotid
+		<if test="cId == 1">
+			,A.CONTENT_ID
+		</if>
+		<if test="cotId == 1">
+			,A.COT_ID
+		</if>
+		<if test="title == 1">
+			,A.TITLE
+		</if>
+		<if test="create_date == 1">
+			, A.CREATE_DATE
+		</if>
+		<if test="status == 1">
+			,case when A.CONTENT_STATUS = 0 then '작업 미완료'
+				when A.CONTENT_STATUS = 1 then '상태 미등록' 
+				when A.CONTENT_STATUS = 2 then '작업 완료' 
+				when A.CONTENT_STATUS = 7 then '비노출' 
+				when A.CONTENT_STATUS = 8 then '삭제' 
+				when A.CONTENT_STATUS = 9 then '작업 보류' 
+				else A.CONTENT_STATUS
+				end as STATUS
+		</if>
+		<if test="finalupdate_date == 1">
+			,A.FINAL_MODIFIED_DATE
+		</if>
+		<if test="update_date == 1">
+			,A.MODIFIED_DATE
+		</if>
+		<if test="stfId == 1">
+			, (SELECT STF_ID FROM STAFF S WHERE A.CREATE_USR_ID = S.USR_ID) STF_ID
+		</if>
+		<if test="otdId == 1">
+			,(SELECT GROUP_CONCAT(G.OTD_ID SEPARATOR ',')  			
+				        FROM OTHER_DEPARTMENT_CONTENT G			
+			        WHERE B.COT_ID = G.COT_ID					
+			        GROUP BY B.COT_ID) OTD_ID
+		</if>
+		<if test="Kogl == 1">
+			,case when B.IS_KOGL = 1 then '적용' else '미적용' end as IS_KOGL
+		</if>
+		<if test="Sigungu == 1">
+			,(select VALUE from CODE CS where B.AREA_CODE = CS.BIG_CATEGORY and B.SIGUGUN_CODE = CS.MID_CATEGORY and CS.SML_CATEGORY = 0 and CODE_TYPE = 0) as SIGUNGU
+		</if>
+		<if test="Area == 1">
+			,(select VALUE from CODE CS where B.AREA_CODE = CS.BIG_CATEGORY and CS.MID_CATEGORY = 0 and CS.SML_CATEGORY = 0 and CODE_TYPE = 0) as AREA
+		</if>
+		<if test="secondcategory == 1">
+			, (SELECT VALUE FROM CODE E WHERE E.BIG_CATEGORY = B.CONTENT_CATEGORY_TWO AND E.CODE_TYPE = 3) CONTENT_CATEGORY_TWO
+		</if>
+		<if test="firstcategory == 1">
+			, (SELECT VALUE FROM CODE E WHERE E.BIG_CATEGORY = B.CONTENT_CATEGORY AND E.CODE_TYPE = 3) CONTENT_CATEGORY
+		</if>
+		<if test="categorytype == 1">
+			,A.CONTENT_TYPE
+		</if>
+		<if test="contentdiv == 1">
+			, case when A.CONTENT_DIV = '0' then '일반' 
+				when A.CONTENT_DIV = '1' then '테마' 
+				end as CONTENT_DIV
+		</if>
+		from CONTENT_MASTER A, ARTICLE_MASTER B
+		where A.COT_ID = B.COT_ID and TITLE is not null
+		<if test="OTD_ID != null">
+		 	and A.COT_ID in (select COT_ID from OTHER_DEPARTMENT_CONTENT where OTD_ID = #{OTD_ID})
+		 </if>
+		<choose>
+			<when test="mode == -1">
+			 and A.TITLE REGEXP ''
+			</when>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+			<when test="mode == 1">
+			 and A.CONTENT_ID=#{keyword}
+			</when>
+			<when test="mode == 2">
+			 	and A.COT_ID in (select DISTINCT COT_ID from TAGS A, CONTENT_TAGS B where A.TAG_ID = B.TAG_ID and A.TAG_NAME REGEXP #{keyword})
+			</when>
+			<when test="mode == 3">
+			 	and username(A.CREATE_USR_ID)=#{keyword}
+			</when>
+		</choose>
+		<choose>
+			<when test="StatusSearch != -1">
+			 	and A.CONTENT_STATUS = ${StatusSearch}
+			</when>
+		</choose>
+		<choose>
+			<when test="Division != -1">
+			 	and A.CONTENT_DIV = ${Division}
+			</when>
+		</choose>
+		<choose>
+			<when test="dateType == 0">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 2">
+				<choose>
+					<when test="startInput != null">
+					 and A.FINAL_MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.FINAL_MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="areaCode != null">
+			 and B.AREA_CODE = #{areaCode}
+			</when>
+			<when test="sigunguname != null">
+			 and B.SIGUGUN_CODE = #{sigunguname}
+			</when>
+		</choose>
+		<if test="CategoryCode != null">
+		 and B.CONTENT_CATEGORY = #{CategoryCode}
+		</if>
+		<if test="CategoryCode_two != null">
+		 and B.CONTENT_CATEGORY_TWO = #{CategoryCode_two}
+		</if>
+		order by A.FINAL_MODIFIED_DATE DESC
+  </select>
+  <select id="ArticleCountExcelDownload" parameterType="hashMap" resultType="int">
+		select count(A.COT_ID) cnt
+		from CONTENT_MASTER A, ARTICLE_MASTER B
+		where A.COT_ID = B.COT_ID and TITLE is not null
+		<if test="OTD_ID != null">
+		 	and A.COT_ID in (select COT_ID from OTHER_DEPARTMENT_CONTENT where OTD_ID = #{OTD_ID})
+		 </if>
+		<choose>
+			<when test="mode == -1">
+			 and A.TITLE REGEXP ''
+			</when>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+			<when test="mode == 1">
+			 and A.CONTENT_ID=#{keyword}
+			</when>
+			<when test="mode == 2">
+			 	and A.COT_ID in (select DISTINCT COT_ID from TAGS A, CONTENT_TAGS B where A.TAG_ID = B.TAG_ID and A.TAG_NAME REGEXP #{keyword})
+			</when>
+			<when test="mode == 3">
+			 	and username(A.CREATE_USR_ID)=#{keyword}
+			</when>
+		</choose>
+		<choose>
+			<when test="StatusSearch != -1">
+			 	and A.CONTENT_STATUS = ${StatusSearch}
+			</when>
+		</choose>
+		<choose>
+			<when test="Division != -1">
+			 	and A.CONTENT_DIV = ${Division}
+			</when>
+		</choose>
+		<choose>
+			<when test="dateType == 0">
+				<choose>
+					<when test="startInput != null">
+					 and A.CREATE_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.CREATE_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 1">
+				<choose>
+					<when test="startInput != null">
+					 and A.MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+			<when test="dateType == 2">
+				<choose>
+					<when test="startInput != null">
+					 and A.FINAL_MODIFIED_DATE >= #{startInput}
+					</when>
+				</choose>
+				<choose>
+					<when test="endInput != null">
+					 and A.FINAL_MODIFIED_DATE <![CDATA[ <= ]]>  #{endInput}
+					</when>
+				</choose>
+			</when>
+		</choose>
+		<choose>
+			<when test="areaCode != null">
+			 and B.AREA_CODE = #{areaCode}
+			</when>
+			<when test="sigunguname != null">
+			 and B.SIGUGUN_CODE = #{sigunguname}
+			</when>
+		</choose>
+		<if test="CategoryCode != null">
+		 and B.CONTENT_CATEGORY = #{CategoryCode}
+		</if>
+		<if test="CategoryCode_two != null">
+		 and B.CONTENT_CATEGORY_TWO = #{CategoryCode_two}
+		</if>
+  </select>
+  
+  <select id="getAllCategories" parameterType="hashMap" resultType="hashMap">
+	select BIG_CATEGORY, MID_CATEGORY, VALUE, FILE_DESCRIPTION
+	from CODE 
+	where CODE_TYPE=3 AND STATUS = 1
+	order by BIG_CATEGORY+0
+  </select>  
+</mapper>

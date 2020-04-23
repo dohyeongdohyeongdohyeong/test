@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.FoodApiMapper">
+  
+  <select id="NewRestaurantList" parameterType="hashMap" resultType="hashMap">
+  	
+	SELECT 
+		C.COT_ID, 
+		C.CONTENT_ID, 
+		C.CONTENT_TYPE, 
+		areacode(D.AREA_CODE) AS AREA_NAME, 
+		siguguncode(D.AREA_CODE, D.SIGUGUN_CODE) AS SIGUGUN_NAME, 
+		C.TITLE, 
+		mastertag(C.COT_ID) AS MASTER_TAG, 
+		IF(C.CONTENT_STATUS=0, '작업 미완료', IF(C.CONTENT_STATUS=1, '상태 미등록', IF(C.CONTENT_STATUS=2, '작업 완료', 
+			IF(C.CONTENT_STATUS=3, '작업 완료', IF(C.CONTENT_STATUS=4, '상태 미등록', IF(C.CONTENT_STATUS=5, '작업 완료', 
+			IF(C.CONTENT_STATUS=6, '상태 미등록', IF(C.CONTENT_STATUS=7, '비노출', IF(C.CONTENT_STATUS=8, '삭제', 
+			IF(C.CONTENT_STATUS=9, '작업보류', '상태 미등록')))))))))) AS CONTENT_STATUS, 
+		C.MODIFIED_DATE, 
+		C.CREATE_DATE, 
+		username(C.CREATE_USR_ID) AS USER_NAME 
+	FROM 
+		CONTENT_MASTER C 
+	INNER JOIN 
+		DATABASE_MASTER D 
+		ON 
+			C.COT_ID = D.COT_ID 
+		AND 
+			C.CONTENT_TYPE = 39 
+	INNER JOIN 
+		EATERY_INTRO E 
+		ON 
+			D.COT_ID = E.COT_ID 
+		AND 
+			E.LCNS_NO IS NOT NULL 
+	WHERE 
+		1=1 
+		<if test="keyword != null and keyword neq ''">
+			<choose>
+				<when test="searchType eq '컨텐츠명'">
+					AND C.TITLE REGEXP #{keyword } 
+				</when>
+				<when test="searchType eq 'CID'">
+					AND C.CONTENT_ID REGEXP #{keyword } 
+				</when>
+			</choose>
+		</if>
+		<if test="startDate != null and startDate neq ''">
+			<choose>
+				<when test="dateOption eq '생성일'">
+					AND C.CREATE_DATE >= #{startDate } 
+				</when>
+				<when test="dateOption eq '수정일'">
+					AND C.MODIFIED_DATE >= #{startDate } 
+				</when>
+			</choose>
+		</if>
+		<if test="endDate != null and endDate neq ''">
+			<choose>
+				<when test="dateOption eq '생성일'">
+					AND #{endDate } >= C.CREATE_DATE 
+				</when>
+				<when test="dateOption eq '수정일'">
+					AND #{endDate } >= C.MODIFIED_DATE 
+				</when>
+			</choose>
+		</if>
+<!-- 		ORDER BY C.CREATE_DATE DESC  -->
+		LIMIT #{offset }, #{limit } 
+  	
+  </select>
+  
+  <select id="NewRestaurantListAmount" parameterType="hashMap" resultType="int">
+  	
+	SELECT 
+		COUNT(*) 
+	FROM 
+		CONTENT_MASTER C 
+	INNER JOIN 
+		DATABASE_MASTER D 
+		ON 
+			C.COT_ID = D.COT_ID 
+		AND 
+			C.CONTENT_TYPE = 39 
+	INNER JOIN 
+		EATERY_INTRO E 
+		ON 
+			D.COT_ID = E.COT_ID 
+		AND 
+			E.LCNS_NO IS NOT NULL 
+	WHERE 
+		1=1 
+		<if test="keyword != null and keyword neq ''">
+			<choose>
+				<when test="searchType eq '컨텐츠명'">
+					AND C.TITLE REGEXP #{keyword } 
+				</when>
+				<when test="searchType eq 'CID'">
+					AND C.CONTENT_ID REGEXP #{keyword } 
+				</when>
+			</choose>
+		</if>
+		<if test="startDate != null and startDate neq ''">
+			<choose>
+				<when test="dateOption eq '생성일'">
+					AND C.CREATE_DATE >= #{startDate } 
+				</when>
+				<when test="dateOption eq '수정일'">
+					AND C.MODIFIED_DATE >= #{startDate } 
+				</when>
+			</choose>
+		</if>
+		<if test="endDate != null and endDate neq ''">
+			<choose>
+				<when test="dateOption eq '생성일'">
+					AND #{endDate } >= C.CREATE_DATE 
+				</when>
+				<when test="dateOption eq '수정일'">
+					AND #{endDate } >= C.MODIFIED_DATE 
+				</when>
+			</choose>
+		</if>
+<!-- 		ORDER BY C.CREATE_DATE DESC  -->
+	
+  </select>
+  
+  
+  
+  
+  <select id="KFDAInformationList" parameterType="hashMap" resultType="hashMap">
+  	
+  	SELECT 
+		I1200.BSN_LCNS_LEDG_NO, 
+		I1200.LCNS_NO, 
+		I1200.PRSDNT_NM, 
+		I1200.BSSH_NM, 
+		I1200.LOCP_ADDR, 
+		I1200.TELNO, 
+		I1200.CLSBIZ_DT, 
+		C004.HG_ASGN_LV, 
+		IF(I2630.LCNS_NO IS NOT NULL, "처분", "") AS DSPS_YN 
+	FROM 
+		FOOD_API_I1200 I1200 
+	LEFT OUTER JOIN 
+		(SELECT LCNS_NO, HG_ASGN_LV FROM FOOD_API_C004 WHERE ASGN_TO >= NOW()) C004 
+	ON 
+		I1200.LCNS_NO = C004.LCNS_NO 
+	LEFT OUTER JOIN 
+		(SELECT LCNS_NO FROM FOOD_API_I2630 GROUP BY LCNS_NO) I2630 
+	ON 
+		I1200.LCNS_NO = I2630.LCNS_NO 
+	WHERE 
+		1=1 
+		<if test="disposition != null">
+			<choose>
+				<when test="disposition eq '처분'">
+					AND I2630.LCNS_NO IS NOT NULL 
+				</when>
+				<when test="disposition eq '미해당'">
+					AND I2630.LCNS_NO IS NULL 
+				</when>
+			</choose>
+		</if>
+		<if test="grade != null">
+			<choose>
+				<when test="grade eq '전체'">
+				</when>
+				<otherwise>
+					AND C004.HG_ASGN_LV = #{grade } 
+				</otherwise>
+			</choose>
+		</if>
+		<if test="keyword != null and keyword neq ''">
+			<choose>
+				<when test="searchType eq '업소명'">
+					AND I1200.BSSH_NM REGEXP #{keyword } 
+				</when>
+				<when test="searchType eq '인허가번호'">
+					AND I1200.LCNS_NO REGEXP #{keyword } 
+				</when>
+				<when test="searchType eq '대표자명'">
+					AND PRSDNT_NM REGEXP #{keyword } 
+				</when>
+			</choose>
+		</if>
+	LIMIT 
+		#{offset }, #{limit } 
+	
+  </select>
+  
+  <select id="KFDAInformationListAmount" parameterType="hashMap" resultType="int">
+  	
+  	SELECT 
+		COUNT(*) 
+	FROM 
+		FOOD_API_I1200 I1200 
+	LEFT OUTER JOIN 
+		(SELECT LCNS_NO, HG_ASGN_LV FROM FOOD_API_C004 WHERE ASGN_TO >= NOW()) C004 
+	ON 
+		I1200.LCNS_NO = C004.LCNS_NO 
+	LEFT OUTER JOIN 
+		(SELECT LCNS_NO FROM FOOD_API_I2630 GROUP BY LCNS_NO) I2630 
+	ON 
+		I1200.LCNS_NO = I2630.LCNS_NO 
+	WHERE 
+		1=1 
+		<if test="disposition != null">
+			<choose>
+				<when test="disposition eq '처분'">
+					AND I2630.LCNS_NO IS NOT NULL 
+				</when>
+				<when test="disposition eq '미해당'">
+					AND I2630.LCNS_NO IS NULL 
+				</when>
+			</choose>
+		</if>
+		<if test="grade != null">
+			<choose>
+				<when test="grade eq '전체'">
+				</when>
+				<otherwise>
+					AND C004.HG_ASGN_LV = #{grade } 
+				</otherwise>
+			</choose>
+		</if>
+		<if test="keyword != null and keyword neq ''">
+			<choose>
+				<when test="searchType eq '업소명'">
+					AND I1200.BSSH_NM REGEXP #{keyword } 
+				</when>
+				<when test="searchType eq '인허가번호'">
+					AND I1200.LCNS_NO REGEXP #{keyword } 
+				</when>
+				<when test="searchType eq '대표자명'">
+					AND PRSDNT_NM REGEXP #{keyword } 
+				</when>
+			</choose>
+		</if>
+	
+  </select>
+  
+  
+  
+  
+  <select id="ExceptionList" parameterType="hashMap" resultType="hashMap">
+  	SELECT 
+  		U.* 
+  	FROM 
+  		(
+  		SELECT 
+	  		MAX(H.CREATE_DATE) AS CREATE_DATE, 
+	  		H.LCNS_NO, 
+	  		I.BSSH_NM, 
+	  		IF(H.RSN_CD=1, "지정등급미지정", IF(H.RSN_CD=2, "처분일", IF(H.RSN_CD=3, "폐업처리", IF(H.RSN_CD=4, "노출처리", "")))) AS RSN_CD, 
+	  		H.COT_ID, 
+	  		(SELECT TITLE FROM CONTENT_MASTER WHERE COT_ID = H.COT_ID) AS TITLE 
+	  	FROM 
+	  		FOOD_API_PROC_HIST H 
+	  		INNER JOIN 
+	  		(SELECT LCNS_NO, BSSH_NM FROM FOOD_API_I1200) I 
+	  			ON 
+	  			H.LCNS_NO = I.LCNS_NO 
+				<if test="exceptionReason != null">
+					<choose>
+						<when test="exceptionReason eq '지정등급'">
+							AND H.RSN_CD = 1 
+						</when>
+						<when test="exceptionReason eq '처분여부'">
+							AND H.RSN_CD = 2 
+						</when>
+						<when test="exceptionReason eq '폐업여부'">
+							AND H.RSN_CD = 3 
+						</when>
+						<when test="exceptionReason eq '노출여부'">
+							AND H.RSN_CD = 4 
+						</when>
+					</choose>
+				</if>
+	  	GROUP BY 
+	  		H.LCNS_NO, 
+	  		DATE_FORMAT(H.CREATE_DATE, '%Y%m%d'), 
+	  		H.RSN_CD 
+	  	ORDER BY 
+	  		MAX(H.CREATE_DATE) DESC, 
+	  		H.LCNS_NO 
+		) U 
+		WHERE 
+			1=1 
+			<if test="startDate != null and startDate neq ''">
+				AND U.CREATE_DATE >= #{startDate } 
+			</if>
+			<if test="endDate != null and endDate neq ''">
+				AND #{endDate } >= U.CREATE_DATE 
+			</if>
+			<if test="keyword != null and keyword neq ''">
+				<choose>
+					<when test="searchType eq '업소명'">
+						AND U.BSSH_NM REGEXP #{keyword } 
+					</when>
+					<when test="searchType eq '인허가번호'">
+						AND U.LCNS_NO REGEXP #{keyword } 
+					</when>
+					<when test="searchType eq '컨텐츠명'">
+						AND U.TITLE REGEXP #{keyword } 
+					</when>
+				</choose>
+			</if>
+		LIMIT 
+			#{offset }, #{limit } 
+	
+  </select>
+  
+  <select id="ExceptionListAmount" parameterType="hashMap" resultType="int">
+  	SELECT 
+  		COUNT(*) 
+  	FROM 
+  		(
+  		SELECT 
+	  		MAX(H.CREATE_DATE) AS CREATE_DATE, 
+	  		H.LCNS_NO, 
+	  		I.BSSH_NM, 
+	  		IF(H.RSN_CD=1, "지정등급미지정", IF(H.RSN_CD=2, "처분일", IF(H.RSN_CD=3, "폐업처리", IF(H.RSN_CD=4, "노출처리", "")))) AS RSN_CD, 
+	  		H.COT_ID, 
+	  		(SELECT TITLE FROM CONTENT_MASTER WHERE COT_ID = H.COT_ID) AS TITLE 
+	  	FROM 
+	  		FOOD_API_PROC_HIST H 
+	  		INNER JOIN 
+	  		(SELECT LCNS_NO, BSSH_NM FROM FOOD_API_I1200) I 
+	  			ON 
+	  			H.LCNS_NO = I.LCNS_NO 
+				<if test="exceptionReason != null">
+					<choose>
+						<when test="exceptionReason eq '지정등급'">
+							AND H.RSN_CD = 1 
+						</when>
+						<when test="exceptionReason eq '처분여부'">
+							AND H.RSN_CD = 2 
+						</when>
+						<when test="exceptionReason eq '폐업여부'">
+							AND H.RSN_CD = 3 
+						</when>
+						<when test="exceptionReason eq '노출여부'">
+							AND H.RSN_CD = 4 
+						</when>
+					</choose>
+				</if>
+	  	GROUP BY 
+	  		H.LCNS_NO, 
+	  		DATE_FORMAT(H.CREATE_DATE, '%Y%m%d'), 
+	  		H.RSN_CD 
+	  	ORDER BY 
+	  		MAX(H.CREATE_DATE) DESC, 
+	  		H.LCNS_NO 
+		) U 
+		WHERE 
+			1=1 
+			<if test="startDate != null and startDate neq ''">
+				AND U.CREATE_DATE >= #{startDate } 
+			</if>
+			<if test="endDate != null and endDate neq ''">
+				AND #{endDate } >= U.CREATE_DATE 
+			</if>
+			<if test="keyword != null and keyword neq ''">
+				<choose>
+					<when test="searchType eq '업소명'">
+						AND U.BSSH_NM REGEXP #{keyword } 
+					</when>
+					<when test="searchType eq '인허가번호'">
+						AND U.LCNS_NO REGEXP #{keyword } 
+					</when>
+					<when test="searchType eq '컨텐츠명'">
+						AND U.TITLE REGEXP #{keyword } 
+					</when>
+				</choose>
+			</if>
+	
+  </select>
+  
+</mapper>

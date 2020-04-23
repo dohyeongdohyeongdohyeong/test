@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.DepartmentInfoMapper">
+    
+ 	<select id="selectDepartmentList" parameterType="hashMap" resultType="hashMap">
+		select A.OTD_ID otdid, A.TITLE title, B.DEP_NAME name, B.DEP_TEL tel, B.DEP_ID depid, B.CONTENT_TYPE ctype
+		from OTHER_DEPARTMENT_SERVICE A left join (select AA.DATA_TYPE, AA.DEP_ID, AA.OTD_ID, AA.CONTENT_TYPE, BB.DEP_NAME, BB.DEP_TEL from OTHER_DEPARTMENT_INFO_DETAIL AA, OTHER_DEPARTMENT_INFO BB
+									where AA.DEP_ID=BB.DEP_ID
+		<choose>
+			<when test="dtype != null">
+	  		 and AA.DATA_TYPE = #{dtype} 
+			</when>
+		</choose>
+		) B on A.OTD_ID=B.OTD_ID
+   </select>
+    <select id="selectDepartmentListCnt" parameterType="hashMap" resultType="hashMap">
+		select count(A.OTD_ID) CNT
+		from OTHER_DEPARTMENT_SERVICE A left join (select AA.DATA_TYPE, AA.DEP_ID, AA.OTD_ID, AA.CONTENT_TYPE, BB.DEP_NAME, BB.DEP_TEL from OTHER_DEPARTMENT_INFO_DETAIL AA, OTHER_DEPARTMENT_INFO BB
+									where AA.DEP_ID=BB.DEP_ID
+		<choose>
+			<when test="dtype != null">
+	  		 and AA.DATA_TYPE = #{dtype} 
+			</when>
+		</choose>
+		) B on A.OTD_ID=B.OTD_ID
+   </select>
+   
+    <select id="selectDepartmentInfoList" parameterType="hashMap" resultType="hashMap">
+		select DEP_ID depid, DEP_NAME name, DEP_TEL tel	from OTHER_DEPARTMENT_INFO
+   </select>
+   <insert id="insertDepartmentInfo" parameterType="hashMap">
+  	insert into OTHER_DEPARTMENT_INFO (	DEP_ID, DEP_NAME, DEP_TEL )
+  	values (	#{depid},	#{name},	#{tel}	)
+  </insert>
+  <update id="updateDepartmentInfo" parameterType="hashMap">
+  	update OTHER_DEPARTMENT_INFO SET DEP_TEL=#{tel}
+  	where DEP_ID=#{depid}
+  </update>
+  <update id="updateDepartmentInfoDetail" parameterType="hashMap">
+  	update OTHER_DEPARTMENT_INFO_DETAIL SET DEP_ID=#{depid}
+  	where DATA_TYPE=#{dtype} and OTD_ID=#{otdid}
+    	<choose>
+			<when test="ctype != null">
+		  	and CONTENT_TYPE=#{ctype} 
+			</when>
+			<otherwise>
+            and CONTENT_TYPE is null
+            </otherwise>
+		</choose>
+  </update>
+   <insert id="insertDepartmentInfoDetail" parameterType="hashMap">
+  	insert into OTHER_DEPARTMENT_INFO_DETAIL (	DATA_TYPE, DEP_ID, OTD_ID, CONTENT_TYPE )
+  	values ( #{dtype}, #{depid}, #{otdid}
+    	<choose>
+			<when test="ctype != null">
+		  	, #{ctype} 
+			</when>
+			<otherwise>
+            , null
+            </otherwise>
+		</choose>
+	)
+  </insert>
+</mapper>

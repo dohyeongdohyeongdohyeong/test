@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.or.visitkorea.system.EventBlacklistMapper">
+
+	<select id="GetBlacklistFileList" resultType="hashMap">
+		SELECT BFI_ID
+		, REG_ID
+		,REG_DATE
+		,FILE_NM
+		,FILE_SAVE_NM
+		,USE_YN
+		FROM EVENT_BLACKLIST_FILE_INFO
+		order by REG_DATE DESC
+	</select>
+	<select id="GetBlacklistFileListCnt" resultType="int">
+		SELECT count(*)
+		FROM EVENT_BLACKLIST_FILE_INFO
+		order by REG_DATE DESC
+	</select>
+	<insert id="InsertBlacklist" parameterType="hashMap">
+		INSERT INTO
+		EVENT_BLACKLIST_FILE_INFO(BFI_ID,REG_ID,REG_DATE,FILE_NM,FILE_SAVE_NM,USE_YN)
+		VALUES (#{bfiId},#{stfId},NOW(),#{fileName},#{SaveName},#{USE_YN})
+
+	</insert>
+	<update id="UpdateAllUseYn" parameterType="hashMap">
+		UPDATE
+		EVENT_BLACKLIST_FILE_INFO
+		SET USE_YN = #{USE_YN}
+	</update>
+	<update id="UpdateUseYn" parameterType="hashMap">
+		UPDATE
+		EVENT_BLACKLIST_FILE_INFO
+		SET USE_YN = #{USE_YN}
+		WHERE BFI_ID = #{bfiId}
+	</update>
+	<select id="GetBlacklistBaseFile" resultType="hashMap">
+		SELECT
+		FILE_NM,FILE_SAVE_NM
+		FROM EVENT_BLACKLIST_FILE_INFO
+		WHERE USE_YN = 'Y'
+		ORDER BY REG_DATE DESC
+		LIMIT 1
+	</select>
+	<delete id="DeleteEvtExcel" parameterType="hashMap">
+	DELETE FROM EVENT_BLACKLIST
+	WHERE EVT_ID = #{evtId}
+	</delete>
+	
+	<insert id="InsertEvtExcel" parameterType="hashMap">
+	INSERT INTO EVENT_BLACKLIST(EVT_ID,HP)
+	VALUES(#{evtId},#{HP})
+	</insert>
+	<update id="UpdateFileName" parameterType="hashMap">
+	UPDATE EVENT_MASTER
+	SET BLACKLIST_FILE_NM = #{FILE_NAME}
+	WHERE EVT_ID = #{evtId}
+	</update>
+</mapper>

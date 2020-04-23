@@ -1,0 +1,25 @@
+
+.startContent .mobileManageListContent {
+
+	overflow: hidden;
+	padding: 20px;	
+	height:100%
+	box-sizing: border-box !important;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    
+	
+}
+
+.startContent .mobileManageDetailContent{
+
+	overflow: hiddeen;
+	box-sizing: border-box;
+	box-sizing: border-box !important;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+	
+}
+
+
+.

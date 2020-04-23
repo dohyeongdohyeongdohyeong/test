@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="kr.or.visitkorea.system.GlobalVariablesMapper">
+	<select id="selectOneValue" parameterType="string" resultType="int">
+		SELECT	VALUE
+		FROM	GLOBAL_VARIABLES
+		WHERE	1 = 1
+		AND		NAME = #{name}
+	</select>
+	
+	<select id="selectAll" resultType="hashMap">
+		SELECT	NAME
+			  , VALUE
+			  , COMMENT
+		FROM	GLOBAL_VARIABLES
+	</select>
+
+	<update id="updateByName" parameterType="hashMap">
+		UPDATE	GLOBAL_VARIABLES
+		<set>
+			<if test="value != null">
+			    `VALUE` = #{value},
+			</if>
+			<if test="comment != null">
+			    COMMENT = #{comment}
+			</if>
+		</set>
+		WHERE	NAME = #{name}
+	</update>
+</mapper>

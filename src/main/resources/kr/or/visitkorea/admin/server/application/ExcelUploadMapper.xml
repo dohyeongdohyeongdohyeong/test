@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.ExcelUploadMapper">
+    <!-- 업로드 히스토리 테이블 조회 -->
+    <select id="selectHistory" parameterType="hashMap" resultType="hashMap">
+        select EIH_ID,
+               FILE_PATH,
+               FILE_NAME,
+               CSV_PATH,
+               TOTAL_ROW,
+               SKIP_ROW,
+               SAVE_ROW,
+               FAIL_ROW,
+               STATUS,
+               UPLOAD_DATE,
+               EXECUTE_DATE
+          from EXCEL_IMG_UPLOAD_HIST
+         <where>
+           <if test="startDate != null and endDate != null">
+               UPLOAD_DATE between STR_TO_DATE(#{startDate}, '%Y-%m-%d') and STR_TO_DATE(#{endDate}, '%Y-%m-%d')
+           </if>
+         </where>
+         order by UPLOAD_DATE desc, EXECUTE_DATE desc
+         limit #{offset}, 20
+    </select>
+    <select id="selectHistoryDetail" parameterType="hashMap" resultType="hashMap">
+        select EIH_ID,
+               TOTAL_ROW,
+               SKIP_ROW,
+               SAVE_ROW,
+               FAIL_ROW
+        from EXCEL_IMG_UPLOAD_HIST
+        where EIH_ID = #{eihId} 
+        order by UPLOAD_DATE desc, EXECUTE_DATE desc
+    </select>
+    <!--
+       업로드 히스토리 등록
+         - 업로드가 완료된 시점에 하므로 STATUS = '2' 로 등록된다.
+         - 이때에는 전체 ROW 수를 알 수 없다. TOTAL_ROW = 0
+    -->
+    <insert id="insertUpload" parameterType="hashMap">
+        insert into EXCEL_IMG_UPLOAD_HIST
+        (EIH_ID, FILE_PATH, FILE_NAME, TOTAL_ROW, STATUS, UPLOAD_DATE)
+        values
+        (#{eihId}, #{filePath}, #{fileName}, 0, 2, NOW())
+    </insert>
+    <update id="updateExecuteDate" parameterType="hashMap">
+        update EXCEL_IMG_UPLOAD_HIST
+           set EXECUTE_DATE = NOW()
+         where EIH_ID = #{eihId}
+    </update>
+    <update id="updateStatus" parameterType="hashMap">
+        update EXCEL_IMG_UPLOAD_HIST
+           set STATUS = #{status}
+         where EIH_ID = #{eihId}
+    </update>
+    <update id="updateCvsPath" parameterType="hashMap">
+        update EXCEL_IMG_UPLOAD_HIST
+           set CSV_PATH = #{xmlPath}
+         where EIH_ID = #{eihId}
+    </update>
+    <update id="updateTotalRow" parameterType="hashMap">
+        update EXCEL_IMG_UPLOAD_HIST
+           set TOTAL_ROW = #{totalRow}
+         where EIH_ID = #{eihId}
+    </update>
+    <update id="updateSkipRow" parameterType="hashMap">
+	    update EXCEL_IMG_UPLOAD_HIST
+	    	set SKIP_ROW = #{skipRow}
+	    where EIH_ID = #{eihId}
+    </update>
+	<update id="updateSaveRow" parameterType="hashMap">
+	    update EXCEL_IMG_UPLOAD_HIST
+	    	set SAVE_ROW = #{saveRow}
+	    where EIH_ID = #{eihId}
+    </update>
+	<update id="updateFailRow" parameterType="hashMap">
+	    update EXCEL_IMG_UPLOAD_HIST
+	    	set FAIL_ROW = #{failRow}
+	    where EIH_ID = #{eihId}
+    </update>
+    <!-- 액셀 업로드 일괄 작업 로그정보 조회 -->
+    <select id="selectHistoryLog" parameterType="hashMap" resultType="hashMap">
+        select EL.EIL_ID,
+               EL.EIH_ID,
+               EL.CONTENT_ID,
+               EL.FAIL_REASON,
+               EL.CREATE_DATE
+          from EXCEL_IMG_UPLOAD_HIST EH
+          inner join
+               EXCEL_IMG_UPLOAD_LOG EL
+         on EH.EIH_ID = EL.EIH_ID
+           and EH.EIH_ID = #{eihId}
+         order by CREATE_DATE desc
+    </select>
+    <delete id="deleteHistoryLog" parameterType="String">
+        delete from EXCEL_IMG_UPLOAD_LOG where EIH_ID = #{eihId}
+    </delete>
+	<select id="selectCotId" parameterType="hashMap" resultType="hashMap">
+		select cotid(#{contentId}) COT_ID, contentType(#{contentId}) CONTENT_TYPE
+	</select>
+	<select id="selectURL" parameterType="hashMap" resultType="hashMap">
+		select URL from IMAGE where IMG_ID in (select FIRST_IMAGE from DATABASE_MASTER where COT_ID = cotid(${contentId}))
+	</select>
+	<select id="selectImageId" parameterType="hashMap" resultType="hashMap">
+		select IMG_ID, URL from IMAGE where COT_ID= #{cotId}
+	</select>
+	
+	<select id="selectAccommodationInfoImageSet" parameterType="hashMap" resultType="hashMap">
+		SELECT COT_ID, ROOM_IMG1, ROOM_IMG2, ROOM_IMG3, ROOM_IMG4, ROOM_IMG5 
+		FROM KTO.ACCOMMODATION_INFO 
+		WHERE COT_ID = cotid(#{contentId})
+	</select>
+	
+	<delete id="deleteCotIdFromImage" parameterType="hashMap">
+		delete from IMAGE 
+		where COT_ID = #{cotId}
+		<choose>
+			<when test='exceptImageList != null and exceptImageList != ""'>
+				and IMG_ID NOT IN (${exceptImageList})
+			</when>
+		</choose>
+	</delete>
+	<insert id="insertNewImage" parameterType="hashMap">
+		INSERT INTO IMAGE
+			(IMG_ID, COT_ID, IMAGE_DESCRIPTION, IS_THUBNAIL, URL, `ORDER`)
+		VALUES
+			(#{imgId}, #{cotId}, #{desc}, 0, #{url}, #{order})
+		ON DUPLICATE KEY
+		UPDATE 
+		COT_ID =#{cotId}
+		, IMAGE_DESCRIPTION =#{desc}
+		, IS_THUBNAIL =0
+		, URL =#{url}
+		, `ORDER`=#{order}
+	</insert>
+	<insert id="insertExistImage" parameterType="hashMap">
+		INSERT INTO IMAGE
+			(IMG_ID, COT_ID, IMAGE_PATH, IMAGE_DESCRIPTION, IS_THUBNAIL, URL, `ORDER`)
+		VALUES
+			(#{imgId}, #{cotId}, #{path}, #{desc}, 0, #{url}, #{order})
+		ON DUPLICATE KEY 
+		UPDATE COT_ID=#{cotId}, IMAGE_PATH=#{path},IMAGE_DESCRIPTION=#{desc}, IS_THUBNAIL=0, URL=#{url}, `ORDER`=#{order}
+	</insert>
+	<update id="updateMainImage" parameterType="hashMap">
+		UPDATE DATABASE_MASTER 
+		SET FIRST_IMAGE = #{imgId}
+		WHERE COT_ID = #{cotId}
+	</update>
+	
+	<delete id="deleteUnusedImage" parameterType="hashMap">
+		delete from IMAGE 
+		where COT_ID = #{cotId}
+		and IMG_ID NOT IN (${exceptImageList})
+	</delete>
+	<delete id="deleteUnusedImage2" parameterType="hashMap">
+		delete from IMAGE 
+		where COT_ID = #{cotId}
+		and IMG_ID NOT IN (${exceptImageList})
+		AND IMG_ID NOT IN ( 
+					   SELECT B.IMG_ID FROM (
+			           SELECT X.ROOM_IMG1 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE X.COT_ID = #{cotId} AND X.ROOM_IMG1 IS NOT NULL AND X.ROOM_IMG1 = Y.IMG_ID  
+			           UNION ALL
+			           SELECT X.ROOM_IMG2 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE X.COT_ID = #{cotId} AND X.ROOM_IMG2 IS NOT NULL AND X.ROOM_IMG2 = Y.IMG_ID 
+			           UNION ALL
+			           SELECT X.ROOM_IMG3 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE X.COT_ID = #{cotId} AND X.ROOM_IMG3 IS NOT NULL AND X.ROOM_IMG3 = Y.IMG_ID  
+			           UNION ALL
+			           SELECT X.ROOM_IMG4 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE X.COT_ID = #{cotId} AND X.ROOM_IMG4 IS NOT NULL AND X.ROOM_IMG4 = Y.IMG_ID 
+			           UNION ALL
+			           SELECT X.ROOM_IMG5 as IMG_ID FROM ACCOMMODATION_INFO X, IMAGE Y WHERE X.COT_ID = #{cotId} AND X.ROOM_IMG5 IS NOT NULL AND X.ROOM_IMG5 = Y.IMG_ID ) B
+			           )
+	</delete>
+</mapper>

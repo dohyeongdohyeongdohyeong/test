@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menu> 
+  <menu caption="메인">
+    <permission id="use" caption="사용여부" uuid="8d521052-a863-4a38-8dd8-ccd73a65714c">false</permission>
+    <menu caption="PC">
+      <permission id="use" caption="사용여부" uuid="a7b56f60-378d-4ef1-bdec-39c0cc117d71">false</permission>
+      <menu caption="쇼케이스">
+        <permission caption="사용여부" uuid="e0995b9c-d1aa-4296-a8ee-4864eea5825d">false</permission>
+        <permission caption="컨텐츠 검색" uuid="bde8e67e-ca7b-49a3-9e54-fe727217407a">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="fcac567b-45d7-444e-8108-3145b7bcd49d">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="34e90a90-c290-45e9-b854-2f51d4bf01ea">false</permission>
+        <permission caption="URL Link 검색" uuid="d0a872c3-4ac6-40b9-a99c-03263c7980f7">false</permission>
+        <permission caption="URL Link 검색 후 업로드" uuid="4f071e41-d9fe-47e6-8823-c909a21adbde">false</permission>
+        <permission caption="URL Link 검색 후 저장" uuid="1e221502-b234-42b1-aa52-ec9688aef844">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="a81de23f-9ba2-45a4-821f-7224fcb4b127">false</permission>
+        <permission caption="목록 순서 갱신" uuid="b3290b9d-24d3-4aac-bf7d-e5c04485665f">false</permission>
+      </menu>
+      <menu caption="큐레이션">
+        <permission caption="사용여부" uuid="08ec98c5-f616-4d59-a79f-64c845c78011">false</permission>
+        <permission caption="컨텐츠 검색" uuid="5debbac6-479e-4ba6-8899-6ef43931ffa7">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="1210c753-72be-4ac4-87b8-92d241dc1000">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="27df3762-775c-4847-8972-351de9b9824c">false</permission>
+        <permission caption="URL Link 검색" uuid="d969d247-cb50-4ef8-8228-e9e5c4171b84">false</permission>
+        <permission caption="URL Link 검색 후 업로드" uuid="3a55c341-1953-4005-92ae-982463f7041d">false</permission>
+        <permission caption="URL Link 검색 후 저장" uuid="ae760a81-9dbe-405a-b5fb-01a879c18937">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="709c87c8-1016-486f-b7bc-aaaf8adc581d">false</permission>
+      </menu>
+      <menu caption="태그">
+        <permission caption="사용여부" uuid="cb869b83-5ec3-4147-9a33-0c5051100fe8">false</permission>
+        <permission caption="태그 추가" uuid="7ec45d0e-4b61-4589-b973-3bf898bfce9f">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="c8eeb970-77e1-4bdb-9f7a-b0cafe1eb53a">false</permission>
+      </menu>
+      <menu caption="홍보마케팅">
+        <permission caption="사용여부" uuid="6ccab7ae-2864-4030-89ee-7db09849b13a">false</permission>
+        <permission caption="영역1 컨텐츠 검색" uuid="eeab71ef-46d8-4402-a2a2-4f0ed65c35ea">false</permission>
+        <permission caption="영역1 컨텐츠 이미지 검색 후 업로드" uuid="e7765db0-3d38-45b6-94dc-b1132bf78dd5">false</permission>
+        <permission caption="영역1 컨텐츠 이미지 검색 후 저장" uuid="aa3904ca-d214-437b-8c00-77a3b3bfddd6">false</permission>
+        <permission caption="영역1 URL Link 검색" uuid="e3375ce2-a83e-4d10-9f4d-7828aec6e650">false</permission>
+        <permission caption="영역1 URL Link 검색 후 업로드" uuid="0ee15afa-43d5-47c6-a0b6-b688b5375f19">false</permission>
+        <permission caption="영역1 URL Link 검색 후 저장" uuid="d3c60044-903e-4f25-8f1c-3c61262ca2d1">false</permission>
+        <permission caption="영역1 컨텐츠 삭제" uuid="89688626-9ef3-45ec-8c31-c6e855cd9501">false</permission>
+        <permission caption="영역1 목록 순서 갱신" uuid="bf3f81ce-13d2-4e40-ae43-a9a5f4cb1201">false</permission>
+        <permission caption="영역1 노출 여부" uuid="27d08fe9-c0cd-43d3-861a-d7e044532e95">false</permission>
+        <permission caption="영역2 컨텐츠 검색" uuid="2ad7d0ce-4f8e-40ee-b28e-91b18e83d842">false</permission>
+        <permission caption="영역2 컨텐츠 이미지 검색 후 업로드" uuid="3bcab45b-8c22-4e52-968d-1432eee6a780">false</permission>
+        <permission caption="영역2 컨텐츠 이미지 검색 후 저장" uuid="02da09d9-6383-422b-a827-ce59ea330419">false</permission>
+        <permission caption="영역2 URL Link 검색" uuid="ac9df3f5-f1f3-4ab2-8348-a62f5bf1192a">false</permission>
+        <permission caption="영역2 URL Link 검색 후 업로드" uuid="0c0a58ed-150a-4436-ac6d-a3e0a3c13015">false</permission>
+        <permission caption="영역2 URL Link 검색 후 저장" uuid="984ce195-ddb4-45b3-97a1-130d57280f1d">false</permission>
+        <permission caption="영역2 컨텐츠 삭제" uuid="262a2bef-9a57-4e4c-9069-e6374f9c9c39">false</permission>
+        <permission caption="영역2 목록 순서 갱신" uuid="f4093927-d64e-4d93-969f-0d29390ca856">false</permission>
+        <permission caption="영역2 노출 여부" uuid="9e3071b2-3323-457a-9a21-3146bbe368c5">false</permission>
+      </menu>
+      <menu caption="켈린더">
+        <permission caption="사용여부" uuid="15c1e389-3446-471e-a43d-a162ee12b7d5">false</permission>
+        <permission caption="컨텐츠 검색" uuid="8eeaf505-9a36-4b98-86ae-06f0aa1103fd">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="7715c6f7-d67a-4180-8d5f-7eefcdfe214b">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="71da4c13-9543-4c6d-9438-dc6f610ae652">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="dd0ad0f1-803f-47dd-83ab-00a38f01e7ad">false</permission>
+      </menu>
+    </menu>
+    <menu caption="Mobile">
+      <permission caption="사용여부" uuid="a1f6d266-9d5e-4fe3-b051-99c91b9b4db3">false</permission>
+      <menu caption="쇼케이스">
+        <permission caption="사용여부" uuid="2e4ea1ea-fc7a-47f7-a83d-63e02238a82f">false</permission>
+        <permission caption="컨텐츠 검색" uuid="f852ba50-b17f-4ddf-a461-5c4b2fe7e3d3">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="c23ab2bf-02eb-441e-97e7-a07abe836aa4">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="f1eab597-5be4-42da-ad5d-6b02c67cc0ee">false</permission>
+        <permission caption="URL Link 검색" uuid="7f1199e4-fe98-4b3d-a46c-2eb865f59eeb">false</permission>
+        <permission caption="URL Link 검색 후 업로드" uuid="03142cba-9f35-4972-8acc-4db7000d76e5">false</permission>
+        <permission caption="URL Link 검색 후 저장" uuid="09af3d61-f43a-4edc-99e5-b1baca6ea425">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="cfff92b5-95d3-4265-bc39-562f81e6e46e">false</permission>
+        <permission caption="목록 순서 갱신" uuid="a5530505-b1ba-4cc7-bf52-aa3e2b599392">false</permission>
+      </menu>
+      <menu caption="큐레이션">
+        <permission caption="사용여부" uuid="7c0f645a-9b27-4fa2-adbe-3e12cefd99c5">false</permission>
+        <permission caption="컨텐츠 검색" uuid="4388ce43-f3fe-48cf-b3d1-b6ef2fc75004">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="e01d756d-6a58-4bf8-9315-0e634389f7f9">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="7014a9c6-38e1-4832-a8e0-32c9f54465ae">false</permission>
+        <permission caption="URL Link 검색" uuid="09452a8f-6009-4c1f-a34a-4315027047db">false</permission>
+        <permission caption="URL Link 검색 후 업로드" uuid="9ce857d7-80b4-40ba-a701-e8400d15ed2b">false</permission>
+        <permission caption="URL Link 검색 후 저장" uuid="d349c249-0a07-4057-896b-3009bc5d2bb0">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="84df8f03-a4b8-4601-a143-444650fc726e">false</permission>
+      </menu>
+      <menu caption="태그">
+        <permission caption="사용여부" uuid="4c9dbce3-c431-455a-b76d-bbcf3ca5d24b">false</permission>
+        <permission caption="태그 추가" uuid="af6a65fc-4c51-43aa-8f0c-02a0e7dce590">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="597f78f8-bc34-46d3-99af-a294e30845a8">false</permission>
+      </menu>
+      <menu caption="홍보마케팅">
+        <permission caption="사용여부" uuid="7b2de7f6-6d85-46e2-a0e9-3ecf3eb7539e">false</permission>
+        <permission caption="영역1 컨텐츠 검색" uuid="ad6e27a3-43bb-44f4-bc6f-b582e16488b7">false</permission>
+        <permission caption="영역1 컨텐츠 이미지 검색 후 업로드" uuid="311dad89-ed33-4ff9-a312-3666893e49b3">false</permission>
+        <permission caption="영역1 컨텐츠 이미지 검색 후 저장" uuid="b38b17c5-d111-43e8-85b5-a92140df71bf">false</permission>
+        <permission caption="영역1 URL Link 검색" uuid="499e87c3-0903-4304-a07f-bc5e26768b57">false</permission>
+        <permission caption="영역1 URL Link 검색 후 업로드" uuid="54b3a15b-a8c7-4a67-bd33-7a6f58d70770">false</permission>
+        <permission caption="영역1 URL Link 검색 후 저장" uuid="2ef4280c-6bc5-46ab-9521-9d3cba46d665">false</permission>
+        <permission caption="영역1 컨텐츠 삭제" uuid="bdd4c8a0-79f0-467f-b7c8-669bf7394eba">false</permission>
+        <permission caption="영역1 목록 순서 갱신" uuid="c092510d-4e15-4051-b426-318a7b835cb3">false</permission>
+        <permission caption="영역1 노출 여부" uuid="e45fc644-2045-4f58-9c53-847eaa9379fd">false</permission>
+        <permission caption="영역2 컨텐츠 검색" uuid="a23a7681-e18c-4427-ba63-ad4c35c9c931">false</permission>
+        <permission caption="영역2 컨텐츠 이미지 검색 후 업로드" uuid="44de4a93-598f-4a6f-a78d-4e7d9b969b3f">false</permission>
+        <permission caption="영역2 컨텐츠 이미지 검색 후 저장" uuid="f83f51d8-1fc6-4e96-af35-2fe960a423a8">false</permission>
+        <permission caption="영역2 URL Link 검색" uuid="d8234ff8-1f49-409c-82b4-438acbcde5e9">false</permission>
+        <permission caption="영역2 URL Link 검색 후 업로드" uuid="aedb0f9b-eddd-4e8c-bf68-1672210be0df">false</permission>
+        <permission caption="영역2 URL Link 검색 후 저장" uuid="9150c587-ee3a-497a-abbd-5b055a7ee41b">false</permission>
+        <permission caption="영역2 컨텐츠 삭제" uuid="bec32aa7-207d-45a0-8eaa-5cbf492ec623">false</permission>
+        <permission caption="영역2 목록 순서 갱신" uuid="e75bb8ea-1612-4fb6-bd61-7099e286fc32">false</permission>
+        <permission caption="영역2 노출 여부" uuid="c2cb52ae-5dcf-45e5-8166-98cacdf2b7ea">false</permission>
+      </menu>
+      <menu caption="켈린더">
+        <permission caption="사용여부" uuid="a5e85178-4a33-406b-a55b-2fb2c24a47ff">false</permission>
+        <permission caption="컨텐츠 검색" uuid="6ac05c4d-79a8-49bc-93d9-0a96d0609560">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="5ce3cd7a-82db-47b7-9af6-00d65fb57dbc">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="54a978c1-5bfe-40fc-8dcc-becf631c4678">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="8acca9b6-0953-4dc8-b74d-7f665da6a783">false</permission>
+      </menu>
+    </menu>
+  </menu>
+  <menu caption="태그">
+    <permission caption="사용여부" uuid="336e4543-4d2e-4e8e-90c5-fc2bdc787e8a">false</permission>
+    <menu caption="태그 생성/삭제">
+      <permission caption="사용여부" uuid="37009033-e1b5-449d-9a3d-58edac5bfbf3">false</permission>
+      <permission caption="태그 검색" uuid="fbf08e84-b77c-4ade-b201-6670bd219758">false</permission>
+      <permission caption="태그 생성" uuid="360e0df0-f08d-45c0-b262-3f0e7a027e96">false</permission>
+      <permission caption="태그 수정" uuid="d7f3e35a-1cf8-42db-a121-82e4af64444d">false</permission>
+      <permission caption="태그 삭제" uuid="b91c30e4-bf7c-40a7-9aa5-b5837cf70107">false</permission>
+    </menu>
+    <menu caption="태그 그룹">
+      <permission caption="사용여부" uuid="f3025c2e-60ac-43d1-9a90-dd8714089734">false</permission>
+      <permission caption="그룹태그 검색" uuid="4d13a9ba-bac5-4f3a-b0b7-56400c9b994b">false</permission>
+      <permission caption="그룹태그 생성" uuid="ac91b180-8d6c-4671-a85b-2102ec3f1c34">false</permission>
+      <permission caption="그룹태그 수정" uuid="02ecd548-4aca-4543-857b-46c1016a54f4">false</permission>
+      <permission caption="소속 태그 선택" uuid="aa38b253-6ba4-4ac8-a479-b43674ffcdce">false</permission>
+      <permission caption="선택 삭제" uuid="e0776444-fb11-4508-850c-c3bed2d19928">false</permission>
+    </menu>
+  </menu>
+  <menu caption="주요 메인">
+    <permission caption="사용여부" uuid="b00feab8-57c7-41e3-94fc-c9fa73d340a4">false</permission>
+    <menu caption="추천">
+      <permission caption="사용여부" uuid="6082954c-c0ad-42c1-bb0c-c12837659681">false</permission>
+      <menu caption="노출 컨텐츠">
+        <permission caption="사용여부" uuid="c5a6fe48-329b-4195-9528-6c37c9ba5a7a">false</permission>
+        <permission caption="년도/월 검색" uuid="cf9cdf75-fff2-4944-bb02-ee7ff840ce72">false</permission>
+        <permission caption="컨텐츠 검색" uuid="3554ba00-fa8c-4450-9e93-e32f8cc2e38d">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="6a805945-b67e-4983-8141-1b01d7b3407e">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="7f6809eb-d80b-46df-bd98-a8fb7aec7fd3">false</permission>
+        <permission caption="URL Link 검색" uuid="0b3e63b0-96e8-4759-906a-8598e62cbc99">false</permission>
+        <permission caption="URL Link 검색 후 업로드" uuid="226a7ce9-548a-4b2e-8c08-0f9a340a3e90">false</permission>
+        <permission caption="URL Link 검색 후 저장" uuid="584652da-b031-46a5-b697-01ca4ad9a389">false</permission>
+        <permission caption="컨텐츠 수정" uuid="aca752cd-48b4-4c30-a27d-d21d2b9b654f">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="4889ea09-edab-43fe-80f0-4b03255432f0">false</permission>
+      </menu>
+      <menu caption="태그 선택">
+        <permission caption="사용여부" uuid="0713d656-2669-4cb4-81a7-d5f1320e4f2d">false</permission>
+        <permission caption="자동/수동 선택" uuid="0c98ae9a-707e-49aa-9abd-ba9ac510d90f">false</permission>
+        <permission caption="자동시 빈도 선택" uuid="01addb01-29fa-4455-97ad-e0cc244cad95">false</permission>
+        <permission caption="수동시 태그 검색" uuid="76019433-dc53-494c-a8b6-94d6c2a26968">false</permission>
+        <permission caption="수동시 멤버태그 선택" uuid="172ce80c-20ef-4291-8c14-3e96be007f1a">false</permission>
+        <permission caption="수동시 멤버리스트 저장" uuid="c347f432-7308-4b50-a749-f53322342efd">false</permission>
+      </menu>
+    </menu>
+    <menu caption="코스">
+      <permission caption="사용여부" uuid="47137811-21dd-4c3f-90ae-11a3f249521a">false</permission>
+      <menu caption="노출 컨텐츠">
+        <permission caption="사용여부" uuid="090163a7-8d4e-421b-b853-33d7993cc550">false</permission>
+        <permission caption="년도/월 검색" uuid="114d52e6-5f0c-4b9d-a883-40f82defc7d2">false</permission>
+        <permission caption="컨텐츠 검색" uuid="34e1c645-5f33-45ef-add2-c9fd9211b3b2">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="176bd45d-b56e-4a90-8cbf-192d8eb73820">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="5201a7b3-ebd2-4140-ba14-f48a33010778">false</permission>
+        <permission caption="URL Link 검색" uuid="9d4c3944-64a2-42aa-b7a1-4962b638b1da">false</permission>
+        <permission caption="URL Link 검색 후 업로드" uuid="57ef1320-f21f-44b9-84ca-9cbb5b463275">false</permission>
+        <permission caption="URL Link 검색 후 저장" uuid="09031a42-0f09-44ee-b994-699983ea0a54">false</permission>
+        <permission caption="미리보기" uuid="522afa9f-1678-4261-bac4-40c4becde8dd">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="cc2f6f5a-8a3a-4024-a258-29c7118eb632">false</permission>
+      </menu>
+      <menu caption="태그 선택" uuid="cd7d76a7-56e1-4bac-8a4d-36fad33d8104">
+        <permission caption="사용여부" uuid="596f099d-c603-4468-96ea-8683f6ee55eb">false</permission>
+        <permission caption="자동/수동 선택" uuid="255d8301-0e73-4cbc-85d2-40bf5fc1819f">false</permission>
+        <permission caption="자동시 빈도 선택" uuid="343ce201-5050-481e-a0a5-73f0b16a76c9">false</permission>
+        <permission caption="수동시 태그 검색" uuid="c23188c0-35e9-4b0f-8181-e0f572e346da">false</permission>
+        <permission caption="수동시 멤버태그 선택" uuid="c0890307-6855-4f4c-9e25-b7eab285ddd3">false</permission>
+        <permission caption="수동시 멤버리스트 저장" uuid="14c2b3b4-f290-4e8e-974f-0c1d82922067">false</permission>
+      </menu>
+    </menu>
+    <menu caption="명소" uuid="6eca3d29-6cb8-4a2e-9061-bcd6a2ac898f">
+      <permission caption="사용여부" uuid="00cdb7df-159e-45db-8334-e6bc7a8ce83e">false</permission>
+      <menu caption="노출 컨텐츠" uuid="f979ad0a-a7b4-4d34-a260-cde9dc0ead2e">
+        <permission caption="사용여부" uuid="fac24661-4111-4c29-adde-884bd4467308">false</permission>
+        <permission caption="구분별 검색" uuid="1078725f-5918-45f3-8211-55b866eea406">false</permission>
+        <permission caption="컨텐츠 검색" uuid="b02399ba-d8d6-4dbf-b8f8-4470eda1eb86">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="badf9fd0-1a27-44ac-8a12-3fadb3c54f2a">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="f3f743fc-9e38-4062-a250-118b3dc43d90">false</permission>
+        <permission caption="미리보기" uuid="ddc5cee3-9d6c-4419-ad30-5e53c530de26">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="9a6cef7c-8102-4090-ab2d-5b59ded8d812">false</permission>
+      </menu>
+      <menu caption="태그 선택" uuid="2a9f1ca8-84b5-45bd-aab3-248ecd716a92">
+        <permission caption="사용여부" uuid="b82dac4e-f8cd-4bfb-8fd6-a3a53f4f9623">false</permission>
+        <permission caption="자동/수동 선택" uuid="70bdad42-27e5-459a-82ea-d838a864bbad">false</permission>
+        <permission caption="자동시 빈도 선택" uuid="ffa7046c-931f-4ff6-ace3-0d656f9b1442">false</permission>
+        <permission caption="수동시 태그 검색" uuid="150b84e6-4c83-4ca6-ba98-ae87718d638e">false</permission>
+        <permission caption="수동시 멤버태그 선택" uuid="94b5a097-a7a0-4037-ab2c-04e05d8f5097">false</permission>
+        <permission caption="수동시 멤버리스트 저장" uuid="bc1ff258-7560-49e5-92ba-979d766b870e">false</permission>
+      </menu>
+    </menu>
+    <menu caption="축제" uuid="a9d0390a-f36f-453a-9593-f915571601a5">
+      <permission caption="사용여부" uuid="f724f797-701d-4875-949a-d63688622885">false</permission>
+      <menu caption="노출 컨텐츠" uuid="1eda181f-b8ef-48f6-b0c9-05e5f9de2eac">
+        <permission caption="사용여부" uuid="542d5ce3-a268-4320-ad20-018b148fe228">false</permission>
+        <permission caption="축제명/CID 검색" uuid="dec5f022-e64f-4a7c-9239-dd15bd3674bf">false</permission>
+        <permission caption="년.월.광역시 검색" uuid="380973bd-4b9d-4909-98fa-f1ad805fd768">false</permission>
+        <permission caption="컨텐츠 검색" uuid="5fdded2d-4e84-478f-9a3d-9a7c413ff424">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 업로드" uuid="cc73747e-7843-4b55-a92d-351dbb4c8a4b">false</permission>
+        <permission caption="컨텐츠 이미지 검색 후 저장" uuid="db8c6ee0-9e52-4b83-ba58-2537b8f23a42">false</permission>
+        <permission caption="URL Link 검색" uuid="571bd09c-6c45-4e07-a855-7334c2d19a76">false</permission>
+        <permission caption="URL Link 검색 후 업로드" uuid="7b264577-2398-4a52-a0a1-a7c3efd906ea">false</permission>
+        <permission caption="URL Link 검색 후 저장" uuid="b7ced622-ee5d-4f2c-ac68-32a4a2e83ff6">false</permission>
+        <permission caption="미리보기" uuid="3353ea8c-e1c1-4477-8139-dfe94ce9ced5">false</permission>
+        <permission caption="금월 대표 축제 목록" uuid="95b09178-7292-441a-a6f2-1eaa0adfdf41">false</permission>
+        <permission caption="컨텐츠 삭제" uuid="c0f5a1dd-530c-4ec2-a4bc-067951f0326a">false</permission>
+      </menu>
+      <menu caption="태그 선택" uuid="ebe5adb3-62ae-4b4f-9073-e250c3611a8d">
+        <permission caption="사용여부" uuid="a7e4f472-e11c-4ca6-8eb2-1381d36a42e6">false</permission>
+        <permission caption="자동/수동 선택" uuid="8d7b89bd-beb6-42bf-834a-1da90b4caae1">false</permission>
+        <permission caption="자동시 빈도 선택" uuid="778cf9f7-04c2-4ddb-92a9-ab4850ade9aa">false</permission>
+        <permission caption="수동시 태그 검색" uuid="903cd78a-e7f8-4527-b8f3-cf36b14e27e1">false</permission>
+        <permission caption="수동시 멤버태그 선택" uuid="4a425a99-b97b-4a24-a2ac-26960cca547f">false</permission>
+        <permission caption="수동시 멤버리스트 저장" uuid="bb09194c-7b73-47d9-af7b-49b60dcd25bd">false</permission>
+      </menu>
+    </menu>
+  </menu>
+  <menu caption="컨텐츠" uuid="2b5a6e34-dc25-45ee-ac07-43c0a9bf0de9">
+    <permission caption="사용여부" uuid="81f3553a-7956-4ef7-9fe2-0c4b26ebe8d1">false</permission>
+    <menu caption="추천 컨텐츠" uuid="24044f02-ad46-47e7-a4b2-733180df1bf5">
+      <permission caption="사용여부" uuid="80feea76-6972-4260-a70c-cf747717dcf1">false</permission>
+      <permission caption="CID.제목.태그 검색" uuid="98afe952-a822-407e-a125-ff2da212f0ee">false</permission>
+      <permission caption="미리보기" uuid="c18e144f-5444-460b-b68e-cd69d0b6f3c1">false</permission>
+      <permission caption="컨텐츠 추가" uuid="58c8820f-2490-423a-be63-3adc28a89657">false</permission>
+      <permission caption="컨텐츠 삭제" uuid="ad9841b8-5190-49e7-b467-da9fea88a5b8">false</permission>
+    </menu>
+    <menu caption="데이터베이스 컨텐츠" uuid="6e271917-2c93-438d-bd30-f7b4b35cbfa8">
+      <permission caption="사용여부" uuid="a4f0e103-a4fd-42c0-bcfe-25dea1a411bd">false</permission>
+      <permission caption="CID.제목.태그 검색" uuid="a70c1054-8e85-4670-9384-0d99dd5a2704">false</permission>
+      <permission caption="기준.시작-종료.광역시 검색" uuid="6115d353-6f6d-4276-8056-78be0ee645cf">false</permission>
+      <permission caption="컨텐츠 종류별 검색" uuid="1a9065ac-ff97-4cea-acbd-5ba76c10a515">false</permission>
+      <permission caption="컨텐츠 추가" uuid="5324cb94-6315-41c1-868a-46ab127a2318">false</permission>
+      <permission caption="컨텐츠 삭제" uuid="1f770bde-331c-4cdd-9b61-b4931a98b904">false</permission>
+    </menu>
+  </menu>
+  <menu caption="사용자" uuid="1ec5ce72-a6e4-4f77-94e9-1de154b71e0f">
+    <permission caption="사용여부" uuid="75622bd8-761c-4a55-94d6-c11687960b17">true</permission>
+    <permission caption="사용자 추가" uuid="90a223a7-ce1a-4e49-bc6e-6fbc7d63b81f">false</permission>
+    <permission caption="사용자 정보수정" uuid="3ce23390-dc4f-4b31-be6b-e67cc70c2bd0">false</permission>
+    <permission caption="사용자 사용중지" uuid="5d8bf268-b5bf-41e6-b38e-1e1c64b6cc8d">false</permission>
+    <permission caption="사용자 삭제" uuid="71e7a1cb-9145-4909-8b7d-46434f00032f">false</permission>
+    <permission caption="관리자 권한" uuid="638b063d-18b6-4d8a-9f29-26da1dff77a0">false</permission>
+    <permission caption="전부 쓰기 권한" uuid="c90df888-9860-44bb-b912-e0e22cb54c65">false</permission>
+    <permission caption="전부 읽기 권한" uuid="1760dcbd-c41a-4f7b-81a0-615dad3a4244">false</permission>
+    <permission caption="권한 세부 설정" uuid="bf245ea9-1ead-4fac-955b-9ecdcbe7d7b1">false</permission>
+  </menu>
+</menu>

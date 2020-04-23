@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.PermissionMapper">
+
+	<select id="permission" parameterType="hashMap" resultType="hashMap">
+		SELECT 		PERMISSION_ID
+				  , PERMISSION
+		FROM	 	PERMISSION
+		WHERE 		CREATE_USR_ID = #{usrId}
+	</select>
+	
+	<delete id="permissionDelete" parameterType="hashMap">
+		DELETE FROM PERMISSION
+		WHERE 		CREATE_USR_ID = #{usrId} 
+		AND 		PERMISSION_ID=#{permissionId}
+	</delete>
+	
+	<insert id="permissionInsert" parameterType="hashMap">
+		INSERT INTO PERMISSION (
+			  CREATE_USR_ID
+			, PERMISSION_ID
+			, PERMISSION
+			, CREATE_DATE
+		) VALUES ( 
+			  #{usrId}
+			, #{permissionId}
+			, #{permission}
+			, now()
+		)
+	</insert>
+	
+	<select id="permissionSelect" parameterType="hashMap" resultType="hashMap">
+		SELECT	PERMISSION_ID 
+		FROM	PERMISSION 
+		WHERE	CREATE_USR_ID = #{usrId}
+	</select>
+	
+	<delete id="permissionDeleteForTgrUser" parameterType="hashMap">
+		DELETE FROM PERMISSION
+		WHERE 		CREATE_USR_ID = #{usrId}
+	</delete>
+	
+	<delete id="permissionDeleteForTgrUserNotSystem" parameterType="hashMap">
+		DELETE 	FROM PERMISSION 
+		WHERE 	CREATE_USR_ID = #{usrId} 
+		AND		PERMISSION_ID NOT IN (
+			'1b958c46-e9d2-410f-af52-c6c16783b4ca',
+			'b1c21dfc-0400-4853-a841-ef87957b1d8e',
+			'04c8092c-d5e7-4682-bef5-ee1983e509c9',
+			'2c0a4cf2-9988-40d1-ada4-d28cefecd279',
+			'69807087-dd72-4857-8825-522902971146',
+			'b867863b-8ab8-46af-a8be-2f1e888d42f7',
+			'89f97334-c9f5-4c45-b9e9-136523465e77',
+			'9d6a68f8-b061-4f54-9b4f-566a7230102b',
+			'e910c29e-412e-49ab-9a1b-2af2fe8209b3',
+			'e273c487-3696-11ea-b70a-020027310001',
+			'd9b68d4b-3696-11ea-b70a-020027310001',
+			'df923938-3696-11ea-b70a-020027310001'
+		)
+	</delete>
+	
+	<select id="selectPermissionHistory" parameterType="hashMap" resultType="hashMap">
+		SELECT 		PH.NO
+				  , PH.PARENT_CAPTION
+				  , PH.CAPTION
+				  , PH.PERMISSION_ID
+				  , PH.PERMISSION
+				  , S.STF_ID	AS	STF_ID
+				  , SS.STF_ID	AS	EDIT_STF_ID
+				  , PH.CREATE_DATE
+		FROM 		PERMISSION_HISTORY PH
+		INNER JOIN	STAFF S
+		ON			PH.USR_ID 		= S.USR_ID
+		INNER JOIN	STAFF SS	
+		ON 			PH.EDIT_USR_ID 	= SS.USR_ID
+		WHERE 		1 = 1
+		ORDER BY	CREATE_DATE DESC
+		LIMIT		#{offset}, #{limit}
+	</select>
+	
+	<select id="selectPermissionHistoryCnt" resultType="Integer">
+		SELECT 		COUNT(*)
+		FROM 		PERMISSION_HISTORY
+		WHERE 		1 = 1
+		ORDER BY	CREATE_DATE DESC
+	</select>
+	
+	<insert id="insertPermissionHistory" parameterType="hashMap">
+		INSERT INTO PERMISSION_HISTORY (
+			  PARENT_CAPTION
+			, CAPTION
+			, PERMISSION_ID
+			, PERMISSION
+			, USR_ID
+			, EDIT_USR_ID
+			, CREATE_DATE
+		) VALUES (
+			  #{parentCaption}
+			, #{caption}
+			, #{permissionId}
+			, #{permission}
+			, #{usrId}
+			, #{editUsrId}
+			, NOW()
+		)
+	</insert>
+</mapper>

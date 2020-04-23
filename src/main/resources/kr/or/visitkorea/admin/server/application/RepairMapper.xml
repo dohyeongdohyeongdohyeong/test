@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.RepairMapper">
+   <select id="selectRepairList" parameterType="hashMap" resultType="hashMap">
+		select A.REP_ID repid, A.REQUEST_TYPE rtype, A.STATUS status, A.TITLE title, A.REQ_BODY reqbody, A.REQ_FILE reqfile, A.REQ_FILEPATH reqfilepath
+			, A.RES_BODY resbody, A.RES_FILE resfile, A.RES_FILEPATH resfilepath
+			, B.STF_ID stfid, B.USR_ID usrid, A.REQUEST_DATE reqdate, A.RESPONSE_DATE resdate, D.NAME resname, D.REM_ID remid
+		from STAFF B, REPAIR_REQUEST A left join REPAIR_MAN D on A.REM_ID=D.REM_ID
+		where A.STF_ID=B.STF_ID
+		<choose><when test="stfid != null"> and B.STF_ID = #{stfid}</when></choose>
+		<choose><when test="rtype != null"> and A.REQUEST_TYPE = #{rtype}</when></choose>
+		<choose><when test="status != null"> and A.STATUS = #{status}</when></choose>
+		<choose><when test="remid != null"> and D.REM_ID = #{remid}	</when></choose>
+		<choose>
+			<when test="datetype != null">
+				 <choose>
+					<when test="datetype == 0">
+					 	<choose><when test="sdate != null"> and A.REQUEST_DATE >= #{sdate}</when></choose>
+						<choose><when test="edate != null"> and A.REQUEST_DATE <![CDATA[ <= ]]> #{edate}</when></choose>
+					</when>
+					<otherwise>
+					 	<choose><when test="sdate != null"> and A.RESPONSE_DATE >= #{sdate}</when></choose>
+						<choose><when test="edate != null"> and A.RESPONSE_DATE <![CDATA[ <= ]]> #{edate}</when></choose>
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+		<if test="searchtype == 0">
+			<choose><when test="word != null"> and (A.TITLE REGEXP #{word}	or A.REQ_BODY REGEXP #{word})</when></choose>
+		</if>
+		<if test="searchtype == 1">
+			<choose><when test="word != null"> and A.TITLE REGEXP #{word}</when></choose>
+		</if>
+		<if test="searchtype == 2">
+			<choose><when test="word != null"> and A.REQ_BODY REGEXP #{word}</when></choose>
+		</if>
+		<if test="searchtype == 3">
+			<choose><when test="word != null"> and B.STF_ID REGEXP #{word}</when></choose>
+		</if>
+		order by A.REQUEST_DATE desc
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+   </select>
+   <select id="selectRepairListCnt" parameterType="hashMap" resultType="hashMap">
+		select count(*) CNT from (
+		select A.REP_ID repid, A.REQUEST_TYPE rtype, A.STATUS status, A.TITLE title, A.REQ_BODY reqbody, A.REQ_FILE reqfile, A.REQ_FILEPATH reqfilepath
+			, A.RES_BODY resbody, A.RES_FILE resfile, A.RES_FILEPATH resfilepath
+			, B.STF_ID stfid, A.REQUEST_DATE reqdate, A.RESPONSE_DATE resdate, D.NAME resname
+		from STAFF B, REPAIR_REQUEST A left join REPAIR_MAN D on A.REM_ID=D.REM_ID
+		where A.STF_ID=B.STF_ID
+		<choose><when test="stfid != null"> and B.STF_ID = #{stfid}</when></choose>
+		<choose><when test="rtype != null"> and A.REQUEST_TYPE = #{rtype}</when></choose>
+		<choose><when test="status != null"> and A.STATUS = #{status}</when></choose>
+		<choose><when test="remid != null"> and D.REM_ID = #{remid}	</when></choose>
+		<choose>
+			<when test="datetype != null">
+				 <choose>
+					<when test="datetype == 0">
+					 	<choose><when test="sdate != null"> and A.REQUEST_DATE >= #{sdate}</when></choose>
+						<choose><when test="edate != null"> and A.REQUEST_DATE <![CDATA[ <= ]]>  #{edate}</when></choose>
+					</when>
+					<otherwise>
+					 	<choose><when test="sdate != null"> and A.RESPONSE_DATE >= #{sdate}</when></choose>
+						<choose><when test="edate != null"> and A.RESPONSE_DATE <![CDATA[ <= ]]>  #{edate}</when></choose>
+					</otherwise>
+				</choose>
+			</when>
+		</choose>
+		<if test="searchtype == 0">
+			<choose><when test="word != null"> and (A.TITLE REGEXP #{word}	or A.REQ_BODY REGEXP #{word})</when></choose>
+		</if>
+		<if test="searchtype == 1">
+			<choose><when test="word != null"> and A.TITLE REGEXP #{word}</when></choose>
+		</if>
+		<if test="searchtype == 2">
+			<choose><when test="word != null"> and A.REQ_BODY REGEXP #{word}</when></choose>
+		</if>
+		) AAA
+   	</select>
+   
+   
+   	<select id="selectRepair" parameterType="hashMap" resultType="hashMap">
+		select A.REP_ID repid, A.REQUEST_TYPE rtype, A.STATUS status, A.TITLE title, A.REQ_BODY reqbody, A.REQ_FILE reqfile, A.REQ_FILEPATH reqfilepath
+			, A.RES_BODY resbody, A.RES_FILE resfile, A.RES_FILEPATH resfilepath
+			, B.USR_ID usrid, A.REQUEST_DATE reqdate, A.RESPONSE_DATE resdate, D.REM_ID remid
+		from REPAIR_REQUEST A, STAFF B, REPAIR_MAN D
+		where A.STF_ID=B.STF_ID and A.REM_ID=D.REM_ID and REP_ID=#{repid}
+   	</select>
+   
+	<insert id="insertRepair" parameterType="hashMap">
+ 		insert into REPAIR_REQUEST (REP_ID, TITLE, REQ_BODY, STF_ID, REQUEST_DATE
+ 		<choose><when test="reqfile != null">, REQ_FILE</when></choose>
+ 		<choose><when test="reqfilepath != null">, REQ_FILEPATH</when></choose>
+ 		)
+  		values (#{repid}, #{title}, #{reqbody}, #{stfid}, now()
+  		<choose><when test="reqfile != null">, #{reqfile}</when></choose>
+ 		<choose><when test="reqfilepath != null">, #{reqfilepath}</when></choose>
+  		)
+	</insert>
+	<update id="updateRepair" parameterType="hashMap">
+	  	update REPAIR_REQUEST set REP_ID=REP_ID
+	  	<choose><when test="title != null">, TITLE=#{title}</when></choose>
+	  	<choose><when test="status != null">, STATUS=#{status}</when></choose>
+	  	<choose><when test="rtype != null">, REQUEST_TYPE=#{rtype}</when></choose>
+	  	<choose><when test="remid != null">, REM_ID=#{remid}</when></choose>
+		<choose><when test="reqbody != null">, REQ_BODY=#{reqbody}</when></choose>
+	  	<choose><when test="reqfile != null">, REQ_FILE=#{reqfile}</when></choose>
+		<choose><when test="reqfilepath != null">, REQ_FILEPATH=#{reqfilepath}</when></choose>
+	  	<choose><when test="resbody != null">, RES_BODY=#{resbody}, RESPONSE_DATE=now()</when></choose>
+	  	<choose><when test="resfile != null">, RES_FILE=#{resfile}</when></choose>
+		<choose><when test="resfilepath != null">, RES_FILEPATH=#{resfilepath}</when></choose>
+		where REP_ID=#{repid}
+	</update>
+	<delete id="deleteRepair" parameterType="hashMap">
+	  	delete from REPAIR_REQUEST where REP_ID=#{repid}
+	</delete>
+	
+	
+	<select id="selectRepairManList" parameterType="hashMap" resultType="hashMap">
+		select A.REM_ID remid, A.NAME name, A.MAIL mail, A.TEL tel
+		from REPAIR_MAN A
+		where IS_USE = 1
+		<choose><when test="remid != null"> and A.REM_ID = #{remid}	</when></choose>
+		order by A.NAME
+		<choose>
+			<when test="offset != null">
+				limit #{offset}, 20
+			</when>
+		</choose>
+   </select>
+   <select id="selectRepairManListCnt" parameterType="hashMap" resultType="hashMap">
+   select count(*) CNT from (
+		select A.REM_ID remid, A.NAME name, A.MAIL mail, A.TEL tel
+		from REPAIR_MAN A
+		where IS_USE = 1
+		<choose><when test="remid != null"> and A.REM_ID = #{remid}	</when></choose>
+		) AAA
+   </select>
+   <insert id="insertRepairMan" parameterType="hashMap">
+ 		insert into REPAIR_MAN (REM_ID, NAME, CREATE_DATE
+ 		<choose><when test="tel != null">, TEL</when></choose>
+ 		<choose><when test="mail != null">, MAIL</when></choose>
+ 		)
+  		values (#{remid}, #{name}, now()
+  		<choose><when test="tel != null">, #{tel}</when></choose>
+ 		<choose><when test="mail != null">, #{mail}</when></choose>
+  		)
+	</insert>
+	<update id="updateRepairMan" parameterType="hashMap">
+	  	update REPAIR_MAN set NAME=#{name}
+	  	<choose><when test="tel != null">, TEL=#{tel}</when></choose>
+	  	<choose><when test="mail != null">, MAIL=#{mail}</when></choose>
+		where REM_ID=#{remid}
+	</update>
+	<delete id="deleteRepairMan" parameterType="hashMap">
+	  	update REPAIR_MAN set IS_USE = 0 where REM_ID in (${remid})
+	</delete>
+</mapper>

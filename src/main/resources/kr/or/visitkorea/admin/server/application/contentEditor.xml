@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<editor>
+	<collection id="property">
+	
+		<group id="DEFAULT_HEADER" >
+			<caption>기본 헤더</caption>
+			<icon>POLYMER</icon>
+			<property id="width" caption="width" icon="POLYMER" default="0px" type="STRING" />
+			<property id="height" caption="height" icon="POLYMER" default="0px" type="STRING" />
+			<property id="x" caption="x" icon="POLYMER" default="0px" type="STRING" />
+			<property id="y" caption="y" icon="POLYMER" default="0px" type="STRING" />
+		</group>
+	
+		<group id="SIZE" >
+			<caption>크기</caption>
+			<icon>POLYMER</icon>
+			<property id="width" caption="width" icon="POLYMER" default="0px" type="STRING" />
+			<property id="height" caption="height" icon="POLYMER" default="0px" type="STRING" />
+			<property id="max-width" caption="max-width" icon="POLYMER" default="0px" type="STRING" />
+			<property id="max-height" caption="max-height" icon="POLYMER" default="0px" type="STRING" />
+		</group>
+		
+		<group id="BACKGROUND" >
+			<caption>배경</caption>
+			<icon>POLYMER</icon>
+			<property id="background-color" caption="배경 색상" icon="POLYMER" type="COLOR" />
+			<property id="background-image" caption="배경 이미지" icon="POLYMER" type="STRING" />
+			<property id="background-position" caption="배경 위치" icon="POLYMER" type="STRING" />
+			<property id="background-repeat" caption="배경 반복" icon="POLYMER" type="SELECT">
+				<option value="repeat">repeat</option>
+				<option value="repeat-x">repeat-x</option>
+				<option value="repeat-y">repeat-y</option>
+				<option value="no-repeat">no-repeat</option>
+			</property>
+		</group>
+		
+		<group id="TEXT" >
+			<caption>텍스트 속성</caption>
+			<icon>POLYMER</icon>
+			<property id="color" caption="텍스트 색상" icon="POLYMER" default="#000000" type="COLOR" />
+			<property id="direction" caption="텍스트 방향" icon="POLYMER" type="SELECT" >
+				<option value="ltr">ltr</option>
+				<option value="rtl">rtl</option>
+			</property>
+			<property id="line-height" caption="텍스트 줄간격" icon="POLYMER" default="150%" type="STRING" />
+			<property id="letter-spacing" caption="글자 간격" icon="POLYMER" default="-0.1px"  type="SELECT" />
+			<property id="text-align" caption="텍스트 정렬" icon="POLYMER" type="SELECT" >
+				<option value="left">left</option>
+				<option value="right">left</option>
+				<option value="center">center</option>
+				<option value="justify">justify</option>
+			</property>
+			<property id="text-decoration" caption="텍스트 장식" icon="POLYMER" type="SELECT">
+				<option value="none">none</option>
+				<option value="underline">underline</option>
+				<option value="overline">overline</option>
+				<option value="line-through">line-through</option>
+				<option value="blink">blink</option>
+			</property>
+			<property id="text-indent" caption="들여쓰기" icon="POLYMER" default="0px"  type="STRING" />
+			<property id="text-transform" caption="대소문자 지정" icon="POLYMER" type="SELECT">
+				<option value="none">none</option>
+				<option value="capitalize">capitalize</option>
+				<option value="uppercase">uppercase</option>
+				<option value="lowercase">lowercase</option>
+			</property>
+			<property id="word-spacing" caption="단어 간격" icon="POLYMER" default="1px" type="STRING" />
+			<property id="text-weight" caption="글자 굵기" icon="POLYMER" type="SELECT" >
+				<option value="normal">normal</option>
+				<option value="bold">bold</option>
+				<option value="bolder">bolder</option>
+				<option value="lighter">lighter</option>
+				<option value="number">number</option>
+				<option value="initial">initial</option>
+				<option value="inherit">inherit</option>
+			</property>
+			<property id="font-size" caption="글자 크기" icon="POLYMER" type="SELECT" >
+				<option value="medium">medium</option>
+				<option value="xx-small">xx-small</option>
+				<option value="x-small">x-small</option>
+				<option value="small">small</option>
+				<option value="x-large">x-large</option>
+				<option value="xx-large">xx-large</option>
+				<option value="smaller">smaller</option>
+				<option value="larger">larger</option>
+				<option value="length">length</option>
+				<option value="initial">initial</option>
+				<option value="inherit">inherit</option>
+			</property>
+		</group>
+		
+	</collection>
+
+	<collection id="component">
+		<component id="7f34f8c9-5db9-465f-badc-6a80f57a9c15" >
+			<caption>텍스트</caption>
+			<icon>POLYMER</icon>
+			<properties>
+				<group caption="배경">
+					<property id="BACKGROUND.background-color" />
+					<property id="BACKGROUND.background-image" />
+					<property id="BACKGROUND.background-position" />
+					<property id="BACKGROUND.background-repeat" />
+				</group>
+				<group caption="텍스트">
+					<property id="TEXT.color" />
+					<property id="TEXT.direction" />
+					<property id="TEXT.text-decoration" />
+					<property id="TEXT.text-indent" />
+					<property id="TEXT.text-transform" />
+					<property id="TEXT.word-spacing" />
+					<property id="TEXT.text-weight" />
+					<property id="TEXT.font-size" />
+				</group>
+				<group caption="크기">
+					<property id="SIZE.width" />
+					<property id="SIZE.height" />
+					<property id="SIZE.max-width" />
+					<property id="SIZE.max-height" />
+				</group>
+			</properties>
+		</component>
+		<component id="2a0e542f-7938-4acd-addc-39e83ef2a61a" >
+			<caption>이미지</caption>
+			<icon>POLYMER</icon>
+			<properties>
+				<group caption="배경">
+					<property id="BACKGROUND.background-color" />
+					<property id="BACKGROUND.background-image" />
+					<property id="BACKGROUND.background-position" />
+					<property id="BACKGROUND.background-repeat" />
+				</group>
+				<group caption="텍스트">
+					<property id="TEXT.color" />
+					<property id="TEXT.direction" />
+					<property id="TEXT.text-decoration" />
+					<property id="TEXT.text-indent" />
+					<property id="TEXT.text-transform" />
+					<property id="TEXT.word-spacing" />
+					<property id="TEXT.text-weight" />
+					<property id="TEXT.font-size" />
+				</group>
+			</properties>
+		</component>
+		<component id="df4da203-2a40-4ecf-9ed0-dc6671a7fbe7" >
+			<caption>기본 헤더</caption>
+			<icon>POLYMER</icon>
+			<properties>
+				<group caption="기본">
+					<property id="TEXT.color" />
+					<property id="TEXT.direction" />
+					<property id="TEXT.text-decoration" />
+					<property id="TEXT.text-indent" />
+					<property id="TEXT.text-transform" />
+					<property id="TEXT.word-spacing" />
+					<property id="TEXT.text-weight" />
+					<property id="TEXT.font-size" />
+				</group>
+			</properties>
+			<childs>
+				<component id="7f34f8c9-5db9-465f-badc-6a80f57a9c15">
+					<properties>
+						<group caption="배경">
+							<property id="BACKGROUND.background-color" value="" />
+							<property id="BACKGROUND.background-image" value="" />
+							<property id="BACKGROUND.background-position" value="" />
+							<property id="BACKGROUND.background-repeat" value="" />
+						</group>
+						<group caption="텍스트">
+							<property id="TEXT.color" value="" />
+							<property id="TEXT.direction" value="" />
+							<property id="TEXT.text-decoration" value="" />
+							<property id="TEXT.text-indent" />
+							<property id="TEXT.text-transform" value="" />
+							<property id="TEXT.word-spacing" value="" />
+							<property id="TEXT.text-weight" value="" />
+							<property id="TEXT.font-size" value="" />
+						</group>
+						<group caption="크기">
+							<property id="SIZE.width" value="" />
+							<property id="SIZE.height" value="" />
+							<property id="SIZE.max-width" value="" />
+							<property id="SIZE.max-height" value="" />
+						</group>
+					</properties>
+				</component>
+			</childs>
+		</component>
+	</collection>
+
+	<collection id="component-group">
+		<group caption="기본" id="4627ecd8-b77b-49fb-a64d-e38fd57f7851">
+			<group caption="기본 요소 1">
+				<icon>POLYMER</icon>
+				<component id="7f34f8c9-5db9-465f-badc-6a80f57a9c15" />
+				<component id="2a0e542f-7938-4acd-addc-39e83ef2a61a" />
+				<component id="df4da203-2a40-4ecf-9ed0-dc6671a7fbe7" />
+			</group>
+			<group caption="기본 요소 2">
+				<icon>POLYMER</icon>
+				<component id="7f34f8c9-5db9-465f-badc-6a80f57a9c15" />
+				<component id="2a0e542f-7938-4acd-addc-39e83ef2a61a" />
+			</group>
+		</group>
+	</collection>
+
+</editor>

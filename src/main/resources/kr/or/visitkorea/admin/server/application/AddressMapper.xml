@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.AddressMapper">
+ 
+ <!-- related ADDRESS table -->
+  <select id="bigCodeList" resultType="hashMap">
+	SELECT BIG_CATEGORY, VALUE from KTO.CODE where CODE_TYPE = 0 and MID_CATEGORY=0 and SML_CATEGORY=0 order by VALUE
+  </select>
+  <select id="bigWithMidCodeList" resultType="hashMap">
+	select BIG_CATEGORY, MID_CATEGORY, VALUE from KTO.CODE 
+	where BIG_CATEGORY in (select BIG_CATEGORY from KTO.CODE where CODE_TYPE=0 and SML_CATEGORY = 0 and MID_CATEGORY=0) and SML_CATEGORY = 0 and VALUE != '' and CODE_TYPE = 0
+	order by MID_CATEGORY *1 ,value, BIG_CATEGORY, SML_CATEGORY ASC
+  </select>
+  
+</mapper>

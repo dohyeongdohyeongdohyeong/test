@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.CodeMapper">
+
+	<insert id="insertCodeInfo" parameterType="hashMap">
+		INSERT INTO CODE ( COD_ID, CODE_TYPE, BIG_CATEGORY, MID_CATEGORY, VALUE, FILE_DESCRIPTION, STATUS, CREATE_DATE )
+		VALUES ( #{codId}, 3, #{CODE}, #{INDEX}, #{value} , #{desc} , #{status} , NOW())
+	</insert>
+	<update id="updateCodeInfo" parameterType="hashMap">
+		UPDATE CODE SET
+		VALUE = #{value}, FILE_DESCRIPTION = #{desc}, STATUS = #{status}
+		WHERE COD_ID = #{codId}
+	</update>
+	<select id="selectCodeList" parameterType="hashMap" resultType="hashMap">
+		SELECT A.COD_ID
+		, A.BIG_CATEGORY
+		, A.MID_CATEGORY
+		, A.VALUE
+		, A.FILE_DESCRIPTION
+		, A.STATUS
+		, (SELECT COUNT(B.CONTENT_CATEGORY) FROM CONTENT_MASTER C , ARTICLE_MASTER B WHERE C.COT_ID = B.COT_ID AND B.CONTENT_CATEGORY = A.BIG_CATEGORY) CATE_ALL
+		, (SELECT COUNT(B.CONTENT_CATEGORY) FROM CONTENT_MASTER C , ARTICLE_MASTER B WHERE C.COT_ID = B.COT_ID AND B.CONTENT_CATEGORY = A.BIG_CATEGORY AND (C.CONTENT_STATUS = 2 OR C.CONTENT_STATUS = 3 OR C.CONTENT_STATUS = 5)) CATE_OPEN
+		, (SELECT COUNT(B.CONTENT_CATEGORY_TWO) FROM CONTENT_MASTER C , ARTICLE_MASTER B WHERE C.COT_ID = B.COT_ID AND B.CONTENT_CATEGORY_TWO = A.BIG_CATEGORY) CATETWO_ALL
+		, (SELECT COUNT(B.CONTENT_CATEGORY_TWO) FROM CONTENT_MASTER C , ARTICLE_MASTER B WHERE C.COT_ID = B.COT_ID AND B.CONTENT_CATEGORY_TWO = A.BIG_CATEGORY AND(C.CONTENT_STATUS = 2 OR C.CONTENT_STATUS = 3 OR C.CONTENT_STATUS = 5)) CATETWO_OPEN
+		FROM CODE A 
+		WHERE CODE_TYPE = 3 
+		<choose>
+			<when test = "SearchType == 1">
+				AND A.VALUE LIKE CONCAT('%',#{Keyword},'%')
+			</when>
+			<when test = "SearchType == 2">
+				AND A.FILE_DESCRIPTION LIKE CONCAT('%',#{Keyword},'%')
+			</when>
+		</choose>
+		ORDER BY A.MID_CATEGORY+0
+		<if test="offset != null">
+		 	limit ${offset}, 20
+		</if>
+	</select>
+	<select id="selectCodeListCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT COUNT(COD_ID) CNT
+		FROM CODE A 
+		WHERE CODE_TYPE = 3 
+		<choose>
+			<when test = "SearchType == 1">
+				AND A.VALUE LIKE CONCAT('%',#{Keyword},'%')
+			</when>
+			<when test = "SearchType == 2">
+				AND A.FILE_DESCRIPTION LIKE CONCAT('%',#{Keyword},'%')
+			</when>
+		</choose>
+	</select>
+	<select id="selectCodeAllCnt" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+		(SELECT COUNT(B.COT_ID) 
+		FROM CONTENT_MASTER C , ARTICLE_MASTER B 
+		WHERE C.COT_ID = B.COT_ID) ALLCNT
+		, (SELECT COUNT(B.COT_ID) 
+			FROM CONTENT_MASTER C , ARTICLE_MASTER B 
+			WHERE C.COT_ID = B.COT_ID 
+			AND(C.CONTENT_STATUS = 2 OR C.CONTENT_STATUS = 3 OR C.CONTENT_STATUS = 5)) OPENCNT
+		, (SELECT COUNT(C.COT_ID) 
+			FROM CONTENT_MASTER C , ARTICLE_MASTER B 
+			WHERE C.COT_ID = B.COT_ID 
+			AND B.CONTENT_CATEGORY not in 
+			(SELECT D.BIG_CATEGORY FROM CODE D WHERE D.CODE_TYPE = 3 )) NOTINALL
+		, (SELECT COUNT(C.COT_ID) 
+			FROM CONTENT_MASTER C , ARTICLE_MASTER B 
+			WHERE C.COT_ID = B.COT_ID
+			 AND B.CONTENT_CATEGORY not in 
+			 (SELECT D.BIG_CATEGORY FROM CODE D WHERE D.CODE_TYPE = 3 ) 
+			 AND(C.CONTENT_STATUS = 2 OR C.CONTENT_STATUS = 3 OR C.CONTENT_STATUS = 5)) NOTINOPEN
+		, (SELECT COUNT(C.COT_ID) 
+			FROM CONTENT_MASTER C , ARTICLE_MASTER B 
+			WHERE C.COT_ID = B.COT_ID 
+			AND B.CONTENT_CATEGORY in 
+			(SELECT D.BIG_CATEGORY FROM CODE D WHERE D.CODE_TYPE = 3 ) ) INALL
+		, (SELECT COUNT(C.COT_ID) 
+			FROM CONTENT_MASTER C , ARTICLE_MASTER B 
+			WHERE C.COT_ID = B.COT_ID 
+			AND B.CONTENT_CATEGORY in 
+			(SELECT D.BIG_CATEGORY FROM CODE D WHERE D.CODE_TYPE = 3 ) 
+			AND(C.CONTENT_STATUS = 2 OR C.CONTENT_STATUS = 3 OR C.CONTENT_STATUS = 5) ) INOPEN
+		, (SELECT COUNT(C.COT_ID)  
+			FROM CONTENT_MASTER C , ARTICLE_MASTER B 
+			WHERE C.COT_ID = B.COT_ID 
+			AND B.CONTENT_CATEGORY is null) NULLALL
+		, (SELECT COUNT(C.COT_ID)  
+			FROM CONTENT_MASTER C , ARTICLE_MASTER B 
+			WHERE C.COT_ID = B.COT_ID AND B.CONTENT_CATEGORY is null 
+			AND(C.CONTENT_STATUS = 2 OR C.CONTENT_STATUS = 3 OR C.CONTENT_STATUS = 5)) NULLOPEN
+	</select>
+	
+	<select id="selectCodeNumber" parameterType="hashMap" resultType="int">
+	SELECT A.BIG_CATEGORY
+	FROM CODE A 
+	WHERE CODE_TYPE = 3 
+	ORDER BY A.MID_CATEGORY+0 desc
+	LIMIT 1
+	</select>
+	<select id="CheckCodeValue" parameterType="hashMap" resultType="int">
+	SELECT COUNT(*)
+	FROM CODE A 
+	WHERE CODE_TYPE = 3 
+	AND VALUE = #{value}  AND COD_ID NOT IN (#{codId})
+	</select>
+	
+</mapper>

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="kr.or.visitkorea.system.StaffMapper">
+	<resultMap type="staffVo" id="staffMap">
+		<id 	column="USR_ID" 				property="usrId" />
+		<result column="STF_ID" 				property="stfId" />
+		<result column="DISP_NAME" 				property="dispName" />
+		<result column="IMAGE_PATH" 			property="imagePath" />
+		<result column="CHK_USE" 				property="checkUse" />
+		<result column="TEMPLATE_ID" 			property="templateId" />
+		<result column="CREATE_DATE" 			property="createDate" />
+		<result column="LAST_LOGIN_DATETIME" 	property="lastLoginDate" />
+		<result column="PW_REFRESH_DATE" 		property="pwRefreshDate" />
+	</resultMap>
+	
+	<select id="loginChk" parameterType="hashMap" resultType="hashMap">
+		SELECT		USR_ID
+				  , LOGIN_FAIL_CNT
+				  , (
+				  		SELECT AUTH FROM STAFF WHERE STF_ID = #{stfId}
+					) = #{auth} AS LOGIN_RESULT
+		FROM 		STAFF 
+		WHERE		1 = 1
+		AND			STF_ID = #{stfId}
+	</select>
+
+	<select id="userSelect" parameterType="string" resultType="hashMap">
+		SELECT		USR_ID
+			  	  , STF_ID
+				  , DISP_NAME
+				  , IMAGE_PATH
+				  , CHK_USE
+				  , TEMPLATE_ID
+				  , CREATE_DATE
+				  , LAST_LOGIN_DATETIME
+				  , PW_REFRESH_DATE
+		FROM 		STAFF
+		WHERE 		USR_ID = #{usrId}
+	</select>
+	
+	<select id="userlist" resultType="hashMap">
+		SELECT 		USR_ID
+				  , STF_ID
+				  , CHK_USE
+				  , CREATE_DATE
+				  , LAST_LOGIN_DATETIME
+				  , PW_REFRESH_DATE
+				  , LOGIN_FAIL_CNT
+				  , IMAGE_PATH
+		FROM 		STAFF
+		WHERE		1 = 1	
+		AND			STF_ID NOT IN ('SYSTEM')
+		ORDER BY 	STF_ID ASC
+	</select>
+	
+	<update id="userLastLogin" parameterType="hashMap">
+		UPDATE		STAFF
+		SET			LAST_LOGIN_DATETIME = NOW() 
+		WHERE		USR_ID = #{usrId}
+	</update>
+	
+	<insert id="userInsert" parameterType="hashMap">
+		INSERT INTO	STAFF (
+				USR_ID
+			  , STF_ID
+			  , AUTH
+			  , IMAGE_PATH
+			  , CHK_USE
+			  , CREATE_DATE
+			  , LAST_LOGIN_DATETIME
+			  , PW_REFRESH_DATE
+		) VALUES (
+				UUID()
+			  , #{stfId}
+			  , #{auth}
+			  , #{img}
+			  , #{chkUse}
+			  , NOW()
+			  , NOW()
+			  , NOW()
+		)
+	</insert>
+	
+	<update id="userUpdate" parameterType="hashMap">
+		UPDATE		STAFF	SET
+		<if test="auth != null">
+			<![CDATA[
+				AUTH = #{auth},
+			]]>
+		</if>
+		<if test="img != null">
+			<![CDATA[
+		  	    IMAGE_PATH = #{img},
+			]]>
+		</if>
+		<if test="chkUse != null">
+			<![CDATA[
+		  	    CHK_USE = #{chkUse}
+			]]>
+		</if>
+		WHERE		USR_ID = #{usrId}
+	</update>
+	
+	<delete id="userDelete" parameterType="hashMap">
+		DELETE FROM	STAFF WHERE USR_ID = #{usrId}
+	</delete>
+	
+	<delete id="userPause" parameterType="hashMap">
+		UPDATE 		STAFF 
+		SET 		CHK_USE = 0 
+		WHERE 		USR_ID = #{usrId}
+	</delete>
+	
+	<select id="selectStaffLoginHistory" parameterType="hashMap" resultType="hashMap">
+		SELECT  	SLH.NO
+				  , S.STF_ID
+				  , SLH.IP_ADDR
+				  , SLH.CREATE_DATE
+				  , SLH.TYPE_CD
+		FROM		STAFF_LOGIN_HISTORY SLH
+		INNER JOIN	STAFF S
+		ON			SLH.USR_ID = S.USR_ID
+		ORDER BY	CREATE_DATE DESC
+		LIMIT		#{offset}, #{limit}
+	</select>
+	
+	<select id="selectStaffLoginHistoryCnt" parameterType="hashMap" resultType="int">
+		SELECT 		COUNT(*) 
+		FROM 		STAFF_LOGIN_HISTORY
+	</select>
+	
+	<select id="selectStaffModifyHistory" parameterType="hashMap" resultType="hashMap">
+		SELECT  	SIMH.NO
+				  , S.STF_ID
+				  , SIMH.IP_ADDR
+				  , ENCRYPT(SIMH.ORIGIN_PW, 'SHA-256') 		AS ORIGIN_PW
+				  , ENCRYPT(SIMH.MODIFIED_PW, 'SHA-256') 	AS MODIFIED_PW
+				  , SIMH.CHK_USE
+				  , SIMH.CREATE_DATE
+		FROM		STAFF_INFO_MODIFY_HISTORY SIMH
+		INNER JOIN	STAFF S
+		ON			SIMH.USR_ID = S.USR_ID
+		ORDER BY	CREATE_DATE DESC
+		LIMIT		#{offset}, #{limit}
+	</select>
+	
+	<select id="selectStaffModifyHistoryCnt" parameterType="hashMap" resultType="int">
+		SELECT 		COUNT(*) 
+		FROM 		STAFF_INFO_MODIFY_HISTORY
+	</select>
+	
+	<insert id="insertStaffLoginHistory" parameterType="hashMap">
+		INSERT INTO STAFF_LOGIN_HISTORY (
+			    USR_ID
+			  , IP_ADDR
+			  , CREATE_DATE
+			  , TYPE_CD
+		) VALUES (
+				#{usrId}
+			  , #{ip}
+			  , NOW()
+			  , #{type}
+		)
+	</insert>
+	
+	<insert id="insertStaffInfoModifyHistory" parameterType="hashMap">
+		INSERT INTO STAFF_INFO_MODIFY_HISTORY (
+				USR_ID
+			  , IP_ADDR
+			  , CREATE_DATE
+			  <if test="stfId != null">
+			  	, ADDED_STF_ID
+			  </if>
+			  <if test="op != null">
+			  	, ORIGIN_PW
+			  </if>
+			  <if test="np != null">
+			  	, MODIFIED_PW
+			  </if>
+			  <if test="chkUse != null">
+			  	, CHK_USE
+			  </if>
+		) VALUES (
+				#{usrId}
+			  , #{ip}
+			  , NOW()
+			  <if test="stfId != null">
+			  	, #{stfId}
+			  </if>
+			  <if test="op != null">
+			  	, #{op}
+			  </if>
+			  <if test="np != null">
+			  	, #{np}
+			  </if>
+			  <if test="chkUse != null">
+			  	, #{chkUse}
+			  </if>
+		)
+	</insert>
+	
+	<update id="updateLoginFailCnt" parameterType="hashMap">
+		<![CDATA[
+			UPDATE 		STAFF 
+			SET 		LOGIN_FAIL_CNT = #{loginFailCnt} + 1
+			WHERE		STF_ID = #{stfId}
+		]]>
+	</update>
+	
+	<update id="updateUserPassword" parameterType="hashMap">
+		UPDATE		STAFF	SET
+				    AUTH  = #{np}
+		WHERE		STF_ID = #{stfId}
+	</update>
+	
+	<update id="updatePasswordRefreshDate" parameterType="hashMap">
+		UPDATE		STAFF	SET
+				    PW_REFRESH_DATE  = NOW()
+		WHERE		STF_ID = #{stfId}
+	</update>
+</mapper>

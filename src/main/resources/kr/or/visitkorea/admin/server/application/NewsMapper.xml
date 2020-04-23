@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.NewsMapper">
+ 
+   <select id="selectNewsList" parameterType="hashMap" resultType="hashMap">
+		select A.NWS_ID nwsid, A.TITLE title, A.IS_VIEW isview, A.CREATE_DATE cdate, A.USR_ID usrid, B.STF_ID stfid from NEWS A, STAFF B
+		where A.USR_ID=B.USR_ID
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE<![CDATA[ <= ]]>#{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 1">
+			 and A.BODY REGEXP #{keyword}
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 2">
+			 and (A.TITLE REGEXP #{keyword} or A.BODY REGEXP #{keyword})
+			</when>
+		</choose>
+		limit #{offset}, 20
+   </select>
+  
+   <select id="selectNewsListCnt" parameterType="hashMap" resultType="hashMap">
+		select count(*) CNT from NEWS A, STAFF B
+		where A.USR_ID=B.USR_ID
+		<choose>
+			<when test="sdate != null">
+			 and A.CREATE_DATE >= #{sdate}
+			</when>
+		</choose>
+		<choose>
+			<when test="edate != null">
+			 and A.CREATE_DATE <![CDATA[ <= ]]>  #{edate}
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 0">
+			 and A.TITLE REGEXP #{keyword}
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 1">
+			 and A.BODY REGEXP #{keyword}
+			</when>
+		</choose>
+		<choose>
+			<when test="mode == 2">
+			 and (A.TITLE REGEXP #{keyword} or A.BODY REGEXP #{keyword})
+			</when>
+		</choose>
+   </select>
+   
+   <select id="selectNews" parameterType="hashMap" resultType="hashMap">
+		select A.*, B.STF_ID from NEWS A, STAFF B where A.USR_ID=B.USR_ID and A.NWS_ID=#{nwsid}
+   </select>
+   <select id="selectNewsImage" parameterType="hashMap" resultType="hashMap">
+	select A.NSI_ID, A.NWS_ID, A.IMG_ID 
+	from NEWS_IMAGE A , IMAGE B 
+	where A.IMG_ID = B.IMG_ID and A.NWS_ID = #{nwsId} and B.IS_VISIABLE = 1
+   </select>
+  <update id="updateNews" parameterType="hashMap">
+  	update NEWS set TITLE=#{title}, MODIFIED_DATE=CURRENT_TIMESTAMP
+	<choose>
+		<when test="usrid != null">
+  		, USR_ID=#{usrid} 
+		</when>
+	</choose>
+	<choose>
+		<when test="body != null">
+  		, BODY=#{body} 
+		</when>
+	</choose>
+	<choose>
+		<when test="nwskind != null">
+  		, NWS_KIND=#{nwskind} 
+		</when>
+	</choose>
+	<choose>
+		<when test="isview != null">
+  		, IS_VIEW=#{isview} 
+		</when>
+	</choose>
+	<choose>
+		<when test="isactivation != null">
+  		, IS_ACTIVATION=#{isactivation} 
+		</when>
+	</choose>
+	<choose>
+		<when test="bname != null">
+  		, BUTTON_NAME=#{bname} 
+		</when>
+	</choose>
+	<choose>
+		<when test="blinkurl != null">
+  		, BUTTON_LINK_URL=#{blinkurl} 
+		</when>
+	</choose>
+	<choose>
+		<when test="linkfileurl != null">
+  		, LINK_FILE_URL=#{linkfileurl} 
+		</when>
+	</choose>
+	<choose>
+		<when test="filedes != null">
+  		, FILE_DESCRIPTION=#{filedes} 
+		</when>
+	</choose>
+  	where NWS_ID=#{nwsid}
+  </update>
+   <update id="UpdateNewsImage" parameterType="hashMap">
+   update NEWS_IMAGE set IMG_ID = #{NewimgId} where NSI_ID = #{nsiId}
+   </update>
+   <insert id="insertNews" parameterType="hashMap">
+  	insert into NEWS (	NWS_ID, USR_ID, TITLE, BODY, NWS_KIND, IS_VIEW, IS_ACTIVATION, BUTTON_NAME, BUTTON_LINK_URL, LINK_FILE_URL, FILE_DESCRIPTION, CREATE_DATE, MODIFIED_DATE )
+  	values (
+  		#{nwsid}, #{usrid}, #{title}, #{body}, #{nwskind}, #{isview}, #{isactivation}, #{bname}, #{blinkurl}, #{linkfileurl}, #{filedes}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+  	)
+  </insert>
+  <insert id="insertNewsImage" parameterType="hashMap">
+  	insert into NEWS_IMAGE (NSI_ID, NWS_ID, IMG_ID)
+  	values (#{nsiId},#{nwsId},#{imgId})
+  </insert>
+  <delete id="deleteNews" parameterType="hashMap">
+  	delete from NEWS where NWS_ID=#{nwsid}
+  </delete>
+   <delete id="deleteNewsImage" parameterType="hashMap">
+  	delete from NEWS_IMAGE where NSI_ID=#{nsiId}
+  </delete>
+</mapper>

@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.or.visitkorea.system.HistoryMapper">
+	<select id="spotContentList" parameterType="hashMap" resultType="hashMap">
+<!-- 		SELECT -->
+<!-- 			*  -->
+<!-- 		FROM  -->
+<!-- 			( -->
+<!-- 			SELECT  -->
+<!-- 				CM.COT_ID,  -->
+<!-- 				CM.CONTENT_ID,  -->
+<!-- 				CM.AUTH_CODE,  -->
+<!-- 				CM.CONTENT_TYPE,  -->
+<!-- 				AM.AREA_CODE,  -->
+<!-- 				NULL AS SIGUGUN_CODE,  -->
+<!-- 				areacode(AM.AREA_CODE) AREA,  -->
+<!-- 				NULL AS SIGUGUN,  -->
+<!-- 				CM.MODIFIED_DATE,  -->
+<!-- 				CM.TITLE  -->
+<!-- 			FROM  -->
+<!-- 				CONTENT_MASTER CM INNER JOIN ARTICLE_MASTER AM  -->
+<!-- 					ON CM.COT_ID = AM.COT_ID  -->
+<!-- 					AND CM.TITLE REGEXP ""  -->
+			
+<!-- 				UNION  -->
+				
+			SELECT 
+				CM.COT_ID, 
+				CM.CONTENT_ID, 
+				CM.AUTH_CODE, 
+				CM.CONTENT_TYPE, 
+				DM.AREA_CODE, 
+				DM.SIGUGUN_CODE, 
+				areacode(DM.AREA_CODE) AREA, 
+				siguguncode(DM.AREA_CODE, DM.SIGUGUN_CODE) SIGUGUN, 
+				CM.MODIFIED_DATE, 
+				CM.TITLE 
+			FROM 
+				CONTENT_MASTER CM INNER JOIN DATABASE_MASTER DM 
+					ON 
+						CM.COT_ID = DM.COT_ID 
+					AND 
+						(CM.CONTENT_TYPE="38" OR <!-- 쇼핑 -->
+						CM.CONTENT_TYPE="32") <!-- 숙박 -->
+<!-- 						(CM.CONTENT_TYPE="12" OR CM.CONTENT_TYPE="14" OR CM.CONTENT_TYPE="28" OR CM.CONTENT_TYPE="38" OR CM.CONTENT_TYPE="32" OR CM.CONTENT_TYPE="39" OR CM.CONTENT_TYPE="2000" OR  -->
+<!-- 						CM.CONTENT_TYPE="15")  -->
+						
+<!-- 			) U  -->
+			WHERE 1=1 
+			<if test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'">
+				AND CM.COT_ID IN (SELECT COT_ID FROM OTHER_DEPARTMENT_CONTENT WHERE OTD_ID = #{OTD_ID }) 
+			</if>
+<!-- 			<choose> -->
+<!-- 				<when test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'"> -->
+<!-- 					AND CM.COT_ID IN (SELECT COT_ID FROM OTHER_DEPARTMENT_CONTENT WHERE OTD_ID = #{OTD_ID })  -->
+<!-- 				</when> -->
+<!-- 				<otherwise> -->
+<!-- 					<if test="MCOT_ID != null"> -->
+<!-- 						AND CM.COT_ID IN (SELECT COT_ID FROM OTHER_DEPARTMENT_CONTENT WHERE OTD_ID = (SELECT OTD_ID FROM OTHER_DEPARTMENT_CONTENT WHERE COT_ID = #{MCOT_ID }))  -->
+<!-- 					</if> -->
+<!-- 				</otherwise> -->
+<!-- 			</choose> -->
+			<if test="MCOT_ID != null">
+				AND CM.COT_ID NOT IN (SELECT SCOT_ID FROM CONTENT_SPOT_HIST WHERE COT_ID = #{MCOT_ID } AND SCOT_ID IS NOT NULL) 
+			</if>
+			<if test="AREA_CODE != null and AREA_CODE != 0">
+				AND DM.AREA_CODE = #{AREA_CODE } 
+			</if>
+			<if test="SIGUGUN_CODE != null and SIGUGUN_CODE != 0">
+				AND DM.SIGUGUN_CODE = #{SIGUGUN_CODE } 
+			</if>
+			<choose>
+				<when test="searchType != null and searchType eq '업소명'">
+					AND (CM.TITLE REGEXP #{keyword }) 
+				</when>
+				<when test="searchType != null and searchType eq 'CID'">
+					AND (CM.CONTENT_ID REGEXP #{keyword }) 
+				</when>
+				<when test="searchType != null and searchType eq '인증번호'">
+					AND (CM.AUTH_CODE REGEXP #{keyword } OR (REPLACE(CM.AUTH_CODE, "-", "") REGEXP #{keyword })) 
+				</when>
+			</choose>
+			LIMIT 0, 100 
+			
+	</select>
+	
+	
+	<select id="spotContentListAmount" resultType="int">
+		SELECT
+			COUNT(*) 
+<!-- 		FROM  -->
+<!-- 			( -->
+<!-- 			SELECT  -->
+<!-- 				CM.COT_ID,  -->
+<!-- 				CM.CONTENT_ID,  -->
+<!-- 				CM.AUTH_CODE,  -->
+<!-- 				CM.CONTENT_TYPE,  -->
+<!-- 				AM.AREA_CODE,  -->
+<!-- 				NULL AS SIGUGUN_CODE,  -->
+<!-- 				CM.TITLE  -->
+<!-- 			FROM  -->
+<!-- 				CONTENT_MASTER CM INNER JOIN ARTICLE_MASTER AM  -->
+<!-- 					ON CM.COT_ID = AM.COT_ID  -->
+<!-- 					AND CM.TITLE REGEXP ""  -->
+			
+<!-- 				UNION  -->
+				
+<!-- 			SELECT  -->
+<!-- 				CM.COT_ID,  -->
+<!-- 				CM.CONTENT_ID,  -->
+<!-- 				CM.AUTH_CODE,  -->
+<!-- 				CM.CONTENT_TYPE,  -->
+<!-- 				DM.AREA_CODE,  -->
+<!-- 				DM.SIGUGUN_CODE,  -->
+<!-- 				CM.TITLE  -->
+			FROM 
+				CONTENT_MASTER CM INNER JOIN DATABASE_MASTER DM 
+					ON 
+						CM.COT_ID = DM.COT_ID 
+					AND 
+						(CM.CONTENT_TYPE="38" OR <!-- 쇼핑 -->
+						CM.CONTENT_TYPE="32") <!-- 숙박 -->
+<!-- 						(CM.CONTENT_TYPE="12" OR CM.CONTENT_TYPE="14" OR CM.CONTENT_TYPE="28" OR CM.CONTENT_TYPE="38" OR CM.CONTENT_TYPE="32" OR CM.CONTENT_TYPE="39" OR CM.CONTENT_TYPE="2000" OR  -->
+<!-- 						CM.CONTENT_TYPE="15")  -->
+						
+<!-- 			) U  -->
+			WHERE 1=1 
+			<if test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'">
+				AND CM.COT_ID IN (SELECT COT_ID FROM OTHER_DEPARTMENT_CONTENT WHERE OTD_ID = #{OTD_ID }) 
+			</if>
+<!-- 			<choose> -->
+<!-- 				<when test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'"> -->
+<!-- 					AND CM.COT_ID IN (SELECT COT_ID FROM OTHER_DEPARTMENT_CONTENT WHERE OTD_ID = #{OTD_ID })  -->
+<!-- 				</when> -->
+<!-- 				<otherwise> -->
+<!-- 					<if test="MCOT_ID != null"> -->
+<!-- 						AND CM.COT_ID IN (SELECT COT_ID FROM OTHER_DEPARTMENT_CONTENT WHERE OTD_ID = (SELECT OTD_ID FROM OTHER_DEPARTMENT_CONTENT WHERE COT_ID = #{MCOT_ID }))  -->
+<!-- 					</if> -->
+<!-- 				</otherwise> -->
+<!-- 			</choose> -->
+			<if test="MCOT_ID != null">
+				AND CM.COT_ID NOT IN (SELECT SCOT_ID FROM CONTENT_SPOT_HIST WHERE COT_ID = #{MCOT_ID } AND SCOT_ID IS NOT NULL) 
+			</if>
+			<if test="AREA_CODE != null and AREA_CODE != 0">
+				AND DM.AREA_CODE = #{AREA_CODE } 
+			</if>
+			<if test="SIGUGUN_CODE != null and SIGUGUN_CODE != 0">
+				AND DM.SIGUGUN_CODE = #{SIGUGUN_CODE } 
+			</if>
+			<choose>
+				<when test="searchType != null and searchType eq '업소명'">
+					AND (CM.TITLE REGEXP #{keyword }) 
+				</when>
+				<when test="searchType != null and searchType eq 'CID'">
+					AND (CM.CONTENT_ID REGEXP #{keyword }) 
+				</when>
+				<when test="searchType != null and searchType eq '인증번호'">
+					AND (CM.AUTH_CODE REGEXP #{keyword } OR (REPLACE(CM.AUTH_CODE, "-", "") REGEXP #{keyword })) 
+				</when>
+			</choose>
+			
+	</select>
+	
+	
+	<select id="alreadyAddSpotAmount" resultType="int">
+		SELECT COUNT(*) FROM 
+				CONTENT_MASTER CM INNER JOIN DATABASE_MASTER DM 
+					ON 
+						CM.COT_ID = DM.COT_ID 
+					AND 
+						(CM.CONTENT_TYPE="38" OR <!-- 쇼핑 -->
+						CM.CONTENT_TYPE="32") <!-- 숙박 -->
+<!-- 						(CM.CONTENT_TYPE="12" OR CM.CONTENT_TYPE="14" OR CM.CONTENT_TYPE="28" OR CM.CONTENT_TYPE="38" OR CM.CONTENT_TYPE="32" OR CM.CONTENT_TYPE="39" OR CM.CONTENT_TYPE="2000" OR  -->
+<!-- 						CM.CONTENT_TYPE="15")  -->
+						
+<!-- 			) U  -->
+			WHERE 1=1 
+			<if test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'">
+				AND CM.COT_ID IN (SELECT SCOT_ID FROM CONTENT_SPOT_HIST WHERE OTD_ID = #{OTD_ID }) 
+			</if>
+			<if test="MCOT_ID != null">
+				AND CM.COT_ID IN (SELECT SCOT_ID FROM CONTENT_SPOT_HIST WHERE COT_ID = #{MCOT_ID } AND SCOT_ID IS NOT NULL) 
+			</if>
+			<if test="AREA_CODE != null and AREA_CODE != 0">
+				AND DM.AREA_CODE = #{AREA_CODE } 
+			</if>
+			<if test="SIGUGUN_CODE != null and SIGUGUN_CODE != 0">
+				AND DM.SIGUGUN_CODE = #{SIGUGUN_CODE } 
+			</if>
+			<choose>
+				<when test="searchType != null and searchType eq '업소명'">
+					AND (CM.TITLE REGEXP #{keyword }) 
+				</when>
+				<when test="searchType != null and searchType eq 'CID'">
+					AND (CM.CONTENT_ID REGEXP #{keyword }) 
+				</when>
+				<when test="searchType != null and searchType eq '인증번호'">
+					AND (CM.AUTH_CODE REGEXP #{keyword } OR (REPLACE(CM.AUTH_CODE, "-", "") REGEXP #{keyword })) 
+				</when>
+			</choose>
+	</select>
+	
+	
+	<select id="historyList" parameterType="hashMap" resultType="hashMap">
+		SELECT 
+			* 
+		FROM 
+			(
+			SELECT 
+				CSH.HIST_ID, 
+				CSH.COT_ID AS MCOT_ID, 
+				CSH.SCOT_ID, 
+				(SELECT C.CONTENT_ID FROM CONTENT_MASTER C WHERE C.COT_ID = CSH.COT_ID) AS MCONTENT_ID, 
+				CM.CONTENT_ID AS SCONTENT_ID, 
+				(SELECT C.CONTENT_DIV FROM CONTENT_MASTER C WHERE C.COT_ID = CSH.COT_ID) AS MCONTENT_DIV, 
+				CM.CONTENT_TYPE AS SCONTENT_TYPE, 
+				CSH.DI_YN, 
+				IF(CSH.DI_YN=0, DM.AREA_CODE, CSH.DI_AREA_CODE) AS AREA_CODE, 
+				IF(CSH.DI_YN=0, DM.SIGUGUN_CODE, CSH.DI_SIGUGUN_CODE) AS SIGUGUN_CODE, 
+				areacode(IF(CSH.DI_YN=0, DM.AREA_CODE, CSH.DI_AREA_CODE)) AS AREA, 
+				siguguncode(IF(CSH.DI_YN=0, DM.AREA_CODE, CSH.DI_AREA_CODE), IF(CSH.DI_YN=0, DM.SIGUGUN_CODE, CSH.DI_SIGUGUN_CODE)) AS SIGUGUN, 
+				IF(CSH.DI_YN=0, DM.ADDR1, CSH.DI_ADDR) AS ADDR, 
+				(SELECT C.TITLE FROM CONTENT_MASTER C WHERE C.COT_ID=CSH.COT_ID) AS MTITLE, 
+				IF(CSH.DI_YN=0, CM.TITLE, CSH.DI_BSSH_NM) AS STITLE, 
+				IF(CSH.DI_YN=0, DM.ADMIN_TEL, CSH.DI_TELNO) AS INQUIRY, 
+				IF(CSH.DI_YN=0, CM.AUTH_CODE, CSH.DI_AUTH_CODE) AS AUTH_CODE, 
+				CSH.REG_ID, 
+				CSH.CREATE_DATE, 
+				CSH.OTD_ID 
+			FROM 
+				CONTENT_MASTER CM INNER JOIN DATABASE_MASTER DM 
+					ON 
+					CM.COT_ID=DM.COT_ID 
+				RIGHT OUTER JOIN CONTENT_SPOT_HIST CSH 
+					ON 
+					CM.COT_ID=CSH.SCOT_ID
+			) U 
+		WHERE 1=1 
+		<if test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'">
+			AND U.OTD_ID = #{OTD_ID } 
+		</if> 
+<!-- 		<if test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'"> -->
+<!-- 			AND U.MCOT_ID IN (SELECT COT_ID FROM OTHER_DEPARTMENT_CONTENT WHERE OTD_ID = #{OTD_ID })  -->
+<!-- 		</if> -->
+		<if test="MCOT_ID != null">
+			AND U.MCOT_ID = #{MCOT_ID } 
+		</if>
+		<if test="areaCode != null and areaCode != 0">
+			AND U.AREA_CODE = #{areaCode } 
+		</if>
+		<if test="sigugunCode != null and sigugunCode != 0">
+			AND U.SIGUGUN_CODE = #{sigugunCode } 
+		</if>
+		<choose>
+			<when test="articleCategory != null and articleCategory eq '일반기사'">
+				AND U.MCONTENT_DIV = 0 
+			</when>
+			<when test="articleCategory != null and articleCategory eq '테마기사'">
+				AND U.MCONTENT_DIV = 1 
+			</when>
+		</choose>
+		<choose>
+			<when test="searchType != null and searchType eq '전체'">
+				AND 
+					(
+						(U.STITLE REGEXP #{keyword }) OR 
+						(U.SCONTENT_ID REGEXP #{keyword }) OR 
+						(U.AUTH_CODE REGEXP #{keyword } OR (REPLACE(U.AUTH_CODE, "-", "") REGEXP #{keyword }))
+					) 
+			</when>
+			<when test="searchType != null and searchType eq '업소명'">
+				AND (U.STITLE REGEXP #{keyword }) 
+			</when>
+			<when test="searchType != null and searchType eq '업소 CID'">
+				AND (U.SCONTENT_ID REGEXP #{keyword }) 
+			</when>
+			<when test="searchType != null and searchType eq '인증번호'">
+				AND (U.AUTH_CODE REGEXP #{keyword } OR (REPLACE(U.AUTH_CODE, "-", "") REGEXP #{keyword })) 
+			</when>
+		</choose>
+		<choose>
+			<when test="searchType2 != null and searchType2 eq '전체'">
+				AND (U.MTITLE REGEXP #{keyword } OR U.MCONTENT_ID REGEXP #{keyword })
+			</when>
+			<when test="searchType2 != null and searchType2 eq '기사명'">
+				AND (U.MTITLE REGEXP #{keyword }) 
+			</when>
+			<when test="searchType2 != null and searchType2 eq 'CID'">
+				AND (U.MCONTENT_ID REGEXP #{keyword }) 
+			</when>
+		</choose>
+		<choose>
+			<when test="offset != null and amount != null">
+				LIMIT #{offset }, #{amount }
+			</when>
+		</choose>
+		
+	</select>
+	
+	
+	<select id="historyListAmount" parameterType="hashMap" resultType="int">
+		SELECT 
+			COUNT(*) 
+		FROM 
+			(
+			SELECT 
+				CSH.HIST_ID, 
+				CSH.COT_ID AS MCOT_ID, 
+				CSH.SCOT_ID, 
+				(SELECT C.CONTENT_ID FROM CONTENT_MASTER C WHERE C.COT_ID = CSH.COT_ID) AS MCONTENT_ID, 
+				CM.CONTENT_ID AS SCONTENT_ID, 
+				(SELECT C.CONTENT_DIV FROM CONTENT_MASTER C WHERE C.COT_ID = CSH.COT_ID) AS MCONTENT_DIV, 
+				CM.CONTENT_TYPE AS SCONTENT_TYPE, 
+				CSH.DI_YN, 
+				IF(CSH.DI_YN=0, DM.AREA_CODE, CSH.DI_AREA_CODE) AS AREA_CODE, 
+				IF(CSH.DI_YN=0, DM.SIGUGUN_CODE, CSH.DI_SIGUGUN_CODE) AS SIGUGUN_CODE, 
+				IF(CSH.DI_YN=0, DM.ADDR1, CSH.DI_ADDR) AS ADDR, 
+				(SELECT C.TITLE FROM CONTENT_MASTER C WHERE C.COT_ID=CSH.COT_ID) AS MTITLE, 
+				IF(CSH.DI_YN=0, CM.TITLE, CSH.DI_BSSH_NM) AS STITLE, 
+				IF(CSH.DI_YN=0, DM.ADMIN_TEL, CSH.DI_TELNO) AS INQUIRY, 
+				IF(CSH.DI_YN=0, CM.AUTH_CODE, CSH.DI_AUTH_CODE) AS AUTH_CODE, 
+				CSH.REG_ID, 
+				CSH.CREATE_DATE, 
+				CSH.OTD_ID 
+			FROM 
+				CONTENT_MASTER CM INNER JOIN DATABASE_MASTER DM 
+					ON 
+					CM.COT_ID=DM.COT_ID 
+				RIGHT OUTER JOIN CONTENT_SPOT_HIST CSH 
+					ON 
+					CM.COT_ID=CSH.SCOT_ID
+			) U 
+		WHERE 1=1 
+		<if test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'">
+			AND U.OTD_ID = #{OTD_ID } 
+		</if> 
+<!-- 		<if test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'"> -->
+<!-- 			AND U.MCOT_ID IN (SELECT COT_ID FROM OTHER_DEPARTMENT_CONTENT WHERE OTD_ID = #{OTD_ID })  -->
+<!-- 		</if> -->
+		<if test="MCOT_ID != null">
+			AND U.MCOT_ID = #{MCOT_ID } 
+		</if>
+		<if test="areaCode != null and areaCode != 0">
+			AND U.AREA_CODE = #{areaCode } 
+		</if>
+		<if test="sigugunCode != null and sigugunCode != 0">
+			AND U.SIGUGUN_CODE = #{sigugunCode } 
+		</if>
+		<choose>
+			<when test="articleCategory != null and articleCategory eq '일반기사'">
+				AND U.MCONTENT_DIV = 0 
+			</when>
+			<when test="articleCategory != null and articleCategory eq '테마기사'">
+				AND U.MCONTENT_DIV = 1 
+			</when>
+		</choose>
+		<choose>
+			<when test="searchType != null and searchType eq '전체'">
+				AND 
+					(
+						(U.STITLE REGEXP #{keyword }) OR 
+						(U.SCONTENT_ID REGEXP #{keyword }) OR 
+						(U.AUTH_CODE REGEXP #{keyword } OR (REPLACE(U.AUTH_CODE, "-", "") REGEXP #{keyword }))
+					) 
+			</when>
+			<when test="searchType != null and searchType eq '업소명'">
+				AND (U.STITLE REGEXP #{keyword }) 
+			</when>
+			<when test="searchType != null and searchType eq '업소 CID'">
+				AND (U.SCONTENT_ID REGEXP #{keyword }) 
+			</when>
+			<when test="searchType != null and searchType eq '인증번호'">
+				AND (U.AUTH_CODE REGEXP #{keyword } OR (REPLACE(U.AUTH_CODE, "-", "") REGEXP #{keyword })) 
+			</when>
+		</choose>
+		<choose>
+			<when test="searchType2 != null and searchType2 eq '전체'">
+				AND (U.MTITLE REGEXP #{keyword } OR U.MCONTENT_ID REGEXP #{keyword })
+			</when>
+			<when test="searchType2 != null and searchType2 eq '기사명'">
+				AND (U.MTITLE REGEXP #{keyword }) 
+			</when>
+			<when test="searchType2 != null and searchType2 eq 'CID'">
+				AND (U.MCONTENT_ID REGEXP #{keyword }) 
+			</when>
+		</choose>
+		
+	</select>
+	
+	
+<!-- 	<insert id="insertHistoryData" parameterType="jsonObject"> -->
+	<insert id="insertHistoryData" parameterType="hashMap">
+		INSERT INTO 
+			CONTENT_SPOT_HIST 
+			(
+			HIST_ID, 
+			COT_ID, 
+			SCOT_ID, 
+			DI_YN, 
+			DI_AREA_CODE, 
+			DI_SIGUGUN_CODE, 
+			DI_ADDR, 
+			DI_BSSH_NM, 
+			DI_TELNO, 
+			DI_AUTH_CODE, 
+			OTD_ID, 
+			REG_ID, 
+			CREATE_CODE
+			) 
+		VALUES (
+			#{HIST_ID }, 
+			#{COT_ID }, 
+			#{SCOT_ID }, 
+			#{DI_YN }, 
+			#{DI_AREA_CODE }, 
+			#{DI_SIGUGUN_CODE }, 
+			#{DI_ADDR }, 
+			#{DI_BSSH_NM }, 
+			#{DI_TELNO }, 
+			#{DI_AUTH_CODE }, 
+			<choose>
+				<when test="OTD_ID != null and OTD_ID neq '0a01eb7b-96de-11e8-8165-020027310001'">
+					#{OTD_ID }, 
+				</when>
+				<otherwise>
+					NULL, 
+				</otherwise>
+			</choose>
+			#{REG_ID }, 
+			NOW()
+		)
+	</insert>
+	
+	
+	<delete id="deleteHistoryData" parameterType="string">
+		DELETE FROM CONTENT_SPOT_HIST WHERE HIST_ID = #{HIST_ID }
+	</delete>
+</mapper>
